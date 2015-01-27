@@ -1,9 +1,10 @@
 from django.shortcuts import render
 
-from django.http import HttpResponse
-
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    context = {}
+    return render(request, 'index.html', context)
 
+def game(request):
+    return render(request, 'game.html', {"row_id": list(range(14))})
 # Create your views here.
