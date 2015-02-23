@@ -7,6 +7,7 @@ urlpatterns = patterns('',
                        url(r'^$', views.index, name='index'),
                        url(r'^accounts/login$', login, name='login'),
                        url(r'^game/(\d+)$', views.game, name='game'),
+                       url(r'^tutorial$', views.game),
                        url(r'^support/$', views.support),
                        url(r'^admin/', include(admin.site.urls)),
                       )

@@ -245,6 +245,12 @@ function init()
     }).resize();
     $("body").keydown(function (evt) {
         //alert (evt.which)
+        if (MODE == 'tutorial') {
+            if (evt.which == 32) {
+                next_tip();
+                return;
+            }
+        }
         if (evt.which == 13)
         {
             if (!inputshown)

@@ -10,28 +10,34 @@ def index(request):
     context = {}
     return render(request, 'index.html', context)
 
-def game(request, game_id):
+def game(request, game_id=None):
     context = {}
     context["row_id"] = list(range(14))
-    game_obj = get_object_or_404(Game, pk=game_id)
-    if game_obj.status == Game.FINISHED:
-        if game_obj.history:
-            return "view history"
-        else:
-            return "no history"
+    if game_id is None:
+        context["mode"] = "tutorial"
+        context["player_num"] = 1
+        context["first"] = request.user.first_name
+        context["second"] = "Робот"
     else:
-        if not request.user.is_authenticated():
-            return redirect('login')
-        if request.user in [game_obj.player1, game_obj.player2]:
-            player = 1 if request.user == game_obj.player1 else 2
-            context["mode"] = "game"
-            context["code"] = sign("{}x{}".format(game_id, player))
-            context["player_num"] = player
-            context["server"] = settings.GAME_SERVER
-            context["first"] = game_obj.player1.first_name
-            context["second"] = game_obj.player2.first_name
+        game_obj = get_object_or_404(Game, pk=game_id)
+        if game_obj.status == Game.FINISHED:
+            if game_obj.history:
+                return "view history"
+            else:
+                return "no history"
         else:
-            return "observe"
+            if not request.user.is_authenticated():
+                return redirect('login')
+            if request.user in [game_obj.player1, game_obj.player2]:
+                player = 1 if request.user == game_obj.player1 else 2
+                context["mode"] = "game"
+                context["code"] = sign("{}x{}".format(game_id, player))
+                context["player_num"] = player
+                context["server"] = settings.GAME_SERVER
+                context["first"] = game_obj.player1.first_name
+                context["second"] = game_obj.player2.first_name
+            else:
+                return "observe"
     return render(request, 'game.html', context)
 
 @csrf_exempt
