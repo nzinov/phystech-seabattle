@@ -35,8 +35,6 @@ function highlight(arg)
     }
     highlighted_squares = arg;
 }
-function highlight_move(index) {
-}
 function highlight_log() {
     set_move($(this).attr("data-move"));
 }

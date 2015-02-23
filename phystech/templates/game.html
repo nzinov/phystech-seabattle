@@ -126,13 +126,17 @@ span.nowrap {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="shortcut icon" href="/static/favicon.png">
 <script type="text/javascript" src="{% static "log.js" %}"></script>
+<script type="text/javascript" src="{% static "tutorial.js" %}"></script>
 <script language="javascript" type="text/javascript">
-var type = "{{ type }}";
-var wsUri = "ws://{{ server_domain }}:8000/";
-var opponent = '{{ opponent }}';
+var MODE = "{{ mode }}";
+var type = "{{ code }}";
+var wsUri = "ws://{{ server }}:8000/";
+var first = '{{ first }}';
+var second = '{{ second }}';
+var you = {{ player_num }};
+var opponent = you == 1 ? second : first;
 var websocket;
 var output;
-var you;
 var phase;
 var player;
 var inputshown = false;
@@ -185,6 +189,17 @@ var info = [ "Пустая клетка",
     "Тральщик<br> Может снимать мины, торпеды и брандеры (атакуя их). Образует блоки. 64 е.с.",
     "Корабль противника",
     "Ничейный корабль<br>Атакуйте его любым кораблем, чтобы забрать себе. Ход перейдет к противнику."];
+function coord(x, y) {
+    return {
+        x: x,
+        y: y
+    }
+}
+
+function is_equal_coord(a, b) {
+    return a.x == b.x && a.y == b.y;
+}
+
 var field = new Array();
 var dragging;
 var isshot;
@@ -192,14 +207,14 @@ var movepassed = false;
 var auto_attack_pass = true;
 var last_moved_fig = 0;
 var isaoe;
-var agr;
-var tar;
-var asktype;
-var block = [];
-var b_str = [];
-var b_fig = [];
-var b_x = [];
-var b_y = [];
+var ask_data = {
+    is_aggressor: false,
+    aggressor: coord(0, 0),
+    target: coord(0, 0),
+    blocks: [],
+    ships: []
+};
+
 function showinput()
 {
     $("#input").fadeIn(1000);
@@ -225,11 +240,9 @@ function fill_matrix(array, value) {
 function init()
 {
     fill_matrix(field, 0);
-    fill_matrix(original_color, "#FFFFFF");
     $(window).resize(function (){
         $("#output").scrollTop($("#output > div").height());
     }).resize();
-    init_socket();
     $("body").keydown(function (evt) {
         //alert (evt.which)
         if (evt.which == 13)
@@ -262,7 +275,7 @@ function init()
                 {
                     displace()
                 }
-                if (phase == 1)
+                else if (phase == 1)
                 {
                     movepass()
                 }
@@ -286,7 +299,8 @@ function init()
         }
         return true;
     });
-        $(".square").popover({trigger: 'hover', placement: 'auto bottom', delay: {show: 1000}, html: true, container: 'body', content: function() { return info[$(this).attr("fig")];}});
+    $(".square").popover({trigger: 'hover', placement: 'auto bottom', delay: {show: 1000},
+        html: true, container: 'body', content: function() { return info[$(this).attr("fig")];}});
     $(".square").on( "touchmove", function(e){
         e.preventDefault();
     });
@@ -295,7 +309,8 @@ function init()
         e.preventDefault();
     });
     $(".square").on( "touchend", function(e){
-        $(document.elementFromPoint(e.originalEvent.changedTouches[0].pageX - window.pageXOffset, e.originalEvent.changedTouches[0].pageY - window.pageYOffset)).mouseup();
+        $(document.elementFromPoint(e.originalEvent.changedTouches[0].pageX - window.pageXOffset,
+                e.originalEvent.changedTouches[0].pageY - window.pageYOffset)).mouseup();
         e.preventDefault();
     });
     window.onfocus = function () {
@@ -305,6 +320,9 @@ function init()
         page_visible = false;
     };
     Notification.requestPermission();
+    if (MODE == "game") {
+        init_socket();
+    }
 }
 function init_socket()
 {
@@ -438,8 +456,9 @@ function draggable(obj,enabled)
 function set_fig(x, y, fig, player)
 {
     if (typeof(player) === "undefined") {
-        player = 0;
+        player = -1;
     }
+    field[x][y] = fig;
     var pos = $("[id='"+x+":"+y+"']");
     if (player == 0)
         pos.css("background-color", "white");
@@ -477,6 +496,122 @@ function should_pass() {
     return true;
 }
 
+function nudge() {
+    if (phase == 3 || (player == you && (phase == 1 || phase == 3)))
+    {
+        if (!page_visible)
+        {
+            var n = new Notification("Ваш ход", {
+                tag : "your-move",
+                body : "Действуйте в игре с "+opponent,
+            });
+        }
+        document.title = "<Действуйте!> Морской бой против "+opponent;
+    } else {
+        document.title = "Морской бой против "+opponent;
+    }
+}
+
+function init_displacing() {
+    zone = you == 1 ? $("[id^='0:'],[id^='1:'],[id^='2:'],[id^='3:'],[id^='4:']") : $("[id^='9:'],[id^='10:'],[id^='11:'],[id^='12:'],[id^='13:']");
+    draggable($(".square"),true);
+    droppable($(".square"),true);
+    zone.css("background-color","#98ff98");
+    var displ = localStorage.getItem(DB_KEY);
+    if (displ !== null && confirm('Обнаружена незавершенная расстановка. Вы хотите ее продолжить?')) {
+        field = JSON.parse(displ);
+        if (you == 2)
+            field.reverse();
+        for (var i = 0; i < 14; i++)
+            for (var j = 0; j < 14; j++)
+                set_fig(i, j, field[i][j]);
+    } else {
+        cur = you != 1 ? 4*14 : 5*14;
+        for (i = 0; i < count.length; i++)
+        {
+            for (j = 0; j < count[i]; j++)
+            {
+                set_fig(Math.floor(cur/14), cur%14, i);
+                cur++;
+            }
+        }
+    }
+}
+
+function set_phase(phase, player) {
+    switch(phase) {
+    case 0:
+        if (player != you)
+        {
+            $("#main").html('<h4>Расставьте корабли</h4><a onclick=displace()>Нажмите</a> Пробел, когда будете готовы');
+            init_displacing();
+        }
+        else
+        {
+            $("#main").html("<h4>Ждите</h4>Противник на вашу погибель готовит подводные лодки");
+        }
+        break;
+    case 1:
+        if (player == you)
+        {
+            draggable($(".square"),true);
+            droppable($(".square"),true);
+            movepassed = false;
+            isshot = false;
+            setshot(false);
+            $("#main").html('<h4 id="shot">Ходите</h4><a onclick=movepass()>Нажмите</a> Пробел чтобы пропустить ход. <a onclick=shottrig()>Нажмите</a> S, чтобы переключить режим выстрела.<div id="aoe" style="display: none;">Площадной эффект ракеты <span id="aoeon">выключен</span>.<a onclick=trigaoe()>Нажмите</a> "R" для переключения</div>');
+            trigaoe();
+        }
+        else
+        {
+            $("#main").html("<h4>Ждите</h4>Ход противника.");
+        }
+        break;
+    case 2:
+        $("#main").html("<h4>Игра окончена</h4>");
+        if (player == 0) show_modal("Игра окончена", "Игра завершилась вничью.");
+        else if (player == you) show_modal("Игра окончена","Ты победил. Поздравляем!!!");
+        else show_modal("Игра окончена","Ты проиграл. Обидно тебе наверное.");
+        break;
+    case 3:
+        start_asking(mess);
+        break;
+    case 4:
+        if (player == you)
+        {
+            draggable($(".square"),true);
+            droppable($(".square"),true);
+            if (!movepassed && auto_attack_pass && should_pass()) {
+                attackpass();
+            }
+            $("#main").html('<h4>Атакуйте</h4>Чтобы '+(movepassed ? 'вернуться к фазе хода' : 'пропустить атаку')+' <a onclick=attackpass()>нажмите</a> Пробел');
+        }
+        else
+        {
+            $("#main").html("<h4>Ждите</h4>Противник атакует.");
+        }
+    }
+}
+
+function start_asking(mess) {
+    $("#main").html("<h4>Выберите блок</h4>");
+    ask_data.target = coord(mess.targetx, mess.targety);
+    ask_data.aggressor = coord(mess.agressorx, mess.agressory);
+    ask_data.is_aggressor = mess.player == you;
+    var ship = mess.player == you ? ask_data.aggressor : ask_data.target;
+    if (field[ship.x][ship.y] == "Pl" || field[ship.x][ship.y] == "KrPl")
+        return;
+    highlight([hl(ask_data.target.x, ask_data.target.y, "#ff0033"), hl(ask_data.aggressor.x, ask_data.aggressor.y, "#2a52be")]);
+    ask_data.ships.push(ship);
+    add_block(1, field[ship.x][ship.y], [ship.x], [ship.y]);
+    $(".square").click(add_ship);
+    if (ship.x < 5)
+        $("#answer").addClass("bottom");
+    else
+        $("#answer").removeClass("bottom");
+    $("#answer").show();
+}
+
 function onMessage(evt)
 {
     console.log('<span style="color: blue;">Сообщение от сервера: ' + evt.data+'</span>');
@@ -484,126 +619,8 @@ function onMessage(evt)
     onbottom = ($("#output").scrollTop() > $("#output > div").height() - $("#output").height());
     if (mess.action == 1)
     {
-        phase = mess.phase;
-        player = mess.player;
-        if (phase == 3 || (player == you && (phase == 1 || phase == 3)))
-        {
-            if (!page_visible)
-            {
-                var n = new Notification("Ваш ход", {
-                    tag : "your-move",
-                    body : "Действуйте в игре с "+opponent,
-                });
-            }
-            document.title = "<Действуйте!> Морской бой против "+opponent;
-        }
-        else
-            document.title = "Морской бой против "+opponent;
-        switch(phase)
-        {
-        case 0:
-            if (player != you)
-            {
-                $("#main").html('<h4>Расставьте корабли</h4><a onclick=displace()>Нажмите</a> Пробел, когда будете готовы');
-                zone = you == 1 ? $("[id^='0:'],[id^='1:'],[id^='2:'],[id^='3:'],[id^='4:']") : $("[id^='9:'],[id^='10:'],[id^='11:'],[id^='12:'],[id^='13:']");
-                draggable($(".square"),true);
-                droppable($(".square"),true);
-                zone.css("background-color","#98ff98");
-                var displ = localStorage.getItem(DB_KEY);
-                if (displ !== null && confirm('Обнаружена незавершенная расстановка. Вы хотите ее продолжить?'))
-                {
-                    field = JSON.parse(displ);
-                    if (you == 2)
-                        field.reverse();
-                    for (var i = 0; i < 14; i++)
-                        for (var j = 0; j < 14; j++)
-                            set_fig(i, j, field[i][j]);
-                }
-                else
-                {
-                    cur = you != 1 ? 4*14 : 5*14;
-                    for (i = 0; i < count.length; i++)
-                    {
-                        for (j = 0; j < count[i]; j++)
-                        {
-                            set_fig(Math.floor(cur/14), cur%14, i);
-                            cur++;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                $("#main").html("<h4>Ждите</h4>Противник на вашу погибель готовит подводные лодки");
-            }
-            break;
-        case 1:
-            draggable($(".square"),true);
-            droppable($(".square"),true);
-            if (player == you)
-            {
-                movepassed = false;
-                isshot = false;
-                setshot(false);
-                $("#main").html('<h4 id="shot">Ходите</h4><a onclick=movepass()>Нажмите</a> Пробел чтобы пропустить ход. <a onclick=shottrig()>Нажмите</a> S, чтобы переключить режим выстрела.<div id="aoe" style="display: none;">Площадной эффект ракеты <span id="aoeon">выключен</span>.<a onclick=trigaoe()>Нажмите</a> "R" для переключения</div>');
-                trigaoe();
-
-            }
-            else
-            {
-                $("#main").html("<h4>Ждите</h4>Ход противника.");
-            }
-            break;
-        case 4:
-            draggable($(".square"),true);
-            droppable($(".square"),true);
-            if (player == you)
-            {
-                if (!movepassed && auto_attack_pass && should_pass()) {
-                    attackpass();
-                }
-                $("#main").html('<h4>Атакуйте</h4>Чтобы '+(movepassed ? 'вернуться к фазе хода' : 'пропустить атаку')+' <a onclick=attackpass()>нажмите</a> Пробел');
-            }
-            else
-            {
-                $("#main").html("<h4>Ждите</h4>Противник атакует.");
-            }
-            break;
-        case 2:
-            $("#main").html("<h4>Игра окончена</h4>");
-            if (player == 0) show_modal("Игра окончена", "Игра завершилась вничью.");
-            else if (player == you) show_modal("Игра окончена","Вы победили. Поздравляем!!!");
-            else show_modal("Игра окончена","Вы проиграли. Обидно Вам наверное...");
-            break;
-        case 3:
-            $("#main").html("<h4>Выберите блок</h4>");
-            tar = [mess.targetx,mess.targety]
-            agr = [mess.agressorx,mess.agressory]
-            if (player == you)
-            {
-                asktype = "agr";
-                cor = agr
-            }
-            else
-            {
-                asktype = "tar";
-                cor = tar
-            }
-            if (field[cor[0]][cor[1]] == "Pl" || field[cor[0]][cor[1]] == "KrPl")
-                break;
-            $("[id='"+agr[0]+':'+agr[1]+"']").css("background-color","#2a52be");
-            $("[id='"+tar[0]+':'+tar[1]+"']").css("background-color","#ff0033");
-            block[cor[0]] = [];
-            block[cor[0]][cor[1]] = true;
-            AddBlock(1,field[cor[0]][cor[1]],[cor[0]],[cor[1]]);
-            $(".square").click(FindBlock);
-            if (cor[0] < 5)
-                $("#answer").addClass("bottom");
-            else
-                $("#answer").removeClass("bottom");
-            $("#answer").show();
-            break;
-        }
+        nudge();
+        set_phase(mess.phase, mess.player);
     }
     else if (mess.action == 4)
     {
@@ -626,7 +643,6 @@ function onMessage(evt)
     }
     else if (mess.action == 0)
     {
-        you = mess.you;
         $("#main").html("Соединено с сервером. Ожидание игры");
     }
     if (onbottom)
@@ -648,94 +664,79 @@ function doSend(message)
     console.log("Отправил сообщение: " + message);
     websocket.send(message);
 }
-function FindBlock(evt)
+function add_ship(evt)
 {
-    el=$(this);
-    x = el.attr("x");
-    y = el.attr("y");
-    if (field[x][y] > 0 && field[x][y] < 20 && (x != tar[0] || y != tar[1]) && (x != agr[0] || y != agr[1]))
+    var el=$(this);
+    var x = el.attr("x");
+    var y = el.attr("y");
+    var ship = coord(x, y);
+    if (field[x][y] > 0 && field[x][y] < 20 && !is_equal_coord(ship, ask_data.aggressor) && !is_equal_coord(ship, ask_data.target))
     {
-        if (block[x] && block[x][y])
+        var index = -1;
+        ask_data.ships.forEach(function (val, i) {if (is_equal_coord(ship, i)) { index = i; }});
+        if (index != -1)
         {
-            $("[id='"+x+":"+y+"']").css("background-color","#FFFFFF");
-            block[x][y] = undefined;
-            isblock(block);
+            ask_data.ships.splice(index, 1);
+            highlight(hl(x, y, "#ffffff"));
         }
         else
         {
-            if (block[x] == undefined) block[x] = [];
-            block[x][y] = true;
-            isblock(block);
-            $("[id='"+x+":"+y+"']").css("background-color",asktype == "agr" ? "#2a52be" : "#ff0035");
+            ask_data.ships.push(ship);
+            highlight(hl(x, y, ask_data.is_aggressor ? "#2a52be" : "#ff0035"));
         }
+        find_blocks();
     }
 }
-function isblock(b)
+function find_blocks()
 {
     $("#answer").html("");
     blocktype = 0;
     str = 0;
     ox = [];
     oy = [];
-    Rd = false;
-    for (i in b)
-    {
-        for (j in b[i])
+    Rd = ask_data.ships.some(function (val) {field[val.x][val.y] == fignum.Rd});
+    for (var i = 0; i < ask_data.ships.length; i++) {
+        ship = ask_data.ships[i];
+        fig = field[i][j];
+        if (blocktype == 0)
         {
-            if (b[i][j])
-            {
-                if (field[i][j] == fignum.Rd) Rd = true;
-            }
+            blocktype = fig;
         }
+        else if (blocktype == fig) blocktype = fig;
+        else if (blocktype == fignum.Rd && (fig == fignum.Es || fig == fignum.St || fig == fignum.Tk || fig == fignum.Tr)) blocktype = fig;
+        else if (fig == fignum.Rd && (blocktype == fignum.Es || blocktype == fignum.St || blocktype == fignum.Tk || blocktype == fignum.Tr)) Rd = true;
+        else if (fig == fignum.Es && blocktype == fignum.St && Rd) blocktype = fignum.Es;
+        else if (fig == fignum.St && blocktype == fignum.Es && Rd) blocktype = fignum.Es;
+        else return;
+        ox.push(ship.x);
+        oy.push(ship.y);
+        str++;
     }
-    for (i in b)
-    {
-        for (j in b[i])
-        {
-            if (b[i][j])
-            {
-                fig = field[i][j];
-                if (blocktype == 0)
-                {
-                    blocktype = fig;
-                }
-                else if (blocktype == fig) blocktype = fig;
-                else if (blocktype == fignum.Rd && (fig == fignum.Es || fig == fignum.St || fig == fignum.Tk || fig == fignum.Tr)) blocktype = fig;
-                else if (fig == fignum.Rd && (blocktype == fignum.Es || blocktype == fignum.St || blocktype == fignum.Tk || blocktype == fignum.Tr)) Rd = true;
-                else if (fig == fignum.Es && blocktype == fignum.St && Rd) blocktype = fignum.Es;
-                else if (fig == fignum.St && blocktype == fignum.Es && Rd) blocktype = fignum.Es;
-                else return false;
-                ox[ox.length] = i*1;
-                oy[oy.length] = j*1;
-                str++;
-            }
-        }
+    add_block(str,blocktype,ox,oy);
+    if (str == 2 && blocktype == fignum.St && Rd) add_block(2,fignum.Es,ox,oy);
+}
+function add_block(str,fig,x,y)
+{
+    var n = ask_data.blocks.length;
+    ask_data.blocks.push({
+        strength: str,
+        fig: fig,
+        x: x,
+        y: y
+    });
+    $("#answer").append("<td onclick=block_click() height=64 width=64 style=\"background-image: url('/static/"+figname[fig]+".png');\" data-index="+n+"><h2>"+str+"</h2></td>");
+}
+function block_click()
+{
+    var n = $(this).attr("data-index");
+    var block = ask_data.blocks[n];
+    SendJSON({action: 1, phase: 3, blockstrength: block.strength, blocktype: block.fig, blockx: block.x, blocky: block.y});
+    for (i = 0; i < block.x.length; i++) {
+        highlight(hl(block.x[i], block.y[i], "#ffffff"));
     }
-    AddBlock(str,blocktype,ox,oy);
-    if (str == 2 && blocktype == fignum.St && Rd) AddBlock(2,fignum.Es,ox,oy);
-    return true;
-}
-function AddBlock(str,fig,x,y)
-{
-    n = b_str.length;
-    b_str[n] = str;
-    b_fig[n] = fig;
-    b_x[n] = x;
-    b_y[n] = y;
-    $("#answer").append("<tr><td onclick=b_click() height=64 width=64 style=\"background-image: url('/SBpic/"+figname[fig]+".png');\" n=\""+n+"\"><h2>"+str+"</h2></td></tr>");
-}
-function b_click()
-{
-    n = $(this).attr("n");
-    SendJSON({action: 1, phase: 3, blockstrength: b_str[n], blocktype: b_fig[n], blockx: b_x[n], blocky: b_y[n]});
-    for (i = 0; i < b_x[n].length; i++) {$("[id='"+b_x[n][i]+":"+b_y[n][i]+"']").css("background-color","#FFFFFF");}
-    $("[id='"+agr[0]+":"+agr[1]+"']").css("background-color","#FFFFFF");
-    $("[id='"+tar[0]+":"+tar[1]+"']").css("background-color","#FFFFFF");
-    b_str = [];
-    b_fig = [];
-    b_x = [];
-    b_y = [];
-    block = [];
+    highlight([hl(ask_data.aggressor.x, ask_data.aggressor.y, "#ffffff"), hl(ask_data.target.x, ask_data.target.y, "#ffffff")]);
+    ask_data.blocks = [];
+    ask_data.ships = [];
     $(".square").unbind("click");
     $("#answer").html("");
     $("#answer").hide();
@@ -752,7 +753,7 @@ window.addEventListener("load", init, false);
       <div class="modal-body" id="modal_msg">
       </div>
         <div class="modal-footer">
-        <a type="button" class="btn btn-primary" href="/index.php">Покинуть страницу</a>
+        <a type="button" class="btn btn-primary" href="/">Покинуть страницу</a>
       </div>
     </div>
   </div>
@@ -769,7 +770,7 @@ window.addEventListener("load", init, false);
 </table>
 </div>
 <div id="info">
-<div id="badge" onclick="$('#info').toggleClass('shown')"><span class="glyphicon glyphicon-align-justify"></span></div>
+<div id="badge" onclick="$('#info').toggleClass('shown')"><span class="glyphicon glyphicon-menu-hamburger"></span></div>
 <div id="header" class="well center-block">
     <h4><span class="nowrap">{{ first }}</span> vs <span class="nowrap">{{ second }}</span><br/>
 </h4>

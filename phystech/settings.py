@@ -12,19 +12,29 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+IS_PRODUCTION = 'OPENSHIFT_REPO_DIR' in os.environ
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '3r-s2!)gl8yt=dk(244-fs8&18p_9ozhmd4db!tv!2!r+#fm!0'
+if IS_PRODUCTION:
+    DATA_DIR = os.environ["OPENSHIFT_DATA_DIR"]
+    GAME_SERVER = "server-seabattle.rhcloud.com"
+else:
+    DATA_DIR = BASE_DIR
+    GAME_SERVER = "localhost"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+SECRET_KEY = 'test'
+if IS_PRODUCTION:
+    with open(os.path.join(DATA_DIR, "secret_token.txt")) as f:
+        SECRET_KEY = f.read().strip()
+
+DEBUG = not IS_PRODUCTION
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*-seabattle.rhcloud.com"]
 LOGIN_REDIRECT_URL = "/"
 
 
@@ -37,7 +47,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'main',
+    'phystech',
     'bootstrap3'
 )
 
@@ -62,7 +72,7 @@ WSGI_APPLICATION = 'phystech.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(DATA_DIR, 'db.sqlite3'),
     }
 }
 
@@ -71,7 +81,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -84,3 +94,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(DATA_DIR, "static")
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(DATA_DIR, "media")
+ADMINS = (("Nikolay", "nzinov@gmail.com"))
