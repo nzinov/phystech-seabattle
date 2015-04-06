@@ -1,14 +1,36 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseForbidden, HttpResponse
 from phystech.utils import sign, get_signature
-from phystech.models import Game
+from phystech.models import Game, CustomUser
 from django.conf import settings
 
 
+def get_context():
+    return {
+        'plus_id': settings.SOCIAL_AUTH_GOOGLE_PLUS_KEY
+        }
+
 def index(request):
-    context = {}
+    context = get_context()
     return render(request, 'index.html', context)
+
+@login_required
+def profile(request):
+    context = get_context()
+    context['games'] = [game.get_opponent(request.user.pk).get_full_name() for
+                        game in Game.get_by_player(request.user.pk).filter(status=Game.ONGOING)[:10]]
+    return render(request, 'profile.html', context)
+
+def rating(request):
+    context = get_context()
+    context['users'] = CustomUser.objects.all()
+    return render(request, 'rating.html', context)
+
+def rules(request):
+    context = get_context()
+    return render(request, 'rules.html', context)
 
 def game(request, game_id=None):
     context = {}
@@ -45,7 +67,7 @@ def support(request):
     command = request.POST["command"]
     signature = request.POST["signature"]
     if signature != get_signature(command):
-        return HttpResponseForbidden(get_signature(command)+"//"+signature)
+        return HttpResponseForbidden(get_signature(command)+"!="+signature)
     command = command.split(':')
     if command[0] == "start":
         game_obj = get_object_or_404(Game, pk=command[1])

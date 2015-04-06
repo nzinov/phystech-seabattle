@@ -14,9 +14,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 IS_PRODUCTION = 'OPENSHIFT_REPO_DIR' in os.environ
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
-
 if IS_PRODUCTION:
     DATA_DIR = os.environ["OPENSHIFT_DATA_DIR"]
     GAME_SERVER = "server-seabattle.rhcloud.com"
@@ -37,18 +34,24 @@ TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = ["*-seabattle.rhcloud.com"]
 LOGIN_REDIRECT_URL = "/"
 
+AUTH_USER_MODEL = 'phystech.CustomUser'
+
 
 # Application definition
 
 INSTALLED_APPS = (
+    'phystech',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'phystech',
-    'bootstrap3'
+    'django.contrib.sites',
+    'django.contrib.flatpages',
+    'markdown_deux',
+    'bootstrap3',
+    'social.apps.django_app.default'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -59,6 +62,20 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware'
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.core.context_processors.request",
+    "django.contrib.auth.context_processors.auth",
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect'
+)
+
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    'social.backends.google.GooglePlusAuth'
 )
 
 ROOT_URLCONF = 'phystech.urls'
@@ -98,3 +115,18 @@ STATIC_ROOT = os.path.join(DATA_DIR, "static")
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(DATA_DIR, "media")
 ADMINS = (("Nikolay", "nzinov@gmail.com"))
+
+from secrets import *
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'phystech.social.save_profile',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details'
+)
+SITE_ID = 1

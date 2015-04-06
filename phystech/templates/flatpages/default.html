@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% load markdown_deux_tags %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        {{ flatpage.content|markdown }}
+    </div>
+</div>
+{% endblock %}

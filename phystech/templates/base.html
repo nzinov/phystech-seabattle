@@ -1,4 +1,5 @@
 {% load bootstrap3 %}
+{% load staticfiles %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,29 +8,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="Nikolay Zinov">
+    <link rel="icon" type="image/png" href="{% static 'logo_small.png' %}"/>
     {% bootstrap_css %}
     {% bootstrap_javascript jquery=1 %}
+    <style>
+.row-eq-height {
+    height: 400px;
+}
+
+.row-eq-height > div {
+    height: 100%;
+}
+    </style>
 </head>
 <body>
 <div class="navbar navbar-default">
     <div class="container-fluid">
     <a class="navbar-brand" href="/">Морской бой по-физтеховски</a>
     <ul class="nav navbar-nav">
-    <li id="rules"><a href="index.php?page=rules">Правила</a></li>
-    <li id="rate"><a href="index.php?page=rate">Рейтинг</a></li>
+    <li id="rules"><a href="/rules">Правила</a></li>
+    <li id="rate"><a href="/rating">Рейтинг</a></li>
     <li id="bugreport"><a target="blank" href="https://github.com/nzinov/phystech-seabattle-ng/issues?state=open">Сообщить об ошибке</a></li>
     </ul>
     {% if user.is_authenticated %}
-    <a class="btn btn-default navbar-btn navbar-right">{% bootstrap_icon "user" %} {{ user.get_username }}</a>
+    <a class="btn btn-default navbar-btn navbar-right" href="/profile">{% bootstrap_icon "user" %} {{ user.get_username }}</a>
     {% else %}
-    <a class="btn navbar-btn btn-primary navbar-right" href="/accounts/login">Войти</a>
+    <div id="signinButton btn navbar-btn navbar-right">
+    <span id="signinButton">
+        <span
+            class="btn g-signin navbar-btn navbar-right"
+            data-callback="signInCallback"
+            data-clientid="{{ plus_id }}"
+            data-cookiepolicy="single_host_origin"
+            data-requestvisibleactions="http://schemas.google.com/AddActivity"
+            data-scope="https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email">
+        </span>
+    </span>
+    </div>
+
+    <form id="google-plus" method="post" action="{% url 'social:complete' "google-plus" %}">
+	{% csrf_token %}
+	<input id="at" type="hidden" name="access_token" value="" />
+	<input id="code" type="hidden" name="code" value="" />
+    </form>
     {% endif %}
+    <script type="text/javascript">
+        (function() {
+            var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+            po.src = 'https://apis.google.com/js/client:plusone.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+        })();
+    </script>
+    <script type="text/javascript">
+        var signInCallback = function (result) {
+            if (result['error']) {
+                alert('An error happened:', result['error']);
+            } else {
+                $('#code').attr('value', result['code']);
+                $('#at').attr('value', result['access_token']);
+                $('#google-plus').submit();
+            }
+        };
+    </script>
 </div>
 </div>
 <div class="container">
     {% block content %}{% endblock %}
 </div>
-<footer style="position: absolute; left: 0px; bottom: 0px; width: 100%;">
+<footer style="margin-top: 300px">
 <p>&copy; Зинов Николай 2015</p>
 <a href="https://plus.google.com/109229859109198130360" rel="publisher">Google+</a>
 <a href="http://www.djangoproject.com/"><img src="https://www.djangoproject.com/m/img/badges/djangomade124x25.gif" border="0" alt="Made with Django." title="Made with Django." /></a>
