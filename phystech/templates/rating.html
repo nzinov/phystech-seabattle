@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped">
+            <thead><tr><th>Место</th><th>Имя</th><th>Рейтинг</th></tr></thead>
+            <tbody>
+                {% for row in users %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{row.get_full_name}}</td>
+                    <td>{{row.get_rate}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

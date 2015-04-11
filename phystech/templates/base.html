@@ -9,8 +9,10 @@
     <meta name="description" content="">
     <meta name="author" content="Nikolay Zinov">
     <link rel="icon" type="image/png" href="{% static 'logo_small.png' %}"/>
+    <link href='http://fonts.googleapis.com/css?family=Neucha&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
     {% bootstrap_css %}
     {% bootstrap_javascript jquery=1 %}
+    <link href='/static/magic-bootstrap.css' rel='stylesheet' type='text/css'>
     <style>
 .row-eq-height {
     height: 400px;
@@ -19,6 +21,41 @@
 .row-eq-height > div {
     height: 100%;
 }
+
+.navbar {
+    font-family: 'Neucha';
+    font-weight: bolder;
+}
+
+body {
+    background: #e9e9ff;
+}
+
+.window {
+    background: url('https://farm4.staticflickr.com/3184/3002902143_57406f712f_o.jpg') bottom, #3181BF;
+    background-size: cover;
+    width: 100%;
+    height: 400px;
+    margin-bottom: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.logo {
+    max-width: 150px;
+    box-shadow: 0 0 100px 30px #044679;
+    outline: 2px solid #0B72C1;
+}
+
+.moto {
+    color: #E7AD00;
+}
+
+.btn {
+    transform: rotate(0deg) skewX(-10deg);
+    margin-right: 0px;
+}
     </style>
 </head>
 <body>
@@ -26,7 +63,7 @@
     <div class="container-fluid">
     <a class="navbar-brand" href="/">Морской бой по-физтеховски</a>
     <ul class="nav navbar-nav">
-    <li id="rules"><a href="/rules">Правила</a></li>
+    <li id="rules"><a href="/pages/rules">Правила</a></li>
     <li id="rate"><a href="/rating">Рейтинг</a></li>
     <li id="bugreport"><a target="blank" href="https://github.com/nzinov/phystech-seabattle-ng/issues?state=open">Сообщить об ошибке</a></li>
     </ul>
@@ -74,12 +111,6 @@
 </div>
 <div class="container">
     {% block content %}{% endblock %}
-</div>
-<footer style="margin-top: 300px">
-<p>&copy; Зинов Николай 2015</p>
-<a href="https://plus.google.com/109229859109198130360" rel="publisher">Google+</a>
-<a href="http://www.djangoproject.com/"><img src="https://www.djangoproject.com/m/img/badges/djangomade124x25.gif" border="0" alt="Made with Django." title="Made with Django." /></a>
-</footer>
 </div>
 </body>
 </html>

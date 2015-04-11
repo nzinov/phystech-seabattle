@@ -130,3 +130,10 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.user_details'
 )
 SITE_ID = 1
+MARKDOWN_DEUX_STYLES = {
+    "default": {
+        "extras": {
+            "tables": True
+        }
+    }
+}

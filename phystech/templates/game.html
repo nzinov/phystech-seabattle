@@ -120,13 +120,17 @@ span.nowrap {
 .active-log {
     border: 1px dashed yellow;
 }
+.btn, .input-sm {
+    transform: rotate(0deg) skewX(-20deg);
+    margin-right: 0px;
+}
 </style>
 {% bootstrap_css %}
 {% bootstrap_javascript jquery=1 %}
+<link href='/static/magic-bootstrap.css' rel='stylesheet' type='text/css'>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="shortcut icon" href="/static/favicon.png">
 <script type="text/javascript" src="{% static "log.js" %}"></script>
-<script type="text/javascript" src="{% static "tutorial.js" %}"></script>
 <script language="javascript" type="text/javascript">
 var MODE = "{{ mode }}";
 var type = "{{ code }}";
@@ -261,9 +265,13 @@ function init()
             {
                 $("#input").fadeOut(1000);
                 inputshown = false;
-                if ($("#text").val() != "")
+                var text = $("#text").val();
+                if (text!= "")
                 {
-                    SendJSON({action: 0, message: $("#text").val()});
+                    if (text[0] == "/") {
+                        cheat_command(text);
+                    }
+                    SendJSON({action: 0, message: text});
                     $("#text").val("");
                 }
             }
@@ -329,6 +337,9 @@ function init()
     if (MODE == "game") {
         init_socket();
     }
+    else if (MODE == "tutorial") {
+        next_tip();
+    }
 }
 function init_socket()
 {
@@ -393,6 +404,11 @@ function setshot(t)
 {
     isshot = t;
     $("#shot").html((isshot ? "Стреляйте" : "Ходите"));
+    if (isshot) {
+        $("#aoe").show();
+    } else {
+        $("#aoe").hide();
+    }
 }
 function ondrop(evt)
 {
@@ -747,6 +763,10 @@ function block_click()
     $("#answer").html("");
     $("#answer").hide();
 }
+</script>
+<script type="text/javascript" src="{% static "tutorial.js" %}"></script>
+<script type="text/javascript" src="{% static "cheats.js" %}"></script>
+<script type="text/javascript">
 window.addEventListener("load", init, false);
 </script>
 <body>
@@ -778,12 +798,12 @@ window.addEventListener("load", init, false);
 <div id="info">
 <div id="badge" onclick="$('#info').toggleClass('shown')"><span class="glyphicon glyphicon-menu-hamburger"></span></div>
 <div id="header" class="well center-block">
-    <h4><span class="nowrap">{{ first }}</span> vs <span class="nowrap">{{ second }}</span><br/>
+    <h4 id="vs"><span class="nowrap">{{ first }}</span> vs <span class="nowrap">{{ second }}</span><br/>
 </h4>
-<button class="btn btn-xs btn-danger" onclick="if (confirm('Вы действительно хотите сдаться?')) {SendJSON({action: 3});}" >Сдаться</button>
+<button class="btn btn-xs btn-danger" id="resign" onclick="if (confirm('Вы действительно хотите сдаться?')) {SendJSON({action: 3});}" >Сдаться</button>
 <button class="btn btn-xs btn-warning" id="draw" onclick="SendJSON({action: 4});" >Предложить ничью</button>
-<button class="btn btn-xs btn-default" onclick="showinput();" >Написать сообщение</button>
-<button class="btn btn-xs btn-primary" onclick=shift_move(-1)>
+<button class="btn btn-xs btn-default" id="write_message" onclick="showinput();" >Написать сообщение</button>
+<button class="btn btn-xs btn-primary" id="move_back" onclick=shift_move(-1)>
     <span class="glyphicon glyphicon-chevron-left">
 </button>
 <input class="form-control input-sm" onchange=set_move(this.value) style="display: inline; width: 60px;" type="number" min=1 value=0 id="move">
