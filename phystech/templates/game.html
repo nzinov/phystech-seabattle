@@ -2,6 +2,7 @@
 {% load staticfiles %}
 {% block head %}
 <link href='/static/game.css' rel='stylesheet' type='text/css'>
+<script type="text/javascript" src="{% static "highlight.js" %}"></script>
 <script type="text/javascript" src="{% static "log.js" %}"></script>
 <script language="javascript" type="text/javascript">
 var MODE = "{{ mode }}";
@@ -52,13 +53,6 @@ window.addEventListener("load", init, false);
 <button class="btn btn-xs btn-danger" id="resign" onclick="if (confirm('Вы действительно хотите сдаться?')) {SendJSON({action: 3});}" >Сдаться</button>
 <button class="btn btn-xs btn-warning" id="draw" onclick="SendJSON({action: 4});" >Предложить ничью</button>
 <button class="btn btn-xs btn-default" id="write_message" onclick="showinput();" >Написать сообщение</button>
-<button class="btn btn-xs btn-primary" id="move_back" onclick=shift_move(-1)>
-    <span class="glyphicon glyphicon-chevron-left">
-</button>
-<input class="form-control input-sm" onchange=set_move(this.value) style="display: inline; width: 60px;" type="number" min=1 value=0 id="move">
-<button class="btn btn-xs btn-primary" onclick=shift_move(1)>
-    <span class="glyphicon glyphicon-chevron-right">
-</button></br>
 <div id="main" >Вероятно, возникла проблема при подключении к серверу</div>
 </div>
 <div id="output" ><div></div></div>

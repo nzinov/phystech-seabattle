@@ -6,68 +6,29 @@ FigNameV = [ "Неизвестный корабль", "Атомную бомбу
 FigNameT = [ "Неизвестным кораблем", "Атомной бомбой", "Авианосцем", "Брандером", "Эсминцем", "Фортом", "Крейсером", "Крейсерской подводной лодкой", "Линкором", "Миной", "Нейтронной бомбой", "Подводной лодкой", "Рейдером", "Ракетой", "Самолетом", "Сторожем", "Торпедой", "Торпедным катером", "Транспортом", "Тральщиком" ];
 FigNameP = [ "Неизвестном корабле", "Атомной бомбе", "Авианосце", "Брандере", "Эсминце", "Форте", "Крейсере", "Крейсерской подводной лодке", "Линкоре", "Мине", "Нейтронной бомбе", "Подводной лодке", "Рейдере", "Ракете", "Самолете", "Стороже", "Торпеде", "Торпедном катере", "Транспорте", "Тральщике" ];
 FigNameM = [ "Неизвестных кораблей", "Атомных бомб", "Авианосцев", "Брандеров", "Эсминцев", "Фортов", "Крейсеров", "Крейсерских подводных лодок", "Линкоров", "Мин", "Нейтронных бомб", "Подводных лодок", "Рейдеров", "Ракет", "Самолетов", "Сторожей", "Торпед", "Торпедных катеров", "Транспортов", "Тральщиков" ];
-var highlighted_squares = [];
-var original_color = [];
-var move_highlights = [];
+
 function message_to_chat(message)
 {
     $("#output > div").append("<p>"+message+"</p>");
 }
+
 function colored_message(message,color)
 {
     message_to_chat("<span style=\"color: "+color+"\">"+message+"</span>");
 }
+
+var move_highlights = [];
+
+function highlight_log() {
+    clear_highlight("log");
+    highlight(move_highlights[highlight$(this).attr("data-move")], 1000, "log");
+};
+
 function highlight_message(message,color,hl)
 {
     $("<p data-move="+move_highlights.length+" style=\"color: "+color+"\">"+message+"</p>").
         appendTo($("#output > div")).click(highlight_log);
     move_highlights.push(hl);
-    if (current_move == move_highlights.length - 2) {
-        shift_move(1);
-    }
-}
-function highlight(arg)
-{
-    clear_highlight();
-    for (var i = 0; i < arg.length; i++)
-    {
-        $("[id='"+arg[i].x+":"+arg[i].y+"']").css("background-color",arg[i].color);
-    }
-    highlighted_squares = arg;
-}
-function highlight_log() {
-    set_move($(this).attr("data-move"));
-}
-var current_move = -1;
-function shift_move(d) {
-    set_move(current_move + parseInt(d, 10));
-}
-function set_move(d) {
-    d = parseInt(d, 10);
-    if (d < 0 || d >= move_highlights.length) {
-        return;
-    }
-    current_move = d;
-    $(".active-log").removeClass("active-log");
-    $("[data-move="+current_move+"]").addClass("active-log");
-    highlight(move_highlights[current_move]);
-    $("#move").val(current_move);
-}
-function clear_highlight()
-{
-    for (var i = 0; i < highlighted_squares.length; i++)
-    {
-        $("[id='"+highlighted_squares[i].x+":"+highlighted_squares[i].y+"']")
-            .css("background-color", original_color[highlighted_squares[i].x][highlighted_squares[i].y]);
-    }
-    highlighted_squares = [];
-}
-function hl(x, y, color) {
-    return {
-        x: x,
-        y: y,
-        color: color
-    };
 }
 
 function get_color(good) {

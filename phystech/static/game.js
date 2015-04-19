@@ -467,7 +467,7 @@ function start_asking(mess) {
     var ship = mess.player == you ? ask_data.aggressor : ask_data.target;
     if (field[ship.x][ship.y] == "Pl" || field[ship.x][ship.y] == "KrPl")
         return;
-    highlight([hl(ask_data.target.x, ask_data.target.y, "#ff0033"), hl(ask_data.aggressor.x, ask_data.aggressor.y, "#2a52be")]);
+    highlight([hl(ask_data.target.x, ask_data.target.y, "#ff0033"), hl(ask_data.aggressor.x, ask_data.aggressor.y, "#2a52be")], 100, "ask");
     ask_data.ships.push(ship);
     add_block(1, field[ship.x][ship.y], [ship.x], [ship.y]);
     $(".square").click(add_ship);
@@ -547,12 +547,12 @@ function add_ship(evt)
         if (index != -1)
         {
             ask_data.ships.splice(index, 1);
-            highlight(hl(x, y, "#ffffff"));
+            clear_highlight("ask"+x+":"+y);
         }
         else
         {
             ask_data.ships.push(ship);
-            highlight(hl(x, y, ask_data.is_aggressor ? "#2a52be" : "#ff0035"));
+            highlight([hl(x, y, ask_data.is_aggressor ? "#2a52be" : "#ff0035")], 100, "ask"+x+":"+y);
         }
         find_blocks();
     }
@@ -620,10 +620,7 @@ function block_click()
     var n = $(this).attr("data-index");
     var block = ask_data.blocks[n];
     SendJSON({action: 1, phase: 3, blockstrength: block.strength, blocktype: block.fig, blockx: block.x, blocky: block.y});
-    for (i = 0; i < block.x.length; i++) {
-        highlight(hl(block.x[i], block.y[i], "#ffffff"));
-    }
-    highlight([hl(ask_data.aggressor.x, ask_data.aggressor.y, "#ffffff"), hl(ask_data.target.x, ask_data.target.y, "#ffffff")]);
+    clear_highlight("ask");
     ask_data.blocks = [];
     ask_data.ships = [];
     $(".square").unbind("click");
