@@ -1,7 +1,7 @@
 from enum import Enum
 
 Fig = Enum('Fig', "Empty, Unknown, Sinking," + #pylint: disable=invalid-name
-           "AB, Av, Br, Es, F, Kr, KrPl, Lk, Mn" +
+           "AB, Av, Br, Es, F, Kr, KrPl, Lk, Mn," +
            "NB, Pl, Rd, Rk, Sm, St, T, Tk, Tp, Tr")
 
 class Square:
@@ -20,6 +20,9 @@ class Coord:
     @staticmethod
     def dist(a, b):
         return abs(a.x - b.x) + abs(a.y - b.y)
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
 
     def __add__(self, other):
         return Coord(self.x + other.x, self.y + other.y)
@@ -159,10 +162,14 @@ class GameController:
         self.field[coord].player = 0
 
     def _shot(self, source, destination):
+        success = self.field[destination].fig != Fig.F
         self.log({"type": "shot", "fig": self.field[source].fig,
-                  "player": self.field[source].player})
+                  "player": self.field[source].player,
+                  "success": success})
         self.destroy(source)
-        self.destroy(destination)
+        if success:
+            self.destroy(destination)
+        self.set_phase(Phase.move, self.player if success else opponent(self.player))
 
     def can_torpedo(self, source, target):
         dist = Coord.dist(source, target)
@@ -227,6 +234,49 @@ class GameController:
                     raise "Too far"
         else:
             raise "Can't shot"
+
+    def explode_bomb(self, square):
+        self.explode(square, 5, self.field[square].fig == Fig.NB)
+
+    def attack(self, player, source, target):
+        if self.phase != Phase.attack or self.player != player:
+            raise "Bad phase"
+        if self.field[source].player != player:
+            raise "Not yours"
+        if self.field[target].empty():
+             raise "Empty"
+        fig = self.field[source].fig
+        if fig in [Fig.AB, Fig.NB] and source == target:
+            self.explode_bomb(source)
+            self.set_phase(Phase.move, player)
+            return
+        if self.field[target].player == 0:
+            #catch
+            pass
+        elif self.field[target].player == player:
+            raise "Can't attack yourself"
+        if fig not in [Fig.Tp, Fig.Tr, Fig.Tk, Fig.St,
+                       Fig.Es, Fig.Rd, Fig.Kr, Fig.Lk,
+                       Fig.Av, Fig.Pl, Fig.KrPl]:
+            raise "Not attacking"
+        target_fig = self.field[target].fig
+        if target_fig in [Fig.Mn, Fig.T, Fig.Rk, Fig.Sm, Fig.AB, Fig.NB, Fig.Br]:
+            if fig == Fig.Tr:
+                self.destroy(target)
+            else:
+                self.destroy(source)
+                if target_fig in [Fig.AB, Fig.NB]:
+                   self.explode_bomb(target)
+                else:
+                    self.destroy(target)
+        if target_fig == Fig.F:
+            self.destroy(target)
+        if fig not in [Fig.Pl, Fig.KrPl, Fig.Tp]:
+            self.ask_block()
+        if fig not in [Fig.Pl, Fig.KrPl, Fig.Tp]:
+            self.ask_block()
+
+
 
 
 
