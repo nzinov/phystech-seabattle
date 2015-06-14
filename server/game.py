@@ -107,9 +107,11 @@ class GameController:
             raise "Bad size"
         for row in field:
             for el in row:
-                counts[el.value] += 1
+                counts[el.fig] += 1
+                if el.player != player:
+                    raise "Bad fig"
         if counts != self.FIG_COUNT:
-            raise "Bad field"
+            raise "Bad fig count"
         lower = 0 if player == 1 else self.FIELD_SIZE - self.DISPLACE_SIZE
         upper = lower + self.DISPLACE_SIZE
         self.field[lower:upper] = field
@@ -125,7 +127,7 @@ class GameController:
                 Coord.dist(source, destination) != 2):
             return False
         dist = source - destination
-        if dist.x == 0:
+        if dist.x == 0 or dist.y == 0:
             return self.field[source + dist*0.5].empty()
         else:
             return (self.field[source + Coord(dist.x, 0)].empty() or
@@ -156,10 +158,10 @@ class GameController:
                       "fig": self.field[coord]})
         self.field[coord] = Square()
 
-    def sink(self, coord, log=True):
+    def convert(self, coord, player, log=True):
         if log:
-            self.log({"type": "sink", "coord": coord})
-        self.field[coord].player = 0
+            self.log({"type": "convert", "coord": coord, "player": player})
+        self.field[coord].player = player
 
     def _shot(self, source, destination):
         success = self.field[destination].fig != Fig.F
@@ -219,7 +221,7 @@ class GameController:
                 raise "Not allowed"
             if Coord.dist(source, target) > 1:
                 raise "Too far"
-            # convert
+            self.convert(target, player, True)
         elif fig == Fig.Rk:
             if is_aoe:
                 if Coord.dist(source, target) <= 2:
@@ -244,16 +246,16 @@ class GameController:
         if self.field[source].player != player:
             raise "Not yours"
         if self.field[target].empty():
-             raise "Empty"
+            raise "Empty"
         fig = self.field[source].fig
         if fig in [Fig.AB, Fig.NB] and source == target:
             self.explode_bomb(source)
             self.set_phase(Phase.move, player)
             return
         if self.field[target].player == 0:
-            #catch
-            pass
-        elif self.field[target].player == player:
+            self.convert(source, player, True)
+            return
+        if self.field[target].player == player:
             raise "Can't attack yourself"
         if fig not in [Fig.Tp, Fig.Tr, Fig.Tk, Fig.St,
                        Fig.Es, Fig.Rd, Fig.Kr, Fig.Lk,
@@ -266,17 +268,22 @@ class GameController:
             else:
                 self.destroy(source)
                 if target_fig in [Fig.AB, Fig.NB]:
-                   self.explode_bomb(target)
+                    self.explode_bomb(target)
                 else:
                     self.destroy(target)
         if target_fig == Fig.F:
             self.destroy(target)
         if fig not in [Fig.Pl, Fig.KrPl, Fig.Tp]:
-            self.ask_block()
-        if fig not in [Fig.Pl, Fig.KrPl, Fig.Tp]:
-            self.ask_block()
+            self.ask_block(source)
+        if self.field[target].fig not in [Fig.Pl, Fig.KrPl, Fig.Tp]:
+            self.ask_block(target)
 
-
-
-
-
+    def take_action(self, data):
+        if data.phase != self.phase:
+            raise "Bad phase"
+        ACTIONS = {
+            Phase.displace : self.displace,
+            Phase.move : self.move,
+            Phase.attack : self.attack
+        }
+        ACTIONS[data.phase](data)
