@@ -1,46 +1,72 @@
 from game import Coord
+from pipeline import Pipeline, PipelineFailure, unpack
 
-def next_square(state, source, destination):
-    return Coord.dist(source, destination) == 1
+@unpack()
+def target_empty(field, destination):
+    if not field[destination].fig.is_empty():
+        raise PipelineFailure("Can't move to an occupied square")
+    return True
 
-def double_move(state, source, destination):
-    if Coord.dist(source, destination) != 2:
-        return False
-    dist = source - destination
-    if dist.x == 0 or dist.y == 0:
-        return state.field[source + dist*0.5].empty()
-    else:
-        return (state.field[source + Coord(dist.x, 0)].empty() or
-                state.field[source + Coord(0, dist.y)].empty())
-
-def patron_near(patron_type):
-    def wrapped(state, source, destination):
-        for coord in (source, destination):
-            flag = False
-            for x in range(-1, 2):
-                for y in range(-1, 2):
-                    if x == 0 and y == 0:
-                        continue
-                    if state.field[coord + Coord(x, y)].fig == patron_type:
-                        flag = True
-            if not flag:
-                return False
-        return True
+def max_dist(dist):
+    @unpack
+    def wrapped(source, destination):
+        return source.dist(destination) <= dist
     return wrapped
 
-class Ship:
-    @staticmethod
-    def apply_policy(policy, *args):
-        for el in policy:
-            if not el(*args):
-                return False
-        return True
+@unpack()
+def get_routes(source, destination, field):
+    routes = []
+    if Coord.dist(source, destination) == 1:
+        routes.append([source, destination])
+    else:
+        shift = source - destination
+        if shift.x == 0 or shift.y == 0:
+            routes.append([source, source + shift // 2, destination])
+        else:
+            routes.append([source, source + Coord(shift.x, 0), destination])
+            routes.append([source, source + Coord(0, shift.y), destination])
+    routes = [route for route in routes
+              if all([field[coord].empty() for coord in route[1:]])]
+    return (True, {"routes"})
 
-    move_policy = (next_square,)
+def patron_near_route(patron_type):
+    @unpack()
+    def wrapped(routes, field):
+        routes = [route for route in routes
+                  if all([patron_near(patron_type, coord, field)
+                          for coord in route])]
+    return wrapped
+
+def patron_near(patron_type, coord, field):
+    for x in range(-1, 2):
+        for y in range(-1, 2):
+            if x == 0 and y == 0:
+                continue
+            if not Coord(x, y).is_legal():
+                continue
+            current_square = field[coord + Coord(x, y)]
+            if (isinstance(current_square, [patron_type, Fig.Tp])
+                    and current_square.player == field[coord].player):
+                return True
+    return False
+
+@unpack()
+def has_route(routes):
+    return len(routes) > 0
+
+
+class Ship:
+    move = Pipeline(target_empty, max_dist(1), get_routes, has_route)
+
+    @staticmethod
+    def is_empty():
+        return False
 
 class Fig:
     class Empty(Ship):
-        pass
+        @staticmethod
+        def is_empty():
+            return True
 
     class AB(Ship):
         pass
@@ -54,12 +80,12 @@ class Fig:
     class Es(Ship):
         pass
 
-    class F(Ship):
+    class F(Ship): #pylint: disable=invalid-name
         @staticmethod
-        def no_move(*args):
-            raise "Fort can't move"
+        def no_move():
+            return False
 
-        move_policy = (no_move,)
+        move = Pipeline(no_move)
 
     class Kr(Ship):
         pass
@@ -71,7 +97,8 @@ class Fig:
         pass
 
     class Mn(Ship):
-        move_policy = (next_square, patron_near(Fig.Es))
+        move = Pipeline(target_empty, max_dist(1), get_routes,
+                        patron_near_route(Fig.Es), has_route)
 
     class NB(Ship):
         pass
@@ -83,19 +110,22 @@ class Fig:
         pass
 
     class Rk(Ship):
-        move_policy = (next_square, patron_near(Fig.KrPl))
+        move = Pipeline(target_empty, max_dist(1), get_routes,
+                        patron_near_route(Fig.KrPl), has_route)
 
     class Sm(Ship):
-        move_policy = (next_square, patron_near(Fig.Av))
+        move = Pipeline(target_empty, max_dist(1), get_routes,
+                        patron_near_route(Fig.Sm), has_route)
 
     class St(Ship):
         pass
 
     class Tk(Ship):
-        move_policy = (double_move,)
+        move = Pipeline(target_empty, max_dist(2), get_routes, has_route)
 
-    class T(Ship):
-        move_policy = (double_move, patron_near(Fig.Tk))
+    class T(Ship): #pylint: disable=invalid-name
+        move = Pipeline(target_empty, max_dist(2), get_routes,
+                        patron_near_route(Fig.Tk), has_route)
 
     class Tp(Ship):
         pass

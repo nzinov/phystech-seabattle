@@ -1,4 +1,7 @@
+from enum import Enum
 from ships import Fig
+
+MAX_COORD = 14
 
 class Square:
     def __init__(self, fig=Fig.Empty, player=0):
@@ -12,6 +15,8 @@ class Coord:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        if not self.is_legal():
+            raise ValueError()
 
     @staticmethod
     def dist(a, b):
@@ -29,6 +34,9 @@ class Coord:
     def __mul__(self, other):
         return Coord(self.x * other, self.y * other)
 
+    def __floordiv__(self, other):
+        return Coord(self.x // other, self.y // other)
+
     def __abs__(self):
         return Coord(abs(self.x), abs(self.y))
 
@@ -38,6 +46,9 @@ class Coord:
 
     def dir(self):
         return Coord(Coord.sign(self.x), Coord.sign(self.y))
+
+    def is_legal(self):
+        return 0 <= self.x < MAX_COORD and 0 <= self.y < MAX_COORD
 
 class Field:
     def __init__(self, height, width):
@@ -56,7 +67,7 @@ class Field:
         return self.array[index.x][index.y]
 
     def __setitem__(self, index, value):
-        if type(value) is not Square:
+        if isinstance(value, Square):
             raise ValueError()
         index = Field._getindex(index)
         self.array[index.x][index.y] = value
@@ -170,7 +181,7 @@ class Game:
         self.field[destination] = self.field[source]
         self.field[source] = Square()
 
-    def move(self, player, source, destination):
+    def move(self, data):
         if self.phase != Phase.move or self.player != player:
             raise "Bad phase"
         if self.field[source].player != player:
