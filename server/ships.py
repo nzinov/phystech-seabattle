@@ -1,5 +1,5 @@
 from game import Coord
-from pipeline import Pipeline, PipelineFailure, unpack
+from pipeline import PipelineFailure, unpack
 
 @unpack()
 def target_empty(field, destination):
@@ -45,7 +45,7 @@ def patron_near(patron_type, coord, field):
             if not Coord(x, y).is_legal():
                 continue
             current_square = field[coord + Coord(x, y)]
-            if (isinstance(current_square, [patron_type, Fig.Tp])
+            if (isinstance(current_square, [patron_type, Ships.Tp])
                     and current_square.player == field[coord].player):
                 return True
     return False
@@ -56,13 +56,42 @@ def has_route(routes):
 
 
 class Ship:
-    move = Pipeline(target_empty, max_dist(1), get_routes, has_route)
+    max_move_distance = 1
+    patron = None
 
     @staticmethod
     def is_empty():
         return False
 
-class Fig:
+    @classmethod
+    def move(cls, source, destination, field):
+        if not field[destination].empty():
+            return False
+        if source == destination:
+            return False
+        shift = source - destination
+        if not shift.dist() < cls.max_move_distance:
+            return False
+        routes = []
+        if shift.dist == 1:
+            routes.append((source, destination))
+        else:
+            if shift.x == 0 or shift.y == 0:
+                routes.append(source, source + shift // 2, destination)
+            else:
+                routes.extend([
+                    (source, source + shift.x, destination),
+                    (source, source + shift.y, destination),
+                ])
+        if cls.patron is not None:
+            routes = [route for route in routes if all(
+                [patron_near(cls.patron, square, field) for square in route]
+                )]
+        if len(routes) == 0:
+            return False
+        return True
+
+class Ships:
     class Empty(Ship):
         @staticmethod
         def is_empty():
@@ -82,10 +111,8 @@ class Fig:
 
     class F(Ship): #pylint: disable=invalid-name
         @staticmethod
-        def no_move():
+        def move(*args): #pylint: disable=unused-argument
             return False
-
-        move = Pipeline(no_move)
 
     class Kr(Ship):
         pass
@@ -97,8 +124,7 @@ class Fig:
         pass
 
     class Mn(Ship):
-        move = Pipeline(target_empty, max_dist(1), get_routes,
-                        patron_near_route(Fig.Es), has_route)
+        patron = Ships.Es
 
     class NB(Ship):
         pass
@@ -110,22 +136,20 @@ class Fig:
         pass
 
     class Rk(Ship):
-        move = Pipeline(target_empty, max_dist(1), get_routes,
-                        patron_near_route(Fig.KrPl), has_route)
+        patron = Ships.KrPl
 
     class Sm(Ship):
-        move = Pipeline(target_empty, max_dist(1), get_routes,
-                        patron_near_route(Fig.Sm), has_route)
+        patron = Ships.Av
 
     class St(Ship):
         pass
 
     class Tk(Ship):
-        move = Pipeline(target_empty, max_dist(2), get_routes, has_route)
+        max_move_distance = 2
 
     class T(Ship): #pylint: disable=invalid-name
-        move = Pipeline(target_empty, max_dist(2), get_routes,
-                        patron_near_route(Fig.Tk), has_route)
+        patron = Ships.Tk
+        max_move_distance = 2
 
     class Tp(Ship):
         pass
