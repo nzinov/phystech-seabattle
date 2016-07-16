@@ -1,81 +1,5 @@
-from enum import Enum
-from ships import Fig
-
-MAX_COORD = 14
-
-class Square:
-    def __init__(self, fig=Fig.Empty, player=0):
-        self.fig = fig
-        self.player = player
-
-    def empty(self):
-        return self.fig == Fig.Empty
-
-class Coord:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        if not self.is_legal():
-            raise ValueError()
-
-    @staticmethod
-    def dist(a, b):
-        return abs(a.x - b.x) + abs(a.y - b.y)
-
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
-
-    def __add__(self, other):
-        return Coord(self.x + other.x, self.y + other.y)
-
-    def __sub__(self, other):
-        return Coord(self.x - other.x, self.y - other.y)
-
-    def __mul__(self, other):
-        return Coord(self.x * other, self.y * other)
-
-    def __floordiv__(self, other):
-        return Coord(self.x // other, self.y // other)
-
-    def __abs__(self):
-        return Coord(abs(self.x), abs(self.y))
-
-    @staticmethod
-    def sign(number):
-        return 1 if number > 0 else (0 if number == 0 else -1)
-
-    def dir(self):
-        return Coord(Coord.sign(self.x), Coord.sign(self.y))
-
-    def is_legal(self):
-        return 0 <= self.x < MAX_COORD and 0 <= self.y < MAX_COORD
-
-class Field:
-    def __init__(self, height, width):
-        self.array = [[Square() for i in range(width)] for j in range(height)]
-
-    @staticmethod
-    def _getindex(index):
-        if isinstance(index, Coord):
-            return index
-        elif isinstance(index, tuple):
-            return Coord(index[0], index[1])
-        raise TypeError()
-
-    def __getitem__(self, index):
-        index = Field._getindex(index)
-        return self.array[index.x][index.y]
-
-    def __setitem__(self, index, value):
-        if isinstance(value, Square):
-            raise ValueError()
-        index = Field._getindex(index)
-        self.array[index.x][index.y] = value
-
-Phase = Enum('Phase', "displace, move, attack, end") #pylint: disable=invalid-name
-
-def opponent(player):
-    return 2 if player == 1 else 1
+from structs import *
+from ships import Ships
 
 class GameRules:
     FIELD_SIZE = 14
@@ -119,17 +43,31 @@ class Player:
             while len(self.queue):
                 self.socket.send(self.queue.pop(0))
 
+def patron_near(patron_type, coord, field):
+    for x in range(-1, 2):
+        for y in range(-1, 2):
+            if x == 0 and y == 0:
+                continue
+            if not Coord(x, y).is_legal():
+                continue
+            current_square = field[coord + Coord(x, y)]
+            if (isinstance(current_square.ship, [patron_type, Ships.Tp])
+                    and current_square.player == field[coord].player):
+                return True
+    return False
+
 class Game:
     def __init__(self):
         self.rules = GameRules()
         self.field = Field(self.rules.FIELD_SIZE, self.rules.FIELD_SIZE)
         self.phase = Phase.displace
-        self.player = 0
+        self.player = Player()
         self.players = [Player() for i in range(2)]
+        self.ready = [False]*2
         self.action_log = []
 
     def restore(self):
-        for el in self.log:
+        for el in self.action_log:
             if el.action in RESTORABLE_ACTIONS:
                 RESTORABLE_ACTIONS[el.action](*el.args, is_real=False)
 
@@ -166,32 +104,50 @@ class Game:
                 counts[el.fig] += 1
                 if el.player != player:
                     raise "Bad fig"
-        if counts != self.rules.FIG_COUNT:
+        if not all([a == b for a, b in zip(counts, self.rules.FIG_COUNT)]):
             raise "Bad fig count"
         lower = 0 if player == 1 else self.rules.FIELD_SIZE - self.rules.DISPLACE_SIZE
-        upper = lower + self.rules.DISPLACE_SIZE
-        self.field[lower:upper] = field
+        for x in range(self.rules.DISPLACE_SIZE):
+            for y in range(self.rules.FIELD_SIZE):
+                self.set_fig(Coord(lower + x, y), field(x, y))
         self.log({"type": "displaced", "player": player})
         self.ready[player] = True
         if False not in self.ready:
-            self.set_phase(Phase.move, 1)
+            self.set_phase(Phase.move, FIRST)
 
     @restorable
     def _move(self, source, destination):
         self.field[destination] = self.field[source]
         self.field[source] = Square()
 
-    def move(self, data):
-        if self.phase != Phase.move or self.player != player:
-            raise "Bad phase"
-        if self.field[source].player != player:
+    def move(self, source, destination):
+        if self.field[source].player != self.player:
             raise "Not yours"
         if not self.field[destination].empty():
             raise "Occupied"
-        if not self.check_policy(self.field[source].fig.move_policy, source, destination):
-            raise "Policy error"
+        ship = self.field[source].ship
+        if not source.dist(destination) <= ship.move_distance:
+            raise "Too far"
+        routes = []
+        if Coord.dist(source, destination) == 1:
+            routes.append([source, destination])
+        else:
+            shift = source - destination
+            if shift.x == 0 or shift.y == 0:
+                routes.append([source, source + shift // 2, destination])
+            else:
+                routes.append([source, source + Coord(shift.x, 0), destination])
+                routes.append([source, source + Coord(0, shift.y), destination])
+        routes = [route for route in routes
+                  if all([self.field[coord].empty() for coord in route[1:]])]
+        if ship.patron is not None:
+            routes = [route for route in routes
+                      if all([patron_near(ship.patron, coord, self.field)
+                              for coord in route])]
+        if not routes:
+            raise "No route"
         self._move(source, destination)
-        self.set_phase(Phase.attack, player)
+        self.set_phase(Phase.attack, self.player)
 
     @restorable
     def destroy(self, coord):
@@ -201,27 +157,29 @@ class Game:
     def convert(self, coord, player):
         self.field[coord].player = player
 
-    def _shot(self, source, destination):
-        success = self.field[destination].fig != Fig.F
+    def _shoot(self, source, destination, mode):
+        ship = self.field[source].ship
+        success = ship not in self.field[destination].ship.shot_immune
         self.log({"type": "shot", "fig": self.field[source].fig,
                   "player": self.field[source].player,
                   "success": success})
-        self.destroy(source)
         if success:
-            self.destroy(destination)
-        self.set_phase(Phase.move, self.player if success else opponent(self.player))
+            ship.fire(destination, mode, self)
+        if source and ship.disposable:
+            self.destroy(source)
+        self.set_phase(Phase.move, self.player if success else not self.player)
 
-    def can_torpedo(self, source, target):
-        dist = Coord.dist(source, target)
-        if dist > 4:
-            raise "Too far"
-        direction = (source - target).dir()
-        if not (direction.x == 0 or direction.y == 0):
-            raise "Not line"
-        for pos in range(1, dist):
-            if not self.field[source + pos*direction].empty():
-                raise "Way blocked"
-        return True
+    def shoot(self, source, destination, mode):
+        if self.field[source].player != self.player:
+            raise "Not yours"
+        ship = self.field[source].ship
+        if not ship.can_shoot(source, destination, mode, self.field):
+            raise "Can't shoot"
+        self._shoot(source, destination, mode)
+
+    def attack(self, source, destination):
+        if self.field[source].player != self.player:
+            raise "Not yours"
 
     def take_action(self, data):
         if data.phase != self.phase:
