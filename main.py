@@ -1,3 +1,4 @@
+import os
 import tornado.ioloop
 import tornado.web
 
@@ -9,5 +10,5 @@ if __name__ == "__main__":
     application = tornado.web.Application([
         (r"/", MainHandler),
         ])
-    application.listen(80)
+    application.listen(os.environ['PORT'])
     tornado.ioloop.IOLoop.current().start()
