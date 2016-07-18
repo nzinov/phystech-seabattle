@@ -1,11 +1,1 @@
-Django==1.8.4
-Markdown==2.6.1
-dj-database-url==0.3.0
-dj-static==0.0.6
-django-badges==0.1.11
-django-bootstrap3==5.0.3
-django-markdown-deux==1.0.5
-gunicorn==19.3.0
-psycopg2==2.6
-static3==0.5.1
-trueskill==0.4.3
+
