@@ -4,12 +4,23 @@ from enum import Enum
 MAX_COORD = 14
 
 class Square:
-    def __init__(self, fig=None, player=0):
-        self.fig = fig
+    def __init__(self, ship=None, player=0):
+        self.ship = ship
         self.player = player
 
     def empty(self):
-        return self.fig is None
+        return self.ship is None
+
+    def is_his(self, player):
+        return self.player == player
+
+    def opp(self):
+        if self.player not in [1, 2]:
+            raise ValueError
+        return 2 if self.player == 1 else 1
+
+    def is_opp(self, player):
+        return self.opp() == player
 
 class Coord:
     def __init__(self, x, y):
@@ -68,30 +79,9 @@ class Field:
         return self.array[index.x][index.y]
 
     def __setitem__(self, index, value):
-        if not isinstance(value, Square):
-            raise ValueError()
+        if not isinstance(value, None):
+            raise TypeError()
         index = Field._getindex(index)
         self.array[index.x][index.y] = value
 
 Phase = Enum('Phase', "displace, move, attack, end")
-
-class Player:
-    def __init__(self, player=0):
-        self.player = player
-
-    def __not__(self):
-        opponent = 2 if self.player == 1 else 1
-        return Player(opponent)
-
-    op = __not__
-
-    def __eq__(self, other):
-        if isinstance(other, int):
-            return self.player == other
-        return self.player == other.player
-
-    def __bool__(self):
-        return self.player != 0
-
-FIRST = Player(1)
-SECOND = Player(2)

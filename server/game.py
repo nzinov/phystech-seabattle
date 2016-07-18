@@ -1,3 +1,4 @@
+from util import *
 from structs import *
 from ships import Ships
 
@@ -43,20 +44,8 @@ class Player:
             while len(self.queue):
                 self.socket.send(self.queue.pop(0))
 
-def patron_near(patron_type, coord, field):
-    for x in range(-1, 2):
-        for y in range(-1, 2):
-            if x == 0 and y == 0:
-                continue
-            if not Coord(x, y).is_legal():
-                continue
-            current_square = field[coord + Coord(x, y)]
-            if (isinstance(current_square.ship, [patron_type, Ships.Tp])
-                    and current_square.player == field[coord].player):
-                return True
-    return False
-
 class Game:
+    @attachable("game_init")
     def __init__(self):
         self.rules = GameRules()
         self.field = Field(self.rules.FIELD_SIZE, self.rules.FIELD_SIZE)
@@ -77,6 +66,7 @@ class Game:
     def notify(self, whom, message):
         self.players[whom].send(message)
 
+    @hooked
     @restorable(notify="both")
     def set_phase(self, phase, player):
         self.phase = phase
@@ -119,35 +109,6 @@ class Game:
     def _move(self, source, destination):
         self.field[destination] = self.field[source]
         self.field[source] = Square()
-
-    def move(self, source, destination):
-        if self.field[source].player != self.player:
-            raise "Not yours"
-        if not self.field[destination].empty():
-            raise "Occupied"
-        ship = self.field[source].ship
-        if not source.dist(destination) <= ship.move_distance:
-            raise "Too far"
-        routes = []
-        if Coord.dist(source, destination) == 1:
-            routes.append([source, destination])
-        else:
-            shift = source - destination
-            if shift.x == 0 or shift.y == 0:
-                routes.append([source, source + shift // 2, destination])
-            else:
-                routes.append([source, source + Coord(shift.x, 0), destination])
-                routes.append([source, source + Coord(0, shift.y), destination])
-        routes = [route for route in routes
-                  if all([self.field[coord].empty() for coord in route[1:]])]
-        if ship.patron is not None:
-            routes = [route for route in routes
-                      if all([patron_near(ship.patron, coord, self.field)
-                              for coord in route])]
-        if not routes:
-            raise "No route"
-        self._move(source, destination)
-        self.set_phase(Phase.attack, self.player)
 
     @restorable
     def destroy(self, coord):
