@@ -8,7 +8,7 @@ def patron_near(patron_type, coord, field):
             if not (coord + Coord(x, y)).is_legal():
                 continue
             current_square = field[coord + Coord(x, y)]
-            if (current_square.ship.__name__ in [patron_type.__name__, "Tp"]
+            if (current_square.ship.name() in [patron_type, "Tp"]
                     and current_square.player == field[coord].player):
                 return True
     return False
@@ -65,10 +65,10 @@ class Shoot(Action):
     @staticmethod
     def take(game, source, destination):
         game.destroy(source)
-        failed = game.field[destination].ship.__name__  == "F"
+        failed = game.field[destination].ship.name()  == "F"
         if not failed:
             game.destroy(destination)
-        game.set_phase(Phase.move, 3 - game.player if failed else game.failed)
+        game.set_phase(Phase.move, 1 - game.player if failed else game.player)
 
 class Attack(Action):
     @staticmethod
@@ -85,9 +85,9 @@ class Attack(Action):
         squares = [source, destination]
         blocks = [None]*2
         ships = [game.field[source].ship,
-            game.field[destination].ship]
+                 game.field[destination].ship]
         if ships[1].explosive:
-            win = ships[0].__name__ == "Tr"
+            win = ships[0].name() == "Tr"
             if not win:
                 game.destroy(source)
                 if ships[1].on_attack is not None:
@@ -97,11 +97,11 @@ class Attack(Action):
             for player, ship in enumerate(ships):
                 if ship.strength is not None:
                     blocks[player] = game.ask_block(squares[player])
-            if blocks[0]:
-                blocks[0].wait()
-                game.send_block(blocks[0])
             if blocks[1]:
-                blocks[1].wait()
+                blocks[1] = blocks[1].wait()
+            game.send_block(blocks[1] if blocks[1] else Block(ships[1], [destination]))
+            if blocks[0]:
+                blocks[0] = blocks[0].wait()
 
             if all(blocks):
                 if blocks[0].strength() == blocks[1].strength():
@@ -109,13 +109,13 @@ class Attack(Action):
                 else:
                     win = blocks[0].strength() > blocks[1].strength()
             else:
-                if ships[0].__name__ == ships[1].__name__:
+                if ships[0].name() == ships[1].name():
                     win = None
                 else:
                     if not blocks[0]:
-                        win = ships[0] not in ships[1].concuers
+                        win = ships[1].name() in ships[0].conquers
                     else:
-                        win = ships[1] in ships[0].conquers
+                        win = ships[0].name() not in ships[1].conquers
             game.attack(source, destination, win)
             if win is None:
                 for block, square in zip(blocks, squares):
@@ -126,7 +126,7 @@ class Attack(Action):
                         game.destroy(square)
             else:
                 game.destroy(squares[win])
-        game.set_phase(Phase.move, game.player if win else 3 - game.player)
+        game.set_phase(Phase.move, game.player if win else 1 - game.player)
 
 class Explode(Action):
     radius = 2

@@ -1,26 +1,40 @@
-from util import sign
 from enum import Enum
+
+def sign(number):
+    return 1 if number > 0 else (0 if number == 0 else -1)
+
+
+class Ships:
+    def __getitem__(self, name):
+        return getattr(self, name)
+
+    def register(self, attr):
+        setattr(self, attr.__name__, attr)
+        return attr
+
+Ships = Ships()
 
 MAX_COORD = 14
 
 class Square:
-    def __init__(self, ship=None, player=0):
-        self.ship = ship
-        self.player = player
+    def __init__(self, ship=None, player=None):
+        if isinstance(ship, tuple):
+            self.ship = Ships[ship[1]]
+            self.player = ship[0]
+        else:
+            self.ship = ship
+            self.player = player
+
+    def dump(self):
+        return (self.player, self.ship.name())
 
     def empty(self):
         return self.ship is None
 
-    def is_his(self, player):
-        return self.player == player
-
     def opp(self):
-        if self.player not in [1, 2]:
+        if self.player not in [0, 1]:
             raise ValueError
-        return 2 if self.player == 1 else 1
-
-    def is_opp(self, player):
-        return self.opp() == player
+        return 1 if self.player == 0 else 0
 
 class Coord:
     def __init__(self, x, y):
@@ -63,8 +77,13 @@ class Coord:
         return self.x == self.y
 
 class Field:
-    def __init__(self, height, width):
+    def __init__(self, height, width=None):
+        if not width:
+            width = height
         self.array = [[Square() for i in range(width)] for j in range(height)]
+
+    def dump(self):
+        return [[el.dump() for el in row] for row in self.array]
 
     @staticmethod
     def _getindex(index):
@@ -85,3 +104,4 @@ class Field:
         self.array[index.x][index.y] = value
 
 Phase = Enum('Phase', "displace, move, attack, end")
+

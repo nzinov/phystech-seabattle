@@ -1,6 +1,3 @@
-def sign(number):
-    return 1 if number > 0 else (0 if number == 0 else -1)
-
 class HookWrapper:
     def __init__(self, method):
         self.hooks = []
@@ -25,7 +22,7 @@ def attached(name):
     def decorator(func):
         if not name in ATTACHED_CALLBACKS:
             ATTACHED_CALLBACKS[name] = []
-        ATTACHED_CALLBACKS[name].append()
+        ATTACHED_CALLBACKS[name].append(func)
         return func
     return decorator
 
