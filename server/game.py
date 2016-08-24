@@ -1,6 +1,7 @@
-from utils import *
-from structs import *
-from ships import Ships
+from .utils import *
+from .structs import *
+from .ships import Ships
+from .utils import Dumper
 
 class GameRules:
     FIELD_SIZE = 14
@@ -14,26 +15,50 @@ class Game:
     @attachable("game_init")
     def __init__(self, rules=GameRules):
         self.rules = rules
-        self.field = Field(self.rules.FIELD_SIZE, self.rules.FIELD_SIZE)
+        self.field = Field(self.rules.FIELD_SIZE)
         self.phase = Phase.displace
         self.handlers = [None]*2
         self.player = None
         self.ready = [False]*2
         self.action_log = []
 
+    def notify(self, message, who=None):
+        json_string = Dumper.dump(message)
+        if who is not None:
+            if self.handlers[who]:
+                self.handlers[who].write_message(json_string)
+        else:
+            for handler in self.handlers:
+                if handler:
+                    handler.write_message(json_string)
+
     def log(self, message):
         self.action_log.append(message)
-        for handler in self.handlers:
-            if handler:
-                handler.write_message(message)
+        self.notify(message)
 
     @hooked
     def set_phase(self, phase, player):
         self.phase = phase
         self.player = player
+        self.notify({"action": "phase", "phase": phase, "player": player})
 
-    def set_fig(self, coord, fig):
+    def send_square(self, coord, player):
+        fig = self.field[coord]
+        shadowed = Square(fig.ship if fig.player == player else None, fig.player)
+        self.notify({"action": "square", "coord": coord, "square": shadowed}, who=player)
+
+    def set_square(self, coord, fig):
         self.field[coord] = fig
+        for player in range(2):
+            self.send_square(coord, player)
+
+    def introduce(self, player):
+        for i in range(self.rules.FIELD_SIZE):
+            for j in range(self.rules.FIELD_SIZE):
+                if not self.field[i, j].empty():
+                    self.send_square(Coord(i, j), player)
+        self.notify({"action": "phase", "phase": self.phase, "player": self.player}, who=player)
+
 
     def displace(self, player, field):
         if self.phase != Phase.displace or self.ready[player]:
@@ -51,40 +76,37 @@ class Game:
         lower = 0 if player == 0 else self.rules.FIELD_SIZE - self.rules.DISPLACE_SIZE
         for x in range(self.rules.DISPLACE_SIZE):
             for y in range(self.rules.FIELD_SIZE):
-                self.set_fig(Coord(lower + x, y), field[x, y])
+                self.set_square(Coord(lower + x, y), field[x, y])
         self.log({"type": "displaced", "player": player})
         self.ready[player] = True
         if False not in self.ready:
             self.set_phase(Phase.move, 0)
 
     def move(self, source, destination):
-        self.field[destination] = self.field[source]
-        self.field[source] = Square()
+        self.set_square(destination, self.field[source])
+        self.set_square(source, Square())
 
     def destroy(self, coord):
-        self.field[coord] = Square()
+        self.set_square(coord, Square())
 
     def convert(self, coord, player):
-        self.field[coord].player = player
+        self.set_square(coord, Square(self.field[coord].ship, player))
 
     def take_action(self, player, data):
         handler = self.handlers[player]
-        if player != self.player:
-            handler.error("Not you")
+        if data["phase"] != self.phase:
             return
-        if not self.field[data["source"]].is_his(player):
-            handler.error("Not yours")
+        if player != self.player:
+            return
+        if self.field[data["source"]].player != player:
             return
         if not self.phase in [Phase.move, Phase.attack]:
-            handler.error("Not now")
             return
         ship = self.field[data["source"]].ship
         actions = ship.move_actions if self.phase == Phase.move else ship.attack_actions
         if data["type"] not in actions:
-            handler.error("Not avaliable")
             return
         action = actions[data["type"]]
         if not action.is_possible(self, data["source"], data["destination"]):
-            handler.error("Not possible")
             return
         action.take(self, data["source"], data["destination"])

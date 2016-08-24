@@ -1,4 +1,4 @@
-from structs import *
+from .structs import *
 
 def patron_near(patron_type, coord, field):
     for x in range(-1, 2):
@@ -30,13 +30,13 @@ class Action:
 class Move(Action):
     @staticmethod
     def is_possible(game, source, destination):
-        if not game.field[source].is_his(game.player):
-            raise "Not yours"
+        if game.field[source].player != game.player:
+            return "Not yours"
         if not game.field[destination].empty():
-            raise "Occupied"
+            return "Occupied"
         ship = game.field[source].ship
-        if not source.dist(destination) <= ship.move_distance:
-            raise "Too far"
+        if not (source - destination).dist() <= ship.move_distance:
+            return "Too far"
         routes = []
         if (source - destination).dist() == 1:
             routes.append([source, destination])
@@ -48,17 +48,18 @@ class Move(Action):
                 routes.append([source, source + Coord(shift.x, 0), destination])
                 routes.append([source, source + Coord(0, shift.y), destination])
         routes = [route for route in routes
-                if all([game.field[coord].empty() for coord in route[1:]])]
+                  if all([game.field[coord].empty() for coord in route[1:]])]
         if ship.patron is not None:
             routes = [route for route in routes
-                    if all([patron_near(ship.patron, coord, game.field)
-                        for coord in route])]
+                      if all([patron_near(ship.patron, coord, game.field)
+                              for coord in route])]
         if not routes:
-            raise "No route"
+            return "No route"
+        return True
 
     @staticmethod
     def take(game, source, destination):
-        game._move(source, destination)
+        game.move(source, destination)
         game.set_phase(Phase.attack, game.player)
 
 class Shoot(Action):
@@ -73,10 +74,10 @@ class Shoot(Action):
 class Attack(Action):
     @staticmethod
     def is_possible(game, source, destination):
-        if game.field[destination].is_opp(game.player):
-            raise "Not opponent"
+        if game.field[destination].opp() != game.player:
+            return "Not opponent"
         if (destination - source).dist() != 1:
-            raise "Too far"
+            return "Too far"
         return True
 
     @staticmethod
