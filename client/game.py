@@ -1,8 +1,7 @@
 from browser import alert, document, html, websocket
-from server.structs import *
-import server.ships
-from server.utils import Dumper
-import server.structs
+from model.structs import *
+import model.ships
+from model.utils import Dumper
 
 squares = document.get(selector=".square")
 

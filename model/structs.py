@@ -28,7 +28,7 @@ class Square:
         return self
 
     def __dump__(self):
-        return (self.player, self.ship.name() if self.ship else None)
+        return (self.player, (self.ship.name() if self.ship else None))
 
     def empty(self):
         return self.ship is None

@@ -1,6 +1,7 @@
 from .structs import Coord, Ships
 from .action import *
 from .utils import *
+from .game import Game
 
 class Ship:
     move_distance = 1
@@ -38,10 +39,10 @@ class Av(Ship):
 class Br(Ship):
     explosive = True
     class Capture(Action):
-        @staticmethod
-        @attached("game_init")
-        def init(game):
+        @Game.__init__.hook
+        def init(game, rules)
             game.brander_used = [False, False]
+            @game.set_phase.hook
             def _hook(game, phase, player):
                 game.brander_used[1 - player] = False
                 if phase == Phase.attack:
