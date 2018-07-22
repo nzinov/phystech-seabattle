@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>Game</title>
+        <script type="text/javascript"
+            src="brython_dist.js">
+        </script>
+<style>
+.square {
+    height: calc(100vh / 14 - 3px);
+    width: calc(100vh / 14 - 3px);
+    padding: 0;
+    border: 1px solid black;
+}
+
+body {
+    overflow: hidden;
+}
+
+table {
+    border-collapse: collapse;
+}
+</style>
+    </head>
+    <body onload="brython(1)">
+        <script type="text/python3" src="/game.py"></script>
+        <div style="display: flex">
+            <div>
+                <table>
+                    {% for i in range(14)%}
+                    <tr class="row">
+                        {% for j in range(14)%}
+                        <td class="square" id="{{i}}:{{j}}" x={{i}} y={{j}}></td>
+                        {% end %}
+                    </tr>
+                    {%end%}
+                </table>
+            </div>
+            <div style="background-color: grey; flex-grow: 1" id="log"></div>
+        </div>
+    </body>
+</html>

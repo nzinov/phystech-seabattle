@@ -45,7 +45,8 @@ class Game(models.Model):
 
     @classmethod
     def get_by_player(cls, player_id):
-        return cls.objects.filter(models.Q(player1_id=player_id) | models.Q(player2_id=player_id))
+        return cls.objects.filter(models.Q(player1_id=player_id) |
+                                  models.Q(player2_id=player_id))
 
     def get_role(self, player_id):
         if self.player1_id == player_id:
