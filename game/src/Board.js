@@ -1,50 +1,55 @@
 import React from 'react';
+import { DragDropContext, DragSource, DropTarget } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+
+const squareSource = {
+	beginDrag(props) {
+		return {x: props.x, y: props.y, figure: props.figure};
+	},
+	
+	canDrag(props, monitor) {
+		return props.figure && props.figure.player == props.player;
+	}
+};
+
+const squareTarget = {
+	drop(props, monitor, component) {
+        props.moves.move([monitor.getItem().x, monitor.getItem().y], [props.x, props.y])
+	}
+};
+
+class Square extends React.Component {
+	render() {
+		let cellStyle = {
+			border: '1px solid #555',
+			width: '6vh',
+			height: '6vh',
+			lineHeight: '50px',
+			textAlign: 'center',
+			backgroundSize: 'contain'
+		};
+		if (this.props.figure) {
+			cellStyle.backgroundImage = "url("+process.env.PUBLIC_URL+"figures/"+this.props.figure.type+".png)";
+		}
+		return this.props.connectDropTarget(this.props.connectDragSource(<td style={cellStyle}></td>));
+	}
+};
+
+Square = DropTarget("square", squareTarget, (connect, monitor) => ({connectDropTarget: connect.dropTarget()}))(
+			DragSource("square", squareSource, (connect, monitor) => ({ connectDragSource: connect.dragSource() }))(Square)
+		 );
 
 class Board extends React.Component {
-    onClick(id) {
-        if (this.isActive(id)) {
-            this.props.moves.clickCell(id);
-            this.props.events.endTurn();
-        }
-    }
-
-    isActive(id) {
-        if (!this.props.isActive) return false;
-        if (this.props.G.cells[id] !== null) return false;
-        return true;
-    }
-
     render() {
-        let winner = '';
-        if (this.props.ctx.gameover) {
-            winner =
-                this.props.ctx.gameover.winner !== undefined ? (
-                    <div id="winner">Winner: {this.props.ctx.gameover.winner}</div>
-                ) : (
-                    <div id="winner">Draw!</div>
-                );
-        }
-
-        const cellStyle = {
-            border: '1px solid #555',
-            width: '50px',
-            height: '50px',
-            lineHeight: '50px',
-            textAlign: 'center',
-        };
-
         let tbody = [];
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 14; i++) {
             let cells = [];
-            for (let j = 0; j < 3; j++) {
-                const id = 3 * i + j;
+            for (let j = 0; j < 14; j++) {
                 cells.push(
-                    <td style={cellStyle} key={id} onClick={() => this.onClick(id)}>
-                    {this.props.G.cells[id]}
-                    </td>
+                    <Square x={i} y={j} figure={this.props.G.cells[i][j]} player={this.props.ctx.currentPlayer} G={this.props.G} moves={this.props.moves}></Square>
                 );
             }
-            tbody.push(<tr key={i}>{cells}</tr>);
+            tbody.push(<tr>{cells}</tr>);
         }
 
         return (
@@ -52,8 +57,9 @@ class Board extends React.Component {
             <table id="board">
             <tbody>{tbody}</tbody>
             </table>
-            {winner}
             </div>
         );
     }
 }
+
+export default DragDropContext(HTML5Backend)(Board);
