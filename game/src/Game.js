@@ -1,5 +1,5 @@
-import { Game } from 'boardgame.io/core';
 import deepcopy from 'deepcopy';
+import { INVALID_MOVE } from 'boardgame.io/core';
 
 const SIZE = 14;
 
@@ -18,6 +18,13 @@ function setPos(G, pos, fig) {
     G.cells[pos[0]][pos[1]] = fig;
 }
 
+function checkSide(G, player, pos) {
+    return true; // TODO: just for testing
+    let low = player == 1 ? 9 : 0;
+    let high = player == 1 ? 14 : 5;
+    return low <= pos[0] && pos[0] < high;
+}
+
 function patronNear(G, type, player, pos) {
     for (let dx = -1; dx < 2; ++dx) {
         for (let dy = -1; dy < 2; ++dy) {
@@ -33,33 +40,43 @@ function patronNear(G, type, player, pos) {
     return false;
 }
 
-const Actions = {
-    Move: {
-        can(G, ctx, ship, from, to) {
-            if (getPos(G, to)) {
-                return false;
-            }
-            if (dist(from, to) > ship.maxMove) {
-                return false;
-            }
-            if (ship.patron && !patronNear(G, ship.patron, ctx.currentPlayer, to)) {
-                return false;
-            }
-            return true;
-        },
+function checkPatron(G, player, ship, from) {
+    return !(ship.patron && !patronNear(G, ship.patron, player, from));
+};
 
-        take(G, ctx, ship, from, to) {
-            G = deepcopy(G)
+const Actions = {
+    Place: {
+        can(G, player, from, to) {
+            return dist(from, to) > 0 && checkSide(G, player, from) && checkSide(G, player, to);
+        },
+        take(G, ctx, from, to) {
+            let tmp = getPos(G, from);
+            setPos(G, from, getPos(G, to));
+            setPos(G, to, tmp);
+        }
+    },
+    Move: {
+        can(G, player, from, to) {
+            let ship = getShip(G, from);
+            return checkPatron(G, player, ship, from) &&
+                !getPos(G, to) &&
+                (dist(from, to) <= ship.maxMove) &&
+                checkPatron(G, player, ship, to);
+        },
+        take(G, ctx, from, to) {
             setPos(G, to, getPos(G, from));
             setPos(G, from, null);
-            ctx.events.endPhase("attack");
-            return G;
+            ctx.events.endStage();
         }
     },
     Attack: {
-        can(G, ctx, ship, from, to) {
+        can(G, player, from, to) {
+            let ship = getShip(G, from);
+            if (!checkPatron(G, player, ship, from)) {
+                return false;
+            }
             let opponent = getPos(G, to);
-            if (!opponent || opponent.player == ctx.currentPlayer) {
+            if (!opponent || opponent.player == player) {
                 return false;
             }
             if (dist(from, to) > 1) {
@@ -68,9 +85,66 @@ const Actions = {
             return true;
         },
 
-        take(G, ctx, ship, from, to) {
+        take(G, ctx, from, to) {
+            if (getPos(G, to).player == -1) {
+                getPos(G, to).player = ctx.currentPlayer;
+                ctx.events.endTurn();
+                return;
+            }
+            let ship = getShip(G, from);
+            let targetShip = getShip(G, to);
+            console.log("pos", getPos(G, to).type);
+            if (targetShip.onAttack) {
+                targetShip.onAttack(G, ctx, from, to);
+                return;
+            }
         }
+    },
+    Explode: {
+        can(G, player, from, to) {
+            return dist(from, to) == 0;
+        },
+
+        take(G, ctx, from, to) {
+            Effects.Explode(G, from, to);
+            ctx.events.endStage();
+        },
     }
+};
+
+const Effects = {
+    Explode(G, from, to) {
+        let ship = getShip(G, from);
+        setPos(G, from, null);
+        for (let dx = -ship.blastRadius; dx <= ship.blastRadius; ++dx) {
+            for (let dy = -ship.blastRadius; dy <= ship.blastRadius; ++dy) {
+                let newPos = [to[0] + dx, to[1] + dy];
+                if (valid(newPos)) {
+                    ship.blastSquare(G, newPos);
+                }
+            }
+        }
+    },
+    ExplodeMine(G, ctx, from, to) {
+        if (getPos(G, from)?.type != 'Tr') {
+            setPos(G, from, null); 
+            setPos(G, to, null); 
+            ctx.events.endTurn();
+        } else {
+            setPos(G, to, null); 
+            ctx.events.endStage();
+        } 
+    },
+    ExplodeBomb(G, ctx, from, to) {
+        if (getPos(G, from)?.type != 'Tr') {
+            setPos(G, from, null); 
+            Effects.Explode(G, to, to);
+            ctx.events.endTurn();
+        } else {
+            setPos(G, to, null); 
+            ctx.events.endStage();
+        } 
+    },
 };
 
 const Ship = {
@@ -89,23 +163,32 @@ const AttackingShip = {
     maxMove:  1,
 };
 
+const Bomb = {
+    actions: {
+        move: [Actions.Move],
+        attack: [Actions.Explode],
+    },
+    maxMove:  1,
+    onAttack: Effects.ExplodeBomb
+};
+
 const Ships = {
     Av: {...AttackingShip},
-    Sm: {...Ship, patron: "Av"},
+    Sm: {...Ship, patron: "Av", onAttack: Effects.ExplodeMine},
     Lk: {...AttackingShip},
     Rk: {...Ship, patron: "KrPl"},
     Kr: {...AttackingShip},
-    T: {...Ship, maxMove: 2, patron: "Tk"},
+    T: {...Ship, maxMove: 2, patron: "Tk", onAttack: Effects.ExplodeMine},
     Rd: {...AttackingShip},
-    Mn: {...Ship, patron: "Es"},
+    Mn: {...Ship, patron: "Es", onAttack: Effects.ExplodeMine},
     Es: {...AttackingShip},
-    Br: {...Ship},
+    Br: {...Ship, onAttack: Effects.ExplodeMine},
     KrPl: {...AttackingShip},
-    AB: {...Ship},
+    AB: {...Bomb, blastRadius: 2, blastSquare(G, pos) {setPos(G, pos, null);}},
     St: {...AttackingShip},
-    NB: {...Ship},
+    NB: {...Bomb, blastRadius: 2, blastSquare(G, pos) {let ship = getPos(G, pos); if (ship) ship.player = -1;}},
     Tk: {...AttackingShip, maxMove: 2},
-    F: {...Ship, maxMove: 0},
+    F: {actions: {move: [], attack: []}},
     Tr: {...AttackingShip},
     Tp: {...AttackingShip},
     Pl: {...AttackingShip},
@@ -133,7 +216,84 @@ const InitialShips = [
     ["Pl", 4],
 ]
 
-const GameRules = Game({
+function getShip(G, from) {
+    return Ships[getPos(G, from)?.type];
+}
+
+export function getStageActions(G, ctx, stage, from) {
+    let ship = getShip(G, from);
+    if (!ship) {
+        return [];
+    }
+    let player = getPos(G, from).player;
+    if (!ctx.activePlayers) {
+        return [];
+    }
+    return ship.actions[stage] || [];
+};
+
+export function getActions(G, ctx, player, from) {
+    if (ctx.phase == 'place') {
+        return checkSide(G, player, from) ? [Actions.Place] : [];
+    }
+    if (getPos(G, from)?.player != player || !ctx.activePlayers) {
+        return [];
+    }
+    let stage = ctx.activePlayers[player];
+    if (!stage) {
+        return [];
+    }
+    return getStageActions(G, ctx, stage, from);
+};
+
+function makeMove(G, ctx, stage, from, to) {
+    let actions = getStageActions(G, ctx, stage, from);
+    if (!actions.length) {
+        return INVALID_MOVE;
+    }
+    if (!actions[0].can(G, ctx.playerID, from, to)) {
+        return INVALID_MOVE;
+    }
+    actions[0].take(G, ctx, from, to);
+};
+
+function Ready(G, ctx) {
+    G.ready++;
+    ctx.events.endStage();
+}
+
+function Place(G, ctx, from, to) {
+    if (!Actions.Place.can(G, ctx.playerID, from, to)) {
+        return INVALID_MOVE;
+    }
+    Actions.Place.take(G, ctx, from, to);
+};
+
+function Move(G, ctx, from, to) {
+    makeMove(G, ctx, 'move', from, to);
+};
+
+const Attack = {
+    move(G, ctx, from, to) {
+        makeMove(G, ctx, 'attack', from, to);
+    },
+    client: false
+};
+
+export function takeMove(G, ctx, moves, from, to) {
+    if (ctx.phase == 'place') {
+        moves.Place(from, to);
+    }
+    let player = getPos(G, from)?.player;
+    let stage = ctx.activePlayers[player];
+    if (stage == 'move') {
+        moves.Move(from, to);
+    } else if (stage == 'attack') {
+        moves.Attack(from, to);
+    }
+};
+
+export const GameRules = {
     setup() {
         let cells = [];
         for (let x = 0; x < SIZE; ++x) {
@@ -156,29 +316,22 @@ const GameRules = Game({
                 i -= 1;
             }
         }
-        return {cells}
+        return {cells, ready: 0}
     },
-    flow: {phases: [{name: "move"}, {name: "attack"}]},
-    moves: {
-        move(G, ctx, from, to) {
-            let ship = getPos(G, from);
-            if (!ship || ship.player != ctx.currentPlayer) {
-                return;
-            }
-            ship = Ships[ship.type];
-            let actions = ship.actions[ctx.phase];
-            if (!actions.length) {
-                return
-            }
-            if (ship.patron && !patronNear(G, ship.patron, ctx.currentPlayer, from)) {
-                return;
-            }
-            if (!actions[0].can(G, ctx, ship, from, to)) {
-                return;
-            }
-            return actions[0].take(G, ctx, ship, from, to);
-        },
-    },
+    phases: {place: {
+        start: true,
+        turn: {activePlayers: {all: 'place'}, stages: {
+            place: {moves: { Ready, Place }},
+        }},
+        endIf: G => (G.ready >= 2),
+        next: 'play'
+    }, play: {
+        turn: {activePlayers: {currentPlayer: 'move'}, stages: {
+            move: {next: 'attack', moves: { Move }},
+            attack: {next: 'move', moves: { Attack }}
+        }},
+    }},
+    moves: {},
 
     playerView(G, ctx, playerID) {
         G = deepcopy(G);
@@ -186,7 +339,7 @@ const GameRules = Game({
             for (let j = 0; j < SIZE; ++j) {
                 let cell = G.cells[i][j]
                 if (cell && cell.player != playerID) {
-                    cell.type = "Unknown";
+                    cell.type = cell.player == -1 ? "Sinking" : "Unknown";
                     cell.state = {}
                 }
                 G.cells[i][j] = cell;
@@ -194,7 +347,6 @@ const GameRules = Game({
         }
         return G
     }
-});
+};
 
 export default GameRules;
-
