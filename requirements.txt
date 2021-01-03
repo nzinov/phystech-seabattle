@@ -1,4 +1,4 @@
-Django==1.8
+Django==1.11.29
 django-badges==0.1.11
 django-bootstrap3==5.0.3
 django-markdown-deux==1.0.5
