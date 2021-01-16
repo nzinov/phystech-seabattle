@@ -16,7 +16,7 @@
     "react-dom": "*",
     "react-scripts": "*",
     "universal-cookie": "^4.0.4",
-    "uuid": "*",
+    "uuid": "*"
   },
   "scripts": {
     "start": "react-scripts start",
