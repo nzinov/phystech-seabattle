@@ -1,7 +1,0 @@
-Django==1.11.29
-django-badges==0.1.11
-django-bootstrap3==5.0.3
-django-markdown-deux==1.0.5
-python-social-auth==0.2.10
-trueskill==0.4.3
-tornado==4.4
