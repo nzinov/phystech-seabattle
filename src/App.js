@@ -27,7 +27,7 @@ if (!matchID) {
 }
 console.log(matchID, playerID);
 
-const SeabattleClient = Client({ game: GameRules, board:  Board, multiplayer: SocketIO({'server': `${window.location.hostname}:8000`}), debug: false});
+const SeabattleClient = Client({ game: GameRules, board:  Board, multiplayer: SocketIO({'server': window.location.host}), debug: false});
 
 const App = () => {
 

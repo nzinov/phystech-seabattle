@@ -4,6 +4,9 @@
   "name": "game",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "15.x"
+  },
   "dependencies": {
     "boardgame.io": "^0.43.1",
     "deepcopy": "^2.1.0",
