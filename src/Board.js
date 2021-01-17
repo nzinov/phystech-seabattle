@@ -3,6 +3,8 @@ import { DndProvider, DragSource, DropTarget } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { getBlocks, getModeAction, takeMove, dist } from './Game';
 import { Log } from './Log';
+import { stageDescr, shipInfo } from './Texts'
+import ReactTooltip from 'react-tooltip';
 
 const squareSource = {
 	beginDrag(props) {
@@ -84,7 +86,7 @@ class Square extends React.Component {
 			}
 		}
 		
-		return this.props.connectDropTarget(this.props.connectDragSource(<td onClick={this.click} style={cellStyle}>{label}</td>));
+		return this.props.connectDropTarget(this.props.connectDragSource(<td data-tip={shipInfo?.[this.props.figure?.type]} onClick={this.click} style={cellStyle}>{label}</td>));
 	}
 };
 
@@ -111,12 +113,18 @@ class Board extends React.Component {
 			this.Skip();
 			return;
 		};
-		this.setState({mode: event.key});
+		if (event.key == 'Alt') {
+			this.setState({tooltip: true});
+			return;
+		}
+		if (event.code.startsWith('Key')) {
+			this.setState({mode: event.code.slice(3).toLowerCase()});
+		}
 		event.preventDefault();
 	}
 
 	handleKeyUp = (event) => {
-		this.setState({mode: undefined});
+		this.setState({mode: undefined, tooltip: false});
 		event.preventDefault();
 	}
 	
@@ -212,14 +220,15 @@ class Board extends React.Component {
 
         return (
 			<DndProvider backend={HTML5Backend}>
+			<ReactTooltip disable={!this.state.tooltip} html={true}/>
 			<div style={outStyle}>
             <table id="board">
             <tbody>{tbody}</tbody>
             </table>
 			<div style={sidebarStyle}>
-				{this.props.ctx?.gameover && <h1>{this.props.ctx.gameover == 0 ? 'Draw' : (this.props.ctx.gameover == this.props.playerID ? 'You win!' : 'You lose…')}</h1>}
+				{this.props.ctx?.gameover && <h1>{!this.props.ctx.gameover.winner ? 'Draw' : (this.props.ctx.gameover.winner == this.props.playerID ? 'You win!' : 'You loose…')}</h1>}
 				{!stage && <h2>Wait</h2>}
-				{stage && <h2>{stage}</h2>}
+				{stage && <h2>{stageDescr[stage]}</h2>}
 				{stage == 'place' && <button onClick={this.Ready}>Finish placement</button>}	
 				<div style={blocksStyle}>
 				{blocks && blocks.map((block, i) =>

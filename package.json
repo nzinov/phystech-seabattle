@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "proxy": "http://localhost:8000",
+  "proxy": "localhost:8000",
   "name": "game",
   "version": "0.1.0",
   "private": true,
@@ -8,6 +8,7 @@
     "node": "15.x"
   },
   "dependencies": {
+    "autoscroll-react": "3.2.0",
     "bgio-postgres": "*",
     "boardgame.io": "^0.43.1",
     "deepcopy": "^2.1.0",
@@ -19,6 +20,8 @@
     "react-dnd-html5-backend": "*",
     "react-dom": "*",
     "react-scripts": "*",
+    "react-scroll-to-bottom": "^4.1.0",
+    "react-tooltip": "4.2.13",
     "universal-cookie": "^4.0.4",
     "uuid": "*"
   },

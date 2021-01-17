@@ -671,7 +671,7 @@ export const GameRules = {
         endIf: G => (G.ready >= 2),
         next: 'play'
     }, play: {
-        turn: {order: TurnOrder.RESET, activePlayers: {currentPlayer: 'move', others: 'wait'}, stages: {
+        turn: {order: TurnOrder.RESET, activePlayers: {value: {'0': 'move', '1': 'wait'}}, stages: {
             move: {next: 'attack', moves: { Move, Label }},
             attack: {moves: { Attack, Skip, Label }},
             attackBlock: {moves: { AttackBlock, Label }},
@@ -711,12 +711,12 @@ export const GameRules = {
                 }
             }
         }
-        if (!fortCount[0] && !fortCount[1]) {
-            return 0;
+        if (fortCount[0] == 0 && fortCount[1] == 0) {
+            return {winner: undefined};
         }
         for (let i = 0; i < 2; ++i) {
             if (fortCount[i] == 0) {
-                return 1 - i;
+                return {winner: 1 - i};
             }
         } 
     },

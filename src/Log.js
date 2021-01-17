@@ -1,4 +1,5 @@
 import React from 'react';
+import ScrollToBottom from 'react-scroll-to-bottom';
 
 function getShipDescr(ship, player) {
     return (ship.player == player ? "your " : "opponent's ") + ship.type;
@@ -35,13 +36,14 @@ class LogEvent extends React.Component {
     }
 }
 
+const style = {
+    width: '100%',
+    height: '100%',
+    overflowY: 'auto'
+};
+
 export class Log extends React.Component {
 	render() {
-        let style = {
-            width: '100%',
-            height: '100%',
-            overflow: 'auto'
-        };
         return <div style={style}>{
             this.props.events.map(event => <LogEvent event={event} player={this.props.player} highlight={this.props.highlight}/>)
         }</div>
