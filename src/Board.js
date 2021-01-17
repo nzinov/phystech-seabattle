@@ -226,7 +226,7 @@ class Board extends React.Component {
             <tbody>{tbody}</tbody>
             </table>
 			<div style={sidebarStyle}>
-				{this.props.ctx?.gameover && <h1>{!this.props.ctx.gameover.winner ? 'Draw' : (this.props.ctx.gameover.winner == this.props.playerID ? 'You win!' : 'You loose…')}</h1>}
+				{this.props.ctx?.gameover && <h1>{this.props.ctx.gameover.winner == undefined ? 'Draw' : (this.props.ctx.gameover.winner == this.props.playerID ? 'You win!' : 'You loose…')}</h1>}
 				{!stage && <h2>Wait</h2>}
 				{stage && <h2>{stageDescr[stage]}</h2>}
 				{stage == 'place' && <button onClick={this.Ready}>Finish placement</button>}	
