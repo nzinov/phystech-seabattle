@@ -1,7 +1,10 @@
 import { Server } from 'boardgame.io/dist/cjs/server.js';
+import { PostgresStore } from 'bgio-postgres';
 import { GameRules } from './Game.js';
 import path from 'path';
 import serve from 'koa-static';
+
+const db = new PostgresStore(process.env.DATABASE_URL);
 
 const authenticateCredentials = (credentials, playerMetadata) => {
     console.log(credentials);
@@ -20,7 +23,7 @@ const authenticateCredentials = (credentials, playerMetadata) => {
     return false;
 }
 
-const server = Server({ games: [GameRules], authenticateCredentials });
+const server = Server({ games: [GameRules], authenticateCredentials, db });
 
 const frontEndAppBuildPath = path.resolve('./build');
 server.app.use(serve(frontEndAppBuildPath))

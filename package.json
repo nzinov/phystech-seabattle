@@ -8,6 +8,7 @@
     "node": "15.x"
   },
   "dependencies": {
+    "bgio-postgres": "*",
     "boardgame.io": "^0.43.1",
     "deepcopy": "^2.1.0",
     "esm": "^3.2.25",
