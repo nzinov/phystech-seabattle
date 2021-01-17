@@ -5,7 +5,10 @@ import path from 'path';
 import serve from 'koa-static';
 
 const db = new PostgresStore(process.env.DATABASE_URL, {dialectOptions: {
-  ssl: true
+  ssl: {
+    require: true,
+    rejectUnauthorized: false
+  }
 }});
 
 const authenticateCredentials = (credentials, playerMetadata) => {
