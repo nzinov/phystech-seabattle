@@ -4,7 +4,9 @@ import { GameRules } from './Game.js';
 import path from 'path';
 import serve from 'koa-static';
 
-const db = new PostgresStore(process.env.DATABASE_URL);
+const db = new PostgresStore(process.env.DATABASE_URL, {dialectOptions: {
+  ssl: true
+}});
 
 const authenticateCredentials = (credentials, playerMetadata) => {
     console.log(credentials);
