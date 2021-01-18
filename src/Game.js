@@ -668,7 +668,7 @@ export const GameRules = {
         endIf: G => (G.ready >= 2),
         next: 'play'
     }, play: {
-        turn: {order: TurnOrder.RESET, activePlayers: {currentPlayer: 'move', other: 'wait'}, stages: {
+        turn: {order: TurnOrder.RESET, activePlayers: {currentPlayer: 'move', others: 'wait'}, stages: {
             move: {next: 'attack', moves: { Move, Label }},
             attack: {moves: { Attack, Skip, Label }},
             attackBlock: {moves: { AttackBlock, Label }},
