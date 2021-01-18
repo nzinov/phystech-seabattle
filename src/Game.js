@@ -88,9 +88,6 @@ export function checkBlock(G, player, type, size, coords) {
     if (!Ships[type].strength) {
        return false; 
     }
-    if (['Av', 'Lk'].includes(type) && size > 1) {
-        return false;
-    }
     for (let i = 1; i < coords.length; ++i) {
         if (dist(coords[i - 1], coords[i]) != 1) {
             return false;
