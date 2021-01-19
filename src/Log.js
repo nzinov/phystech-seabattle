@@ -1,8 +1,12 @@
 import React from 'react';
 import ScrollToBottom from 'react-scroll-to-bottom';
 
+function getSide(ship, player) {
+    return (ship.player == player ? "your" : "opponent's");
+}
+
 function getShipDescr(ship, player) {
-    return (ship.player == player ? "your " : "opponent's ") + ship.type;
+    return  `${getSide(ship)} ${ship.type}`;
 }
 
 class LogEvent extends React.Component {
@@ -22,9 +26,9 @@ class LogEvent extends React.Component {
 	renderText = () => {
         let event = this.props.event;
         switch (event.type) {
-            case 'move': return <span>ship moved</span>;
+            case 'move': return <span>{getSide(event.ship, this.props.player)} ship moved</span>;
             case 'shoot': return <span>{getShipDescr(event.ship, this.props.player)} made a {event.area && 'area '} shot</span>;
-            case 'attack': return <span>ship attacked</span>;
+            case 'attack': return <span>{getSide(event.ship, this.props.player)} ship attacked</span>;
             case 'die': return <span>{getShipDescr(event.ship, this.props.player)} was destroyed</span>;
             case 'explode': return <span>{getShipDescr(event.ship, this.props.player)} exploded</span>;
             case 'response': return <span><b>{event.size} x {event.ship_type} block was declared</b></span>;
