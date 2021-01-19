@@ -420,7 +420,7 @@ const Ships = {
     Av: {...AttackingShip, strength: 11.390625},
     Sm: {...Missile, patron: "Av", canShoot(G, player, from, to) {
         let v = vector(from, to);
-        return isStraight(from, to) || Math.abs([0]) == Math.abs(v[1]);
+        return isStraight(from, to) || Math.abs(v[0]) == Math.abs(v[1]);
     }},
     Lk: {...AttackingShip, strength: 7.59375},
     Rk: {
