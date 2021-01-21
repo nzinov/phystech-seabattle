@@ -222,6 +222,8 @@ const Actions = {
                 ctx.events.endTurn();
                 return;
             }
+            let fig = getPos(G, from);
+            let targetFig = getPos(G, to);
             let ship = getShip(G, from);
             let targetShip = getShip(G, to);
             if (targetShip.onAttack) {
@@ -229,7 +231,8 @@ const Actions = {
                 return;
             }
             if (targetShip.compare) {
-                let res = targetShip.compare(ship);
+                addLog(G, 'response', null, null, {size: 1, ship_type: targetFig.type});
+                let res = targetShip.compare(fig);
                 battle(G, ctx, -res, from, to, [from], [to]);
                 return;
             }
@@ -683,7 +686,7 @@ export const GameRules = {
                 let ship = getShip(G, G.attackFrom);
                 let targetShip = getShip(G, G.attackTo);
                 if (ship.compare) {
-                    let res = ship.compare(targetShip);
+                    let res = ship.compare(getPos(G, G.attackTo));
                     battle(G, ctx, res, G.attackFrom, G.attackTo, [G.attackFrom], [G.attackTo]);
                 } else {
                     let res = getBlockStrength(G.attackBlock) - getBlockStrength(G.responseBlock);
