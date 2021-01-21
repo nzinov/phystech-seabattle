@@ -10,7 +10,7 @@
   "dependencies": {
     "autoscroll-react": "3.2.0",
     "bgio-postgres": "*",
-    "boardgame.io": "^0.43.1",
+    "boardgame.io": "^0.43.2",
     "deepcopy": "^2.1.0",
     "esm": "^3.2.25",
     "koa": "2.12.0",
