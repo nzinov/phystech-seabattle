@@ -119,12 +119,11 @@ class Board extends React.Component {
 		for (let i = this.props.G.log.length - 1; i >= 0; i--) {
 			let event = this.props.G.log[i];
 			if (event.type == 'move' && dist(coords, event.to) == 0) {
-				coords = event.from;
-				let fade = count * 51;
-				//fade to string
+				let fade = count * 25;
 				trace.push([coords, 'rgb(' + fade + ', 255, ' + fade + ')']);
+				coords = event.from;
 				count++;
-				if (count == 5) {
+				if (count == 10) {
 					break;
 				}
 			}
