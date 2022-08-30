@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "proxy": "localhost:8000",
+  "proxy": "http://localhost:8000",
   "name": "game",
   "version": "0.1.0",
   "private": true,

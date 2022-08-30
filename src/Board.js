@@ -10,7 +10,7 @@ const squareSource = {
 	beginDrag(props) {
 		return {coord: props.coord, figure: props.figure};
 	},
-	
+
 	canDrag(props, monitor) {
 		let action = getModeAction(props.G, props.ctx, props.player, props.mode, props.coord);
 		return action && action.canFrom(props.G, props.player, props.coord);
@@ -33,7 +33,7 @@ const squareTarget = {
 
 class Square extends React.Component {
 	click = () => {
-		if (['Unknown', 'Sinking'].includes(this.props.figure?.type)) {
+		if (['Unknown', 'Sinking'].includes(this.props.figure?.type && !this.props.G.attackFrom)) {
 			this.props.moves.Label(this.props.coord, prompt('Enter label'));
 		}
 	}
@@ -85,8 +85,8 @@ class Square extends React.Component {
 				label = <img style={labelStyle} src={process.env.PUBLIC_URL+"figures/"+this.props.figure.label+".png"}/>;
 			}
 		}
-		
-		return this.props.connectDropTarget(this.props.connectDragSource(<td data-tip={shipInfo?.[this.props.figure?.type]} onClick={this.click} style={cellStyle}>{label}</td>));
+
+		return this.props.connectDropTarget(this.props.connectDragSource(<td data-tip={shipInfo?.[this.props.figure?.type]} onClick={this.click} style={cellStyle} onMouseEnter={this.props.hover} onMouseLeave={this.props.leave}>{label}</td>));
 	}
 };
 
@@ -107,7 +107,31 @@ class Board extends React.Component {
 	Skip = () => {
 		this.props.moves.Skip();
 	}
-	
+
+	HighlightTrace = () => {
+		let coords = this.state.hoveredCoords;
+		console.log(coords);
+		if (coords === undefined) {
+			return;
+		}
+		let trace = [];
+		let count = 0;
+		for (let i = this.props.G.log.length - 1; i >= 0; i--) {
+			let event = this.props.G.log[i];
+			if (event.type == 'move' && dist(coords, event.to) == 0) {
+				coords = event.from;
+				let fade = count * 51;
+				//fade to string
+				trace.push([coords, 'rgb(' + fade + ', 255, ' + fade + ')']);
+				count++;
+				if (count == 5) {
+					break;
+				}
+			}
+		}
+		this.setState({highlight: trace});
+	};
+
 	handleKeyDown = (event) => {
 		if (event.key == ' ') {
 			this.Skip();
@@ -117,6 +141,10 @@ class Board extends React.Component {
 			this.setState({tooltip: true});
 			return;
 		}
+		if (event.key == 'Control') {
+			this.HighlightTrace();
+			return;
+		}
 		if (event.code.startsWith('Key')) {
 			this.setState({mode: event.code.slice(3).toLowerCase()});
 		}
@@ -124,18 +152,27 @@ class Board extends React.Component {
 	}
 
 	handleKeyUp = (event) => {
-		this.setState({mode: undefined, tooltip: false});
+		this.setState({mode: undefined, tooltip: false, highlight: []});
 		event.preventDefault();
 	}
-	
+
 	hoverBlock = (event, block) => {
 		this.setState({highlightedBlock: block});
 	}
-	
+
 	leaveBlock = (event) => {
 		this.setState({highlightedBlock: undefined});
 	}
-	
+
+	hoverSquare = (event, coords) => {
+		console.log("hover");
+		this.setState({hoveredCoords: coords});
+	}
+
+	leaveSquare = (event) => {
+		this.setState({hoveredCoords: undefined, highlight: []});
+	}
+
 	clickBlock = (event, block) => {
 		this.setState({highlightedBlock: undefined});
 		let stage = this.props.ctx.activePlayers && this.props.ctx.activePlayers[this.props.playerID];
@@ -146,16 +183,16 @@ class Board extends React.Component {
 			this.props.moves.ResponseBlock(block);
 		}
 	}
-	
+
 	highlight = (highlight) => {
 		this.setState({highlight: highlight});
 	}
-	
+
 	componentDidMount(){
 		document.addEventListener("keydown", this.handleKeyDown);
 		document.addEventListener("keyup", this.handleKeyUp);
 	}
-	
+
 	componentWillUnmount() {
 		document.removeEventListener("keydown", this.handleKeyDown);
 		document.removeEventListener("keyup", this.handleKeyUp);
@@ -176,12 +213,14 @@ class Board extends React.Component {
 					 ctx={this.props.ctx}
 					 moves={this.props.moves}
 					 highlightedBlock={this.state.highlightedBlock}
+					 hover={(e) => this.hoverSquare(e, [i, j])}
+					 leave={this.leaveSquare}
 					 highlight={this.state.highlight}></Square>
                 );
             }
             tbody.push(<tr>{cells}</tr>);
         }
-		
+
 		let sidebarStyle = {
 			padding: '10px',
 			backgroundColor: '#FFEEEE',
@@ -193,7 +232,7 @@ class Board extends React.Component {
 			height: '99vh',
 			margin: 0
 		};
-		
+
 		let outStyle = {
 			display: 'flex',
 			flexDirection: 'row',
@@ -202,13 +241,13 @@ class Board extends React.Component {
 			height: '99vh',
 			margin: 0,
 		};
-		
+
 		let blocksStyle = {
 			display: 'flex',
 			flexDirection: 'row',
 			flexWrap: 'wrap',
 		};
-		
+
 		let stage = this.props.ctx.activePlayers && this.props.ctx.activePlayers[this.props.playerID];
 		let blocks = [];
 		if (stage == 'attackBlock') {
@@ -229,7 +268,7 @@ class Board extends React.Component {
 				{this.props.ctx?.gameover && <h1>{this.props.ctx.gameover.winner === undefined ? 'Draw' : (this.props.ctx.gameover.winner == this.props.playerID ? 'You win!' : 'You loose…')}</h1>}
 				{!stage && <h2>Wait</h2>}
 				{stage && <h2>{stageDescr[stage]}</h2>}
-				{stage == 'place' && <button onClick={this.Ready}>Finish placement</button>}	
+				{stage == 'place' && <button onClick={this.Ready}>Finish placement</button>}
 				<div style={blocksStyle}>
 				{blocks && blocks.map((block, i) =>
 					<button style={{padding: '5px', margin: '2px'}} idx={i} onMouseEnter={(e) => this.hoverBlock(e, block)} onMouseLeave={this.leaveBlock} onClick={(e) => this.clickBlock(e, block)}>{block.size} x {block.type}</button>

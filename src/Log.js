@@ -30,7 +30,7 @@ class LogEvent extends React.Component {
             case 'response': return <span><b>{event.size} x {event.ship_type} block was declared</b></span>;
         }
     }
-    
+
     render() {
         return <p onMouseEnter={(e) => this.props.highlight(this.getHighlight())} onMouseLeave={(e) => this.props.highlight([])}>{this.renderText()}</p>
     }
