@@ -109,6 +109,9 @@ class Board extends React.Component {
 	}
 
 	HighlightTrace = () => {
+		if (!this.state.trace) {
+			return;
+		}
 		let coords = this.state.hoveredCoords;
 		console.log(coords);
 		if (coords === undefined) {
@@ -118,9 +121,12 @@ class Board extends React.Component {
 		let count = 0;
 		for (let i = this.props.G.log.length - 1; i >= 0; i--) {
 			let event = this.props.G.log[i];
+			if (event.type == 'move' && dist(coords, event.from) == 0) {
+				return;
+			}
 			if (event.type == 'move' && dist(coords, event.to) == 0) {
 				let fade = count * 25;
-				trace.push([coords, 'rgb(' + fade + ', 255, ' + fade + ')']);
+				trace.push([coords, 'rgb(' + fade + ', ' + (255 - fade) + ', 50)']);
 				coords = event.from;
 				count++;
 				if (count == 10) {
@@ -128,6 +134,10 @@ class Board extends React.Component {
 				}
 			}
 		}
+		if (count > 0) {
+			let fade = count * 25;
+			trace.push([coords, 'rgb(' + fade + ', ' + (255 - fade) + ', 50)']);
+		};
 		this.setState({highlight: trace});
 	};
 
@@ -141,6 +151,7 @@ class Board extends React.Component {
 			return;
 		}
 		if (event.key == 'Control') {
+			this.setState({trace: true});
 			this.HighlightTrace();
 			return;
 		}
@@ -151,7 +162,7 @@ class Board extends React.Component {
 	}
 
 	handleKeyUp = (event) => {
-		this.setState({mode: undefined, tooltip: false, highlight: []});
+		this.setState({mode: undefined, tooltip: false, highlight: [], trace: false});
 		event.preventDefault();
 	}
 
@@ -164,8 +175,8 @@ class Board extends React.Component {
 	}
 
 	hoverSquare = (event, coords) => {
-		console.log("hover");
 		this.setState({hoveredCoords: coords});
+		this.HighlightTrace();
 	}
 
 	leaveSquare = (event) => {
