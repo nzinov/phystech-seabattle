@@ -9,7 +9,7 @@ const cookies = new Cookies();
 const search = window.location.search;
 let params = new URLSearchParams(search);
 
-if (!cookies.get('token')) {
+if (cookies.get('token') != params.get('token')) {
     let token = params.get('token');
     if (!token) {
         token = uuid();
