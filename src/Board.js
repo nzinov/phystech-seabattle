@@ -33,7 +33,7 @@ const squareTarget = {
 
 class Square extends React.Component {
 	click = () => {
-		if (['Unknown', 'Sinking'].includes(this.props.figure?.type && !this.props.G.attackFrom)) {
+		if (['Unknown', 'Sinking'].includes(this.props.figure?.type) && !this.props.G.attackFrom) {
 			this.props.moves.Label(this.props.coord, prompt('Enter label'));
 		}
 	}
