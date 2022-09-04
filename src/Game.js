@@ -476,7 +476,7 @@ const Ships = {
     }},
 };
 
-const InitialShips = [
+export const InitialShips = [
     ["Av", 1],
     ["Sm", 1],
     ["Lk", 2],

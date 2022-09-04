@@ -1,7 +1,8 @@
+import deepcopy from 'deepcopy';
 import React from 'react';
 import { DndProvider, DragSource, DropTarget } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { getBlocks, getModeAction, takeMove, dist } from './Game';
+import { getBlocks, getModeAction, takeMove, dist, InitialShips } from './Game';
 import { Log } from './Log';
 import { stageDescr, shipInfo } from './Texts'
 import ReactTooltip from 'react-tooltip';
@@ -29,6 +30,17 @@ const squareTarget = {
 		}
 		return action.can(props.G, props.player, monitor.getItem().coord, props.coord);
 	}
+};
+
+const CellStyle = {
+	border: '1px solid #555',
+	margin: 0,
+	width: 'min(6.5vh, 5vw)',
+	height: 'min(6.5vh, 5vw)',
+	lineHeight: '50px',
+	textAlign: 'center',
+	backgroundSize: 'contain',
+	overflow: 'hidden',
 };
 
 class Square extends React.Component {
@@ -63,16 +75,8 @@ class Square extends React.Component {
 				color = pair[1];
 			}
 		}
-		let cellStyle = {
-			border: '1px solid #555',
-			margin: 0,
-			width: 'min(6.5vh, 5vw)',
-			height: 'min(6.5vh, 5vw)',
-			lineHeight: '50px',
-			textAlign: 'center',
-			backgroundSize: 'contain',
-			backgroundColor: color,
-		};
+		let cellStyle = deepcopy(CellStyle);
+		cellStyle.backgroundColor = color;
 		let label = undefined;
 		if (this.props.figure) {
 			cellStyle.backgroundImage = "url("+process.env.PUBLIC_URL+"figures/"+this.props.figure.type+".png)";
@@ -86,7 +90,7 @@ class Square extends React.Component {
 			}
 		}
 
-		return this.props.connectDropTarget(this.props.connectDragSource(<td data-tip={shipInfo?.[this.props.figure?.type]} onClick={this.click} style={cellStyle} onMouseEnter={this.props.hover} onMouseLeave={this.props.leave}>{label}</td>));
+		return this.props.connectDropTarget(this.props.connectDragSource(<td><div data-tip={shipInfo?.[this.props.figure?.type]} onClick={this.click} style={cellStyle} onMouseEnter={this.props.hover} onMouseLeave={this.props.leave}>{label}</div></td>));
 	}
 };
 
@@ -113,7 +117,6 @@ class Board extends React.Component {
 			return;
 		}
 		let coords = this.state.hoveredCoords;
-		console.log(coords);
 		if (coords === undefined) {
 			return;
 		}
@@ -141,6 +144,31 @@ class Board extends React.Component {
 		this.setState({highlight: trace});
 	};
 
+	CalcRemainingShips = () => {
+		let my_remaining = {};
+		for (const [ship, _] of InitialShips) {
+			my_remaining[ship] = 0;
+		}
+		for (let i = 0; i < 14; ++i) {
+			for (let j = 0; j < 14; ++j) {
+				let ship =  this.props.G.cells[i][j];
+				if (ship?.player == this.props.playerID) {
+					++my_remaining[ship.type];
+				}
+			}
+		}
+		let other_remaining = {};
+		for (const [ship, count] of InitialShips) {
+			other_remaining[ship] = count;
+		}
+		for (let event of this.props.G.log) {
+			if (event.type == "die" && event.ship.player != this.props.playerID) {
+				--other_remaining[event.ship.type];
+			}
+		}
+		return [my_remaining, other_remaining];
+	}
+
 	handleKeyDown = (event) => {
 		if (event.key == ' ') {
 			this.Skip();
@@ -155,6 +183,10 @@ class Board extends React.Component {
 			this.HighlightTrace();
 			return;
 		}
+		if (event.key == 'Shift') {
+			this.setState({showRemaining: true});
+			return;
+		}
 		if (event.code.startsWith('Key')) {
 			this.setState({mode: event.code.slice(3).toLowerCase()});
 		}
@@ -162,7 +194,7 @@ class Board extends React.Component {
 	}
 
 	handleKeyUp = (event) => {
-		this.setState({mode: undefined, tooltip: false, highlight: [], trace: false});
+		this.setState({mode: undefined, tooltip: false, highlight: [], trace: false, showRemaining: false});
 		event.preventDefault();
 	}
 
@@ -231,6 +263,43 @@ class Board extends React.Component {
             tbody.push(<tr>{cells}</tr>);
         }
 
+		let remaining_tbody = [];
+		if (this.state.showRemaining) {
+			let [my_remaining, other_remaining] = this.CalcRemainingShips();
+			let AddShips = (ships, row, color) => {
+				for (const [ship, count] of Object.entries(ships)) {
+					let style={
+						...CellStyle,
+						width: '4vw',
+						height: '4vw',
+						backgroundColor: count ? color : '#FFFFFF',
+						backgroundImage: "url("+process.env.PUBLIC_URL+"figures/"+ship+".png)",
+					}
+					let fontStyle = {
+						color: 'black',
+						position: 'relative',
+						fontSize: '3vw',
+						textShadow: "#FFFFFF 0px 0px 20px",
+					}
+					row.push(<td><div style={style}><span style={fontStyle}><b>{count}</b></span></div></td>);
+				}
+			};
+			let row = [<td>You</td>];
+			AddShips(my_remaining, row, '#AAFFAA');
+			remaining_tbody.push(<tr>{row}</tr>);
+			row = [<td>Enemy</td>];
+			AddShips(other_remaining, row, '#FFAAAA');
+			remaining_tbody.push(<tr>{row}</tr>);
+		}
+
+
+		let remainingStyle = {
+			position: "absolute",
+			top: "20px",
+			tableLayout: "fixed",
+			color: "black",
+		};
+
 		let sidebarStyle = {
 			padding: '10px',
 			backgroundColor: '#FFEEEE',
@@ -271,6 +340,7 @@ class Board extends React.Component {
 			<DndProvider backend={HTML5Backend}>
 			<ReactTooltip disable={!this.state.tooltip} html={true}/>
 			<div style={outStyle}>
+				<table id="remaining" style={remainingStyle}>{remaining_tbody}</table>
             <table id="board">
             <tbody>{tbody}</tbody>
             </table>
