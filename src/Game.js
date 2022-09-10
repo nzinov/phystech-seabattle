@@ -86,7 +86,7 @@ export function checkBlock(G, player, type, size, coords) {
         return false;
     }
     if (!Ships[type].strength) {
-       return false; 
+       return false;
     }
     for (let i = 1; i < coords.length; ++i) {
         if (dist(coords[i - 1], coords[i]) != 1) {
@@ -110,7 +110,7 @@ export function checkBlock(G, player, type, size, coords) {
     function matchBlock(block, pattern) {
         return block.length == pattern.length && block.slice().sort().every((el, i) => el == pattern[i]);
     }
-    
+
     console.log(type, block);
     console.log((block.every((el) => el == type)),
            (block.every((el) => [type, 'Rd'].includes(el)) && Ships[type].strength <= Ships['Rd'].strength),
@@ -141,7 +141,7 @@ export function getBlocks(G, player, coord) {
                 blocks.push([coord, [coord[0], coord[1] + dy], [coord[0] + dx, coord[1] + dy]]);
                 blocks.push([[coord[0] + dx, coord[1]], coord, [coord[0], coord[1] + dy]]);
             }
-        } 
+        }
     }
     let validBlocks = [];
     for (let block of blocks) {
@@ -172,7 +172,7 @@ function battle(G, ctx, res, from, to, fromBlock, toBlock) {
 const Actions = {
     Place: {
         canFrom(G, player, from) {
-            return checkSide(G, player, from);    
+            return checkSide(G, player, from);
         },
         can(G, player, from, to) {
             return dist(from, to) > 0 && checkSide(G, player, to);
@@ -294,7 +294,7 @@ const Actions = {
         can(G, player, from, to) {
             let ship = getShip(G, from);
             return checkPatron(G, player, ship, from) &&
-                dist(from, to) > 0 && 
+                dist(from, to) > 0 &&
                 Actions.RocketShootArea.canShoot(G, player, from, to);
         },
         canShoot(G, player, from, to) {
@@ -339,7 +339,7 @@ const Effects = {
     Explode(G, from, to) {
         let ship = getShip(G, from);
         addLog(G, 'explode', from, to, {ship: getPos(G, from)});
-        setPos(G, from, null);
+        Effects.Die(G, from);
         for (let dx = -ship.blastRadius; dx <= ship.blastRadius; ++dx) {
             for (let dy = -ship.blastRadius; dy <= ship.blastRadius; ++dy) {
                 let newPos = [to[0] + dx, to[1] + dy];
@@ -357,17 +357,22 @@ const Effects = {
         } else {
             Effects.Die(G, to);
             repeatTurn(ctx);
-        } 
+        }
+    },
+    ExplodeSm(G, ctx, from, to) {
+        Effects.Die(G, from);
+        Effects.Die(G, to);
+        ctx.events.endTurn();
     },
     ExplodeBomb(G, ctx, from, to) {
         if (getPos(G, from)?.type != 'Tr') {
-            Effects.Die(G, from)%
+            Effects.Die(G, from);
             Effects.Explode(G, to, to);
             ctx.events.endTurn();
         } else {
             Effects.Die(G, to);
             repeatTurn(ctx);
-        } 
+        }
     },
 
 };
@@ -403,6 +408,10 @@ const Missile = {
         if (getPos(G, to).type == 'F') {
             ctx.events.endTurn();
         } else {
+            let targetShip = getShip(G, to);
+            if (targetShip?.onShoot) {
+                targetShip.onShoot(G, ctx, from, to);
+            }
             Effects.Die(G, to);
             repeatTurn(ctx);
         }
@@ -416,7 +425,8 @@ const Bomb = {
         attack: [false, Actions.Explode],
     },
     maxMove:  1,
-    onAttack: Effects.ExplodeBomb
+    onAttack: Effects.ExplodeBomb,
+    onShoot: Effects.ExplodeBomb
 };
 
 const Ships = {
@@ -424,7 +434,7 @@ const Ships = {
     Sm: {...Missile, patron: "Av", canShoot(G, player, from, to) {
         let v = vector(from, to);
         return isStraight(from, to) || Math.abs(v[0]) == Math.abs(v[1]);
-    }},
+    }, onAttack: Effects.ExplodeSm},
     Lk: {...AttackingShip, strength: 7.59375},
     Rk: {
         actions: {
@@ -529,7 +539,7 @@ export function getModeAction(G, ctx, player, mode, from) {
     let actions = getActions(G, ctx, player, from);
     if (!actions) {
         return false;
-    } 
+    }
     let action = actions[0];
     if (mode) {
         action = false;
@@ -700,7 +710,7 @@ export const GameRules = {
         }},
     }},
     moves: {},
-    
+
     endIf: (G, ctx) => {
         let fortCount = [0, 0];
         for (let i = 0; i < 14; ++i) {
@@ -718,7 +728,7 @@ export const GameRules = {
             if (fortCount[i] == 0) {
                 return {winner: 1 - i};
             }
-        } 
+        }
     },
 
     playerView(G, ctx, playerID) {
@@ -751,7 +761,7 @@ export const GameRules = {
         setActivePlayers: false,
         endStage: false,
         setStage: false,
-      }, 
+      },
     disableUndo: true
 };
 

@@ -340,7 +340,7 @@ class Board extends React.Component {
 			<DndProvider backend={HTML5Backend}>
 			<ReactTooltip disable={!this.state.tooltip} html={true}/>
 			<div style={outStyle}>
-				<table id="remaining" style={remainingStyle}>{remaining_tbody}</table>
+			<table id="remaining" style={remainingStyle}>{remaining_tbody}</table>
             <table id="board">
             <tbody>{tbody}</tbody>
             </table>
