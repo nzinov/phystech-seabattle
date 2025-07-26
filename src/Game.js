@@ -576,9 +576,9 @@ function makeMove(G, ctx, stage, mode, from, to) {
     action.take(G, ctx, from, to);
 };
 
-function Ready({ G, ctx }) {
+function Ready({ G, ctx, events }) {
     G.ready++;
-    ctx.events.endStage();
+    events.endStage();
 }
 
 const Place = {
@@ -592,8 +592,8 @@ function Move({ G, ctx }, mode, from, to) {
     makeMove(G, ctx, 'move', mode, from, to);
 };
 
-function Skip({ G, ctx }) {
-    ctx.events.endTurn();
+function Skip({ G, ctx, events }) {
+    events.endTurn();
 };
 
 const Attack = {
