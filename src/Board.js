@@ -361,7 +361,21 @@ class Board extends React.Component {
 
         return (
 			<DndProvider backend={HTML5Backend}>
-			<Tooltip id="ship-tooltip" isOpen={this.state.tooltip} />
+			<Tooltip 
+				id="ship-tooltip" 
+				isOpen={this.state.tooltip}
+				place="right"
+				style={{
+					maxWidth: '300px',
+					width: 'max-content',
+					whiteSpace: 'normal',
+					wordWrap: 'break-word',
+					lineHeight: '1.4'
+				}}
+				render={({ content }) => (
+					content ? <div dangerouslySetInnerHTML={{ __html: content }} /> : null
+				)}
+			/>
 			<div style={outStyle}>
 			<table id="remaining" style={remainingStyle}><tbody>{remaining_tbody}</tbody></table>
             <table id="board">
