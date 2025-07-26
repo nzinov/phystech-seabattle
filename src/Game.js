@@ -1,5 +1,5 @@
-import deepcopy from 'deepcopy';
 import { INVALID_MOVE, TurnOrder } from 'boardgame.io/dist/cjs/core.js';
+import deepcopy from 'deepcopy';
 
 const SIZE = 14;
 
@@ -158,14 +158,14 @@ function getBlockStrength(block) {
     return block.size * Ships[block.type].strength;
 }
 
-function battle(G, ctx, res, from, to, fromBlock, toBlock) {
+function battle({ G, ctx, events }, res, from, to, fromBlock, toBlock) {
     //addLog(ctx, 'battle', from, to, {fromShip: getPos(G, from).type, toShip: getPos(G, to).type, res});
     if (Math.abs(res) < 1e-7) {
-        Effects.Draw(G, ctx, fromBlock, toBlock);
+        Effects.Draw({ G, ctx, events }, fromBlock, toBlock);
     } else if (res > 0) {
-        Effects.Win(G, ctx, from, to);
+        Effects.Win({ G, ctx, events }, from, to);
     } else {
-        Effects.Loose(G, ctx, from, to);
+        Effects.Loose({ G, ctx, events }, from, to);
     }
 }
 
@@ -177,7 +177,7 @@ const Actions = {
         can(G, player, from, to) {
             return dist(from, to) > 0 && checkSide(G, player, to);
         },
-        take(G, ctx, from, to) {
+        take({ G, ctx }, from, to) {
             let tmp = getPos(G, from);
             setPos(G, from, getPos(G, to));
             setPos(G, to, tmp);
@@ -195,10 +195,10 @@ const Actions = {
                 checkPatron(G, player, ship, to) &&
                 checkPath(G, false, ship.patron, player, from, to);
         },
-        take(G, ctx, from, to) {
+        take({ G, ctx, events }, from, to) {
             setPos(G, to, getPos(G, from));
             setPos(G, from, null);
-            ctx.events.endStage();
+            events.endStage();
             addLog(G, 'move', from, to);
         },
         key: 'm',
@@ -215,11 +215,11 @@ const Actions = {
                 opponent.player != player &&
                 dist(from, to) == 1;
         },
-        take(G, ctx, from, to) {
+        take({ G, ctx, events }, from, to) {
             addLog(G, 'attack', from, to);
             if (getPos(G, to).player == -1) {
                 getPos(G, to).player = ctx.currentPlayer;
-                ctx.events.endTurn();
+                events.endTurn();
                 return;
             }
             let fig = getPos(G, from);
@@ -227,13 +227,13 @@ const Actions = {
             let ship = getShip(G, from);
             let targetShip = getShip(G, to);
             if (targetShip.onAttack) {
-                targetShip.onAttack(G, ctx, from, to);
+                targetShip.onAttack({ G, ctx, events }, from, to);
                 return;
             }
             if (targetShip.compare) {
                 addLog(G, 'response', null, null, {size: 1, ship_type: targetFig.type});
                 let res = targetShip.compare(fig);
-                battle(G, ctx, -res, from, to, [from], [to]);
+                battle({ G, ctx, events } - res, from, to, [from], [to]);
                 return;
             }
             G.attackFrom = from;
@@ -242,7 +242,7 @@ const Actions = {
             if (!isBlockableFrom) {
                 G.attackBlock = 'not_required';
             }
-            ctx.events.setActivePlayers({
+            events.setActivePlayers({
                 currentPlayer: isBlockableFrom && 'attackBlock',
                 others: 'responseBlock',
                 revert: true,
@@ -259,9 +259,9 @@ const Actions = {
         can(G, player, from, to) {
             return dist(from, to) == 0;
         },
-        take(G, ctx, from, to) {
-            Effects.Explode(G, from, to);
-            repeatTurn(ctx);
+        take({ G, ctx, events }, from, to) {
+            Effects.Explode({ G, ctx, events }, from, to);
+            repeatTurn({ ctx, events });
         },
         key: 'e',
         name: 'Explode'
@@ -278,10 +278,10 @@ const Actions = {
                 getPos(G, to).player != player &&
                 ship.canShoot(G, player, from, to);
         },
-        take(G, ctx, from, to) {
+        take({ G, ctx, events, playerID }, from, to) {
             let ship = getShip(G, from);
             addLog(G, 'shoot', from, to, {ship: getPos(G, from)});
-            ship.shoot(G, ctx, from, to);
+            ship.shoot({ G, ctx, events, playerID }, from, to);
         },
         key: 's',
         name: 'Shoot'
@@ -300,22 +300,22 @@ const Actions = {
         canShoot(G, player, from, to) {
             return isStraight(from, to) && dist(from, to) <= 2;
         },
-        take(G, ctx, from, to) {
+        take({ G, ctx, events }, from, to) {
             addLog(G, 'shoot', from, to, {ship: getPos(G, from), area: true});
-            Effects.Explode(G, from, to);
-            repeatTurn(ctx);
+            Effects.Explode({ G, ctx, events }, from, to);
+            repeatTurn({ ctx, events });
         },
         key: 'r',
         name: 'Shoot with area damage'
     }
 };
 
-function repeatTurn(ctx) {
-    ctx.events.endTurn({next: ctx.currentPlayer});
+function repeatTurn({ ctx, events }) {
+    events.endTurn({ next: ctx.currentPlayer });
 }
 
 const Effects = {
-    Die(G, pos) {
+    Die({ G }, pos) {
         let sq = getPos(G, pos);
         if (!sq) {
             return;
@@ -323,23 +323,23 @@ const Effects = {
         addLog(G, 'die', pos, pos, {ship: sq});
         setPos(G, pos, null);
     },
-    Win(G, ctx, from, to) {
-        Effects.Die(G, to);
-        repeatTurn(ctx);
+    Win({ G, ctx, events }, from, to) {
+        Effects.Die({ G }, to);
+        repeatTurn({ ctx, events });
     },
-    Loose(G, ctx, from, to) {
-        Effects.Die(G, from);
-        ctx.events.endTurn();
+    Loose({ G, ctx, events }, from, to) {
+        Effects.Die({ G }, from);
+        events.endTurn();
     },
-    Draw(G, ctx, fromBlock, toBlock) {
-        fromBlock.forEach(el => Effects.Die(G, el));
-        toBlock.forEach(el => Effects.Die(G, el));
-        ctx.events.endTurn();
+    Draw({ G, ctx, events }, fromBlock, toBlock) {
+        fromBlock.forEach(el => Effects.Die({ G }, el));
+        toBlock.forEach(el => Effects.Die({ G }, el));
+        events.endTurn();
     },
-    Explode(G, from, to) {
+    Explode({ G }, from, to) {
         let ship = getShip(G, from);
         addLog(G, 'explode', from, to, {ship: getPos(G, from)});
-        Effects.Die(G, from);
+        Effects.Die({ G }, from);
         for (let dx = -ship.blastRadius; dx <= ship.blastRadius; ++dx) {
             for (let dy = -ship.blastRadius; dy <= ship.blastRadius; ++dy) {
                 let newPos = [to[0] + dx, to[1] + dy];
@@ -349,29 +349,29 @@ const Effects = {
             }
         }
     },
-    ExplodeMine(G, ctx, from, to) {
+    ExplodeMine({ G, ctx, events }, from, to) {
         if (getPos(G, from)?.type != 'Tr') {
-            Effects.Die(G, from);
-            Effects.Die(G, to);
-            ctx.events.endTurn();
+            Effects.Die({ G }, from);
+            Effects.Die({ G }, to);
+            events.endTurn();
         } else {
-            Effects.Die(G, to);
-            repeatTurn(ctx);
+            Effects.Die({ G }, to);
+            repeatTurn({ ctx, events });
         }
     },
-    ExplodeSm(G, ctx, from, to) {
-        Effects.Die(G, from);
-        Effects.Die(G, to);
-        ctx.events.endTurn();
+    ExplodeSm({ G, ctx, events }, from, to) {
+        Effects.Die({ G }, from);
+        Effects.Die({ G }, to);
+        events.endTurn();
     },
-    ExplodeBomb(G, ctx, from, to) {
+    ExplodeBomb({ G, ctx, events }, from, to) {
         if (getPos(G, from)?.type != 'Tr') {
-            Effects.Die(G, from);
-            Effects.Explode(G, to, to);
-            ctx.events.endTurn();
+            Effects.Die({ G }, from);
+            Effects.Explode({ G }, to, to);
+            events.endTurn();
         } else {
-            Effects.Die(G, to);
-            repeatTurn(ctx);
+            Effects.Die({ G }, to);
+            repeatTurn({ ctx, events });
         }
     },
 
@@ -403,17 +403,17 @@ const Missile = {
     },
     maxMove:  1,
     onAttack: Effects.ExplodeMine,
-    shoot(G, ctx, from, to) {
-        Effects.Die(G, from);
+    shoot({ G, ctx, events }, from, to) {
+        Effects.Die({ G }, from);
         if (getPos(G, to).type == 'F') {
-            ctx.events.endTurn();
+            events.endTurn();
         } else {
             let targetShip = getShip(G, to);
             if (targetShip?.onShoot) {
-                targetShip.onShoot(G, ctx, from, to);
+                targetShip.onShoot({ G, ctx, events }, from, to);
             }
-            Effects.Die(G, to);
-            repeatTurn(ctx);
+            Effects.Die({ G }, to);
+            repeatTurn({ ctx, events });
         }
     }
 };
@@ -447,7 +447,7 @@ const Ships = {
         patron: "KrPl",
         canShoot: (G, player, from, to) => (isStraight(from, to) && dist(from, to) <= 3),
         blastRadius: 1,
-        blastSquare(G, pos) {Effects.Die(G, pos);}
+        blastSquare(G, pos) { Effects.Die({ G }, pos); }
     },
     Kr: {...AttackingShip, strength: 5.0625},
     T: {...Missile, maxMove: 2, patron: "Tk", canShoot: (G, player, from, to) =>
@@ -458,21 +458,22 @@ const Ships = {
     Es: {...AttackingShip, strength: 3.375},
     Br: {...Missile,
         canShoot: (G, player, from, to) => (!G.usedBrander[player] && dist(from, to) == 1),
-        shoot(G, ctx, from, to) {
-            G.usedBrander[ctx.playerID] = 2;
-            getPos(G, to).player = ctx.playerID;
+        shoot({ G, playerID }, from, to) {
+            G.usedBrander[playerID] = 2;
+            getPos(G, to).player = playerID;
     }},
     KrPl: {...AttackingShip, compare(ship) {
         if (ship.type == 'KrPl') return 0;
         if (['Kr', 'Rd', 'Es'].includes(ship.type)) return -1;
         return 1;
     }},
-    AB: {...Bomb, blastRadius: 2, blastSquare(G, pos) {Effects.Die(G, pos);}},
+    AB: { ...Bomb, blastRadius: 2, blastSquare(G, pos) { Effects.Die({ G }, pos); } },
     St: {...AttackingShip, strength: 2.25},
     NB: {...Bomb, blastRadius: 2, blastSquare(G, pos) {let ship = getPos(G, pos); if (ship) ship.player = -1;}},
     Tk: {...AttackingShip, maxMove: 2, strength: 1.5},
-    F: {actions: {place: [Actions.Place], move: [], attack: []}, onAttack(G, ctx, from, to) {
-        Effects.Win(G, ctx, from, to);
+    F: {
+        actions: { place: [Actions.Place], move: [], attack: [] }, onAttack({ G, ctx, events }, from, to) {
+            Effects.Win({ G, ctx, events }, from, to);
     }},
     Tr: {...AttackingShip, strength: 1},
     Tp: {...AttackingShip, compare(ship) {
@@ -553,7 +554,7 @@ export function getModeAction(G, ctx, player, mode, from) {
     return action
 }
 
-function makeMove(G, ctx, stage, mode, from, to) {
+function makeMove({ G, ctx, playerID, events }, stage, mode, from, to) {
     if (!valid(from) || !valid(to)) {
         return INVALID_MOVE;
     }
@@ -570,10 +571,10 @@ function makeMove(G, ctx, stage, mode, from, to) {
             }
         }
     }
-    if (!action.can(G, ctx.playerID, from, to)) {
+    if (!action.can(G, playerID, from, to)) {
         return INVALID_MOVE;
     }
-    action.take(G, ctx, from, to);
+    action.take({ G, ctx, playerID, events }, from, to);
 };
 
 function Ready({ G, ctx, events }) {
@@ -582,30 +583,30 @@ function Ready({ G, ctx, events }) {
 }
 
 const Place = {
-    move({ G, ctx }, mode, from, to) {
-        makeMove(G, ctx, 'place', mode, from, to);
+    move(all_data, mode, from, to) {
+        makeMove(all_data, 'place', mode, from, to);
     },
     redact: true
 };
 
-function Move({ G, ctx }, mode, from, to) {
-    makeMove(G, ctx, 'move', mode, from, to);
+function Move(all_data, mode, from, to) {
+    makeMove(all_data, 'move', mode, from, to);
 };
 
-function Skip({ G, ctx, events }) {
+function Skip({ events }) {
     events.endTurn();
 };
 
 const Attack = {
-    move({ G, ctx }, mode, from, to) {
-        makeMove(G, ctx, 'attack', mode, from, to);
+    move(all_data, mode, from, to) {
+        makeMove(all_data, 'attack', mode, from, to);
     },
     client: false
 };
 
 const AttackBlock = {
-    move({ G, ctx }, block) {
-        if (!block.coords.some(el => dist(el, G.attackFrom) == 0) || !checkBlock(G, ctx.playerID, block.type, block.size, block.coords)) {
+    move({ G, playerID }, block) {
+        if (!block.coords.some(el => dist(el, G.attackFrom) == 0) || !checkBlock(G, playerID, block.type, block.size, block.coords)) {
             return INVALID_MOVE;
         }
         G.attackBlock = block;
@@ -614,8 +615,8 @@ const AttackBlock = {
 };
 
 const ResponseBlock = {
-    move({ G, ctx }, block) {
-        if (!block.coords.some(el => dist(el, G.attackTo) == 0) || !checkBlock(G, ctx.playerID, block.type, block.size, block.coords)) {
+    move({ G, playerID }, block) {
+        if (!block.coords.some(el => dist(el, G.attackTo) == 0) || !checkBlock(G, playerID, block.type, block.size, block.coords)) {
             return INVALID_MOVE;
         }
         addLog(G, 'response', null, null, {size: block.size, ship_type: block.type});
@@ -625,8 +626,8 @@ const ResponseBlock = {
 };
 
 const Label = {
-    move({ G, ctx }, pos, label) {
-        getPos(G, pos).label[ctx.playerID] = label;
+    move({ G, playerID }, pos, label) {
+        getPos(G, pos).label[playerID] = label;
     },
     redact: true,
     client: false,
@@ -678,7 +679,7 @@ export const GameRules = {
         turn: {activePlayers: {all: 'place'}, stages: {
             place: {moves: { Ready, Place }},
         }},
-        endIf: G => (G.ready >= 2),
+        endIf: ({ G }) => (G.ready >= 2),
         next: 'play'
     }, play: {
         turn: {order: TurnOrder.RESET, activePlayers: {currentPlayer: 'move', others: 'wait'}, stages: {
@@ -687,20 +688,20 @@ export const GameRules = {
             attackBlock: {moves: { AttackBlock, Label }},
             responseBlock: {moves: { ResponseBlock, Label }},
             wait: {moves: { Label }}
-        }, onBegin(G) {
+        }, onBegin({ G }) {
             for (let i = 0; i < 2; ++i) {
                 G.usedBrander[i] = Math.max(0, G.usedBrander[i] - 1);
             }
-        }, onMove({ G, ctx }) {
+            }, onMove({ G, ctx, events }) {
             if (G.attackBlock && G.responseBlock) {
                 let ship = getShip(G, G.attackFrom);
                 let targetShip = getShip(G, G.attackTo);
                 if (ship.compare) {
                     let res = ship.compare(getPos(G, G.attackTo));
-                    battle(G, ctx, res, G.attackFrom, G.attackTo, [G.attackFrom], [G.attackTo]);
+                    battle({ G, ctx, events }, res, G.attackFrom, G.attackTo, [G.attackFrom], [G.attackTo]);
                 } else {
                     let res = getBlockStrength(G.attackBlock) - getBlockStrength(G.responseBlock);
-                    battle(G, ctx, res, G.attackFrom, G.attackTo, G.attackBlock.coords, G.responseBlock.coords)
+                    battle({ G, ctx, events }, res, G.attackFrom, G.attackTo, G.attackBlock.coords, G.responseBlock.coords)
                 }
                 G.attackFrom = undefined;
                 G.attackTo = undefined;

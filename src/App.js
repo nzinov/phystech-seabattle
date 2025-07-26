@@ -51,7 +51,7 @@ const SeabattleClient = Client({
     game: GameRules, 
     board: Board, 
     multiplayer: SocketIO({ server: getServerUrl() }), 
-    debug: false 
+    debug: process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost'
 });
 
 const App = () => {
