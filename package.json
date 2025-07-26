@@ -5,25 +5,24 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": "15.x"
+    "node": ">=18.0.0"
   },
   "dependencies": {
-    "autoscroll-react": "3.2.0",
-    "bgio-postgres": "*",
-    "boardgame.io": "^0.43.2",
+    "bgio-postgres": "^1.0.15",
+    "boardgame.io": "^0.50.2",
     "deepcopy": "^2.1.0",
     "esm": "^3.2.25",
-    "koa": "2.12.0",
+    "koa": "^3.0.0",
     "koa-static": "^5.0.0",
-    "react": "*",
-    "react-dnd": "*",
-    "react-dnd-html5-backend": "*",
-    "react-dom": "*",
-    "react-scripts": "*",
-    "react-scroll-to-bottom": "^4.1.0",
-    "react-tooltip": "4.2.13",
-    "universal-cookie": "^4.0.4",
-    "uuid": "*"
+    "react": "^19.1.0",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^19.1.0",
+    "react-scripts": "^5.0.1",
+    "react-scroll-to-bottom": "^4.2.0",
+    "react-tooltip": "^5.29.1",
+    "universal-cookie": "^8.0.1",
+    "uuid": "^11.1.0"
   },
   "scripts": {
     "start": "react-scripts start",

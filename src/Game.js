@@ -576,35 +576,35 @@ function makeMove(G, ctx, stage, mode, from, to) {
     action.take(G, ctx, from, to);
 };
 
-function Ready(G, ctx) {
+function Ready({ G, ctx }) {
     G.ready++;
     ctx.events.endStage();
 }
 
 const Place = {
-    move(G, ctx, mode, from, to) {
+    move({ G, ctx }, mode, from, to) {
         makeMove(G, ctx, 'place', mode, from, to);
     },
     redact: true
 };
 
-function Move(G, ctx, mode, from, to) {
+function Move({ G, ctx }, mode, from, to) {
     makeMove(G, ctx, 'move', mode, from, to);
 };
 
-function Skip(G, ctx) {
+function Skip({ G, ctx }) {
     ctx.events.endTurn();
 };
 
 const Attack = {
-    move(G, ctx, mode, from, to) {
+    move({ G, ctx }, mode, from, to) {
         makeMove(G, ctx, 'attack', mode, from, to);
     },
     client: false
 };
 
 const AttackBlock = {
-    move(G, ctx, block) {
+    move({ G, ctx }, block) {
         if (!block.coords.some(el => dist(el, G.attackFrom) == 0) || !checkBlock(G, ctx.playerID, block.type, block.size, block.coords)) {
             return INVALID_MOVE;
         }
@@ -614,7 +614,7 @@ const AttackBlock = {
 };
 
 const ResponseBlock = {
-    move(G, ctx, block) {
+    move({ G, ctx }, block) {
         if (!block.coords.some(el => dist(el, G.attackTo) == 0) || !checkBlock(G, ctx.playerID, block.type, block.size, block.coords)) {
             return INVALID_MOVE;
         }
@@ -625,7 +625,7 @@ const ResponseBlock = {
 };
 
 const Label = {
-    move(G, ctx, pos, label) {
+    move({ G, ctx }, pos, label) {
         getPos(G, pos).label[ctx.playerID] = label;
     },
     redact: true,
@@ -649,7 +649,7 @@ export const GameRules = {
     name: 'PhystechSeaBattle',
     minPlayers: 2,
     maxPlayers: 2,
-    setup() {
+    setup({ ctx }) {
         let cells = [];
         for (let x = 0; x < SIZE; ++x) {
             cells.push([]);
@@ -691,7 +691,7 @@ export const GameRules = {
             for (let i = 0; i < 2; ++i) {
                 G.usedBrander[i] = Math.max(0, G.usedBrander[i] - 1);
             }
-        }, onMove(G, ctx) {
+        }, onMove({ G, ctx }) {
             if (G.attackBlock && G.responseBlock) {
                 let ship = getShip(G, G.attackFrom);
                 let targetShip = getShip(G, G.attackTo);
@@ -711,7 +711,7 @@ export const GameRules = {
     }},
     moves: {},
 
-    endIf: (G, ctx) => {
+    endIf: ({ G, ctx }) => {
         let fortCount = [0, 0];
         for (let i = 0; i < 14; ++i) {
             for (let j = 0; j < 14; ++j) {
@@ -731,7 +731,7 @@ export const GameRules = {
         }
     },
 
-    playerView(G, ctx, playerID) {
+    playerView({ G, ctx, playerID }) {
         G = deepcopy(G);
         for (let i = 0; i < SIZE; ++i) {
             for (let j = 0; j < SIZE; ++j) {

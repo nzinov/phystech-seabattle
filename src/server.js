@@ -1,6 +1,6 @@
 import { Server } from 'boardgame.io/dist/cjs/server.js';
 import { PostgresStore } from 'bgio-postgres';
-import { GameRules } from './Game.js';
+import GameRules from './Game.js';
 import path from 'path';
 import serve from 'koa-static';
 

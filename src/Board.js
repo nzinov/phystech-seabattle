@@ -1,36 +1,11 @@
 import deepcopy from 'deepcopy';
 import React from 'react';
-import { DndProvider, DragSource, DropTarget } from 'react-dnd';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { getBlocks, getModeAction, takeMove, dist, InitialShips } from './Game';
-import { Log } from './Log';
-import { stageDescr, shipInfo } from './Texts'
-import ReactTooltip from 'react-tooltip';
-
-const squareSource = {
-	beginDrag(props) {
-		return {coord: props.coord, figure: props.figure};
-	},
-
-	canDrag(props, monitor) {
-		let action = getModeAction(props.G, props.ctx, props.player, props.mode, props.coord);
-		return action && action.canFrom(props.G, props.player, props.coord);
-	}
-};
-
-const squareTarget = {
-	drop(props, monitor, component) {
-        takeMove(props.G, props.ctx, props.moves, props.mode, monitor.getItem().coord, props.coord);
-	},
-
-	canDrop(props, monitor, component) {
-		let action = getModeAction(props.G, props.ctx, props.player, props.mode, monitor.getItem().coord);
-		if (!action) {
-			return false;
-		}
-		return action.can(props.G, props.player, monitor.getItem().coord, props.coord);
-	}
-};
+import { getBlocks, getModeAction, takeMove, dist, InitialShips } from './Game.js';
+import { Log } from './Log.js';
+import { stageDescr, shipInfo } from './Texts.js'
+import { Tooltip } from 'react-tooltip';
 
 const CellStyle = {
 	border: '1px solid #555',
@@ -43,60 +18,102 @@ const CellStyle = {
 	overflow: 'hidden',
 };
 
-class Square extends React.Component {
-	click = () => {
-		if (['Unknown', 'Sinking'].includes(this.props.figure?.type) && !this.props.G.attackFrom) {
-			this.props.moves.Label(this.props.coord, prompt('Enter label'));
+const Square = (props) => {
+	const click = () => {
+		if (['Unknown', 'Sinking'].includes(props.figure?.type) && !props.G.attackFrom) {
+			props.moves.Label(props.coord, prompt('Enter label'));
 		}
 	}
 
-	render() {
-		let color = 'white';
-		if (this.props.isDragging) {
-			color = '#AAAAFF';
-		}
-		if (this.props.canDrop) {
-			color = '#CCFFCC';
-		}
-		if (this.props.canDrag) {
-			color = '#EEFFEE';
-		}
-		if (this.props.G.attackFrom && dist(this.props.G.attackFrom, this.props.coord) == 0) {
-			color = '#BBAAFF';
-		}
-		if (this.props.G.attackTo && dist(this.props.G.attackTo, this.props.coord) == 0) {
-			color = '#FFAABB';
-		}
-		if (this.props.highlightedBlock && this.props.highlightedBlock.coords.some(el => dist(el, this.props.coord) == 0)) {
-			color = '#CCFFCC';
-		}
-		for (let pair of (this.props.highlight || [])) {
-			if (dist(this.props.coord, pair[0]) == 0) {
-				color = pair[1];
-			}
-		}
-		let cellStyle = deepcopy(CellStyle);
-		cellStyle.backgroundColor = color;
-		let label = undefined;
-		if (this.props.figure) {
-			cellStyle.backgroundImage = "url("+process.env.PUBLIC_URL+"figures/"+this.props.figure.type+".png)";
-			if (this.props.figure.label) {
-				let labelStyle = {
-					width: '70%',
-					height: '70%',
-					backgroundColor: '#F0F0FF'
-				}
-				label = <img style={labelStyle} src={process.env.PUBLIC_URL+"figures/"+this.props.figure.label+".png"}/>;
-			}
-		}
+	const [{ canDrag, isDragging }, dragRef] = useDrag(() => ({
+		type: 'square',
+		item: { coord: props.coord, figure: props.figure },
+		canDrag: () => {
+			let action = getModeAction(props.G, props.ctx, props.player, props.mode, props.coord);
+			return action && action.canFrom(props.G, props.player, props.coord);
+		},
+		collect: (monitor) => ({
+			canDrag: monitor.canDrag(),
+			isDragging: monitor.isDragging(),
+		}),
+	}), [props.G, props.ctx, props.player, props.mode, props.coord, props.figure]);
 
-		return this.props.connectDropTarget(this.props.connectDragSource(<td><div data-tip={shipInfo?.[this.props.figure?.type]} onClick={this.click} style={cellStyle} onMouseEnter={this.props.hover} onMouseLeave={this.props.leave}>{label}</div></td>));
+	const [{ canDrop }, dropRef] = useDrop(() => ({
+		accept: 'square',
+		drop: (item) => {
+			takeMove(props.G, props.ctx, props.moves, props.mode, item.coord, props.coord);
+		},
+		canDrop: (item) => {
+			let action = getModeAction(props.G, props.ctx, props.player, props.mode, item.coord);
+			if (!action) {
+				return false;
+			}
+			return action.can(props.G, props.player, item.coord, props.coord);
+		},
+		collect: (monitor) => ({
+			canDrop: monitor.canDrop(),
+		}),
+	}), [props.G, props.ctx, props.player, props.mode, props.moves, props.coord]);
+
+	let color = 'white';
+	if (isDragging) {
+		color = '#AAAAFF';
 	}
+	if (canDrop) {
+		color = '#CCFFCC';
+	}
+	if (canDrag) {
+		color = '#EEFFEE';
+	}
+	if (props.G.attackFrom && dist(props.G.attackFrom, props.coord) == 0) {
+		color = '#BBAAFF';
+	}
+	if (props.G.attackTo && dist(props.G.attackTo, props.coord) == 0) {
+		color = '#FFAABB';
+	}
+	if (props.highlightedBlock && props.highlightedBlock.coords.some(el => dist(el, props.coord) == 0)) {
+		color = '#CCFFCC';
+	}
+	for (let pair of (props.highlight || [])) {
+		if (dist(props.coord, pair[0]) == 0) {
+			color = pair[1];
+		}
+	}
+	let cellStyle = deepcopy(CellStyle);
+	cellStyle.backgroundColor = color;
+	let label = undefined;
+	if (props.figure) {
+		cellStyle.backgroundImage = "url("+process.env.PUBLIC_URL+"figures/"+props.figure.type+".png)";
+		if (props.figure.label) {
+			let labelStyle = {
+				width: '70%',
+				height: '70%',
+				backgroundColor: '#F0F0FF'
+			}
+			label = <img style={labelStyle} src={process.env.PUBLIC_URL+"figures/"+props.figure.label+".png"}/>;
+		}
+	}
+
+	const combinedRef = (el) => {
+		dragRef(el);
+		dropRef(el);
+	};
+
+	return (
+		<td ref={combinedRef}>
+			<div 
+				data-tooltip-id="ship-tooltip"
+				data-tooltip-content={shipInfo?.[props.figure?.type]} 
+				onClick={click} 
+				style={cellStyle} 
+				onMouseEnter={props.hover} 
+				onMouseLeave={props.leave}
+			>
+				{label}
+			</div>
+		</td>
+	);
 };
-
-Square = DropTarget("square", squareTarget, (connect, monitor) => ({connectDropTarget: connect.dropTarget(), canDrop: monitor.canDrop()}))(
-			DragSource("square", squareSource, (connect, monitor) => ({ connectDragSource: connect.dragSource(), canDrag: monitor.canDrag(), isDragging: monitor.isDragging(), preview: connect.dragPreview()}))(Square)
-		 );
 
 class Board extends React.Component {
 	constructor(props) {
@@ -241,12 +258,18 @@ class Board extends React.Component {
 	}
 
     render() {
+        // Wait for game state to initialize
+        if (!this.props.G || !this.props.G.cells) {
+            return <div>Loading game...</div>;
+        }
+        
         let tbody = [];
         for (let i = 0; i < 14; i++) {
             let cells = [];
             for (let j = 0; j < 14; j++) {
                 cells.push(
                     <Square
+					 key={`${i}-${j}`}
 					 coord={[i, j]}
 					 figure={this.props.G.cells[i][j]}
 					 mode={this.state.mode}
@@ -260,7 +283,7 @@ class Board extends React.Component {
 					 highlight={this.state.highlight}></Square>
                 );
             }
-            tbody.push(<tr>{cells}</tr>);
+            tbody.push(<tr key={i}>{cells}</tr>);
         }
 
 		let remaining_tbody = [];
@@ -281,15 +304,15 @@ class Board extends React.Component {
 						fontSize: '3vw',
 						textShadow: "#FFFFFF 0px 0px 20px",
 					}
-					row.push(<td><div style={style}><span style={fontStyle}><b>{count}</b></span></div></td>);
+					row.push(<td key={ship}><div style={style}><span style={fontStyle}><b>{count}</b></span></div></td>);
 				}
 			};
-			let row = [<td>You</td>];
+			let row = [<td key="you">You</td>];
 			AddShips(my_remaining, row, '#AAFFAA');
-			remaining_tbody.push(<tr>{row}</tr>);
-			row = [<td>Enemy</td>];
+			remaining_tbody.push(<tr key="my">{row}</tr>);
+			row = [<td key="enemy">Enemy</td>];
 			AddShips(other_remaining, row, '#FFAAAA');
-			remaining_tbody.push(<tr>{row}</tr>);
+			remaining_tbody.push(<tr key="other">{row}</tr>);
 		}
 
 
@@ -338,9 +361,9 @@ class Board extends React.Component {
 
         return (
 			<DndProvider backend={HTML5Backend}>
-			<ReactTooltip disable={!this.state.tooltip} html={true}/>
+			<Tooltip id="ship-tooltip" isOpen={this.state.tooltip} />
 			<div style={outStyle}>
-			<table id="remaining" style={remainingStyle}>{remaining_tbody}</table>
+			<table id="remaining" style={remainingStyle}><tbody>{remaining_tbody}</tbody></table>
             <table id="board">
             <tbody>{tbody}</tbody>
             </table>
@@ -351,7 +374,7 @@ class Board extends React.Component {
 				{stage == 'place' && <button onClick={this.Ready}>Finish placement</button>}
 				<div style={blocksStyle}>
 				{blocks && blocks.map((block, i) =>
-					<button style={{padding: '5px', margin: '2px'}} idx={i} onMouseEnter={(e) => this.hoverBlock(e, block)} onMouseLeave={this.leaveBlock} onClick={(e) => this.clickBlock(e, block)}>{block.size} x {block.type}</button>
+					<button key={i} style={{padding: '5px', margin: '2px'}} idx={i} onMouseEnter={(e) => this.hoverBlock(e, block)} onMouseLeave={this.leaveBlock} onClick={(e) => this.clickBlock(e, block)}>{block.size} x {block.type}</button>
 				)}
 				</div>
 				<Log events={this.props.G.log} player={this.props.playerID} highlight={this.highlight} />
