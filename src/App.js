@@ -37,10 +37,20 @@ if (!params.get('token')) {
 }
 console.log(matchID, playerID);
 
+// Determine server URL based on environment
+const getServerUrl = () => {
+    // In development, use localhost:8000
+    if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+        return 'http://localhost:8000';
+    }
+    // In production, use the same protocol and hostname as the current page
+    return `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
+};
+
 const SeabattleClient = Client({ 
     game: GameRules, 
     board: Board, 
-    multiplayer: SocketIO({ server: 'http://localhost:8000' }), 
+    multiplayer: SocketIO({ server: getServerUrl() }), 
     debug: false 
 });
 
