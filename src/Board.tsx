@@ -1022,43 +1022,78 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   <button
                     key={i}
                     style={{
-                      padding: '12px 20px',
+                      width: '80px',
+                      height: '80px',
                       margin: '6px',
-                      background: 'var(--surface-1)',
-                      border: '1px solid var(--border-light)',
-                      borderRadius: 'var(--border-radius-lg)',
-                      color: 'var(--text-primary)',
-                      fontSize: '0.875rem',
-                      fontWeight: '500',
+                      background:
+                        'linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%)',
+                      border: '2px solid var(--border-light)',
+                      borderRadius: '16px',
                       cursor: 'pointer',
-                      transition: 'var(--transition-fast)',
-                      boxShadow: 'var(--shadow-sm)',
-                      minWidth: '100px',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                       position: 'relative',
-                      overflow: 'hidden',
+                      overflow: 'visible',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '8px',
                     }}
                     onMouseEnter={e => {
                       this.hoverBlock(e, block);
-                      e.currentTarget.style.background = 'var(--accent-primary)';
-                      e.currentTarget.style.color = 'var(--text-light)';
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                      e.currentTarget.style.background =
+                        'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary, #4338ca) 100%)';
+                      e.currentTarget.style.color = 'white';
+                      e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.25)';
                       e.currentTarget.style.borderColor = 'var(--accent-primary)';
-                      e.currentTarget.style.transition = 'var(--transition-fast)';
                     }}
                     onMouseLeave={e => {
                       this.leaveBlock(e);
-                      e.currentTarget.style.background = 'var(--surface-1)';
+                      e.currentTarget.style.background =
+                        'linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%)';
                       e.currentTarget.style.color = 'var(--text-primary)';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                      e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
                       e.currentTarget.style.borderColor = 'var(--border-light)';
-                      e.currentTarget.style.transition = 'var(--transition-fast)';
                     }}
                     onClick={e => this.clickBlock(e, block)}
                   >
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: '500' }}>
-                      {block.size} × {block.type}
+                    {/* Ship Icon */}
+                    <img
+                      src={`/figures/${block.type}.png`}
+                      alt={block.type}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))',
+                      }}
+                    />
+
+                    {/* Size Badge */}
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-10px',
+                        right: '-10px',
+                        backgroundColor: 'var(--accent-primary, #6366f1)',
+                        color: 'white',
+                        borderRadius: '50%',
+                        width: '28px',
+                        height: '28px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.8rem',
+                        fontWeight: '700',
+                        border: '3px solid white',
+                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+                        fontFamily: 'JetBrains Mono, monospace',
+                        zIndex: 10,
+                      }}
+                    >
+                      {block.size}
                     </span>
                   </button>
                 ))}
