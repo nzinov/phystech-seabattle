@@ -9,35 +9,52 @@ This is a web-based multiplayer board game called "Phystech Sea Battle" (Мор�
 ## Development Commands
 
 ```bash
-# Development (starts React dev server with proxy to backend)
+# Development (starts Vite dev server with proxy to backend)
 npm start
 
 # Production build
 npm run build
 
-# Run tests
+# Run tests (using Vitest)
 npm test
+
+# Preview production build
+npm run preview
+
+# Build server for production
+npm run build-server
 
 # Start production server (serves built app + backend)
 npm run serve
+
+# Code quality
+npm run lint
+npm run lint:fix
+npm run format
+npm run format:check
+npm run type-check
+npm run pre-commit
 ```
 
 ## Architecture
 
 ### Tech Stack
-- **Frontend**: React with Create React App
-- **Game Engine**: BoardGame.io for turn-based multiplayer logic
-- **Backend**: Node.js with Koa server
+- **Frontend**: React 19.1.0 with Vite build system
+- **Game Engine**: BoardGame.io 0.50.2 for turn-based multiplayer logic
+- **Backend**: Node.js with Koa 3.0.0 server
 - **Database**: PostgreSQL (production) / in-memory (development)
 - **Real-time**: WebSocket via BoardGame.io's SocketIO
-- **UI**: React DnD for drag-and-drop ship movement
+- **UI**: React DnD 16.0.1 for drag-and-drop ship movement
+- **Build Tool**: Vite 6.1.1 (replacing Create React App)
+- **Testing**: Vitest 3.2.4
+- **TypeScript**: Full TypeScript support with strict mode
 
 ### Key Files
-- `src/Game.js` - Core game logic, rules, and BoardGame.io game definition
-- `src/Board.js` - Main game board UI component with drag-and-drop
-- `src/server.js` - Backend server with authentication and database setup
-- `src/App.js` - Root React component and BoardGame.io client setup
-- `src/Texts.js` - Ship descriptions and game text constants
+- `src/Game.ts` - Core game logic, rules, and BoardGame.io game definition
+- `src/Board.tsx` - Main game board UI component with drag-and-drop
+- `src/server.ts` - Backend server with authentication and database setup
+- `src/App.tsx` - Root React component and BoardGame.io client setup
+- `src/Texts.ts` - Ship descriptions and game text constants
 - `public/figures/` - Ship imagery for 21 different ship types
 
 ### Game Architecture
@@ -48,50 +65,53 @@ npm run serve
 - **Authentication**: Token-based player credentials stored in game metadata
 
 ### Development Setup
-- Development proxy configured to backend on port 8000
-- Environment-based database: PostgreSQL (production) vs in-memory (development)
-- Node.js 18+ required
-- Uses latest package versions (migrated from legacy dependencies)
-- **ES Modules**: Project uses `"type": "module"` - all imports must use .js extensions
-- **TypeScript Preference**: Always prefer TypeScript over CommonJS when adding new code
-- **Migration Complete**: Successfully updated from legacy packages to latest versions
-- **API Migration**: Updated to BoardGame.io 0.50.2 API (destructured parameters)
+- **Vite Dev Server**: Runs on port 3000 with proxy to backend on port 8000
+- **Environment-based database**: PostgreSQL (production) vs in-memory (development)
+- **Node.js 18+ required**
+- **TypeScript**: Strict mode enabled with comprehensive type checking
+- **ESLint + Prettier**: Code formatting and linting with pre-commit hooks
+- **Husky**: Git hooks for code quality enforcement
 
-### Package Versions (Updated)
-- **BoardGame.io**: 0.50.2 (latest)
-- **React**: 19.1.0 with new hooks-based React DnD
-- **React DnD**: 16.0.1 (hooks API, not decorator-based)
-- **React Tooltip**: 5.29.1 (new API)
+### Package Versions (Current)
+- **BoardGame.io**: 0.50.2
+- **React**: 19.1.0
+- **React DnD**: 16.0.1 (hooks API)
+- **React Tooltip**: 5.29.1
 - **Universal Cookie**: 8.0.1
 - **Koa**: 3.0.0
+- **Vite**: 6.1.1
+- **TypeScript**: 5.8.3
+- **Vitest**: 3.2.4
 
 ### Database
-Uses PostgreSQL in production (Heroku) with `bgio-postgres` adapter. Game state and player authentication persisted automatically by BoardGame.io framework.
+Uses PostgreSQL in production with `bgio-postgres` adapter. Game state and player authentication persisted automatically by BoardGame.io framework.
 
 ### Code Standards
-- **Always use TypeScript** when adding new files or major refactoring
-- Use ES modules with explicit .js extensions for local imports
-- Prefer modern React patterns (hooks over classes for new components)
-- Use BoardGame.io's latest API patterns
+- **TypeScript First**: All new code should be written in TypeScript
+- **Strict TypeScript**: Project uses strict mode with noImplicitAny
+- **ESLint + Prettier**: Enforced code formatting and linting
+- **Modern React**: Hooks-based components, React 19 patterns
+- **BoardGame.io 0.50+ API**: Destructured parameters for all game callbacks
 
-### BoardGame.io Import Patterns (ES Modules)
-- **All files**: Use `boardgame.io/dist/cjs/[module].js` pattern for BoardGame.io imports
-- **Local imports**: Always use `.js` extensions (e.g., `./Component.js`)
-- **Consistent module system**: ES modules everywhere with `"type": "module"` in package.json
+### Import Patterns
+- **BoardGame.io imports**: Use standard module paths (no /dist/cjs required)
+- **Local imports**: Use relative paths with appropriate extensions
+- **TypeScript**: Proper type imports where needed
 
 #### Working Import Examples:
-```javascript
+```typescript
 // BoardGame.io imports
-import { Server } from 'boardgame.io/dist/cjs/server.js';
-import { Client } from 'boardgame.io/dist/cjs/react.js';
-import { INVALID_MOVE } from 'boardgame.io/dist/cjs/core.js';
+import { Server } from 'boardgame.io/server';
+import { Client } from 'boardgame.io/react';
+import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 
 // Local imports
-import GameRules from './Game.js';
-import Board from './Board.js';
+import GameRules from './Game';
+import Board from './Board';
+import type { Position } from './Game';
 ```
 
-#### BoardGame.io API Changes (v0.50+)
-- **Function signatures**: Changed from `(G, ctx) => {}` to `({ G, ctx }) => {}`
-- **All game callbacks** now use destructured parameters
+#### BoardGame.io API (v0.50+)
+- **Function signatures**: Use destructured parameters `({ G, ctx }) => {}`
+- **Type safety**: Full TypeScript support with proper interfaces
 - **Applies to**: `setup`, `moves`, `endIf`, `playerView`, `onMove`, etc.
