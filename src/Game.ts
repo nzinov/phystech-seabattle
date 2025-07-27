@@ -192,16 +192,6 @@ export function checkBlock(
     );
   }
 
-  console.log(type, block);
-  console.log(
-    block.every(el => el == type),
-    block.every(el => [type, 'Rd'].includes(el)) &&
-      Ships[type]?.strength! <= Ships['Rd']?.strength!,
-    type == 'Es' && matchBlock(block, ['Rd', 'St']),
-    type == 'Es' &&
-      matchBlock(block, ['Es', 'Rd', 'St']) &&
-      Math.abs(block.indexOf('Rd') - block.indexOf('St')) == 1
-  );
   return (
     block.every(el => el == type) ||
     (block.every(el => [type, 'Rd'].includes(el)) &&
