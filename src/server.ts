@@ -1,21 +1,18 @@
-import { Server } from 'boardgame.io/server';
 import { PostgresStore } from 'bgio-postgres';
-import GameRules from './Game.js';
-import path from 'path';
+import { Server } from 'boardgame.io/server';
 import serve from 'koa-static';
+import path from 'path';
+import GameRules from './Game.js';
 
 const authenticateCredentials = (credentials: any, playerMetadata: any): boolean => {
-  console.log(credentials);
   if (!playerMetadata) {
     return true;
   }
   if (credentials) {
     if (!playerMetadata.credentials) {
-      console.log('empty');
       playerMetadata.credentials = credentials;
     }
     let allow = credentials == playerMetadata.credentials;
-    console.log(allow);
     return allow;
   }
   return false;

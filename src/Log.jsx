@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-function getShipDescr(ship, player) {
-  return (ship.player == player ? 'your ' : "opponent's ") + ship.type;
+function getSide(player, currentPlayer) {
+  return player == currentPlayer ? 'your' : "opponent's";
+}
+
+function getShipDescr(ship, currentPlayer) {
+  return getSide(ship.player, currentPlayer) + ' ' + ship.type;
 }
 
 class LogEvent extends React.Component {
@@ -34,7 +38,7 @@ class LogEvent extends React.Component {
     let event = this.props.event;
     switch (event.type) {
       case 'move':
-        return <span>ship moved</span>;
+        return <span>{getSide(event.player, this.props.player)} ship moved</span>;
       case 'shoot':
         return (
           <span>
@@ -42,7 +46,7 @@ class LogEvent extends React.Component {
           </span>
         );
       case 'attack':
-        return <span>ship attacked</span>;
+        return <span>{getSide(event.player, this.props.player)} ship attacked</span>;
       case 'die':
         return <span>{getShipDescr(event.ship, this.props.player)} was destroyed</span>;
       case 'explode':
@@ -61,32 +65,62 @@ class LogEvent extends React.Component {
   };
 
   render() {
+    const event = this.props.event;
+    const isCurrentPlayer = event.player === this.props.player;
+
     return (
       <div
         style={{
-          padding: '8px 0',
-          margin: '0',
+          padding: '4px 12px',
+          margin: '2px 0',
           cursor: 'pointer',
           transition: 'all 0.03s ease',
           fontSize: '0.875rem',
           color: 'var(--text-primary)',
-          lineHeight: '1.5',
-          borderLeft: '3px solid transparent',
+          lineHeight: '1.4',
+          display: 'flex',
+          justifyContent: isCurrentPlayer ? 'flex-start' : 'flex-end',
         }}
         onMouseEnter={e => {
           this.props.highlight(this.getHighlight());
-          e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-          e.currentTarget.style.borderLeftColor = 'var(--accent-primary)';
-          e.currentTarget.style.transition = 'all 0.03s ease';
+          e.currentTarget.style.background = 'rgba(139, 92, 246, 0.05)';
         }}
         onMouseLeave={e => {
           this.props.highlight([]);
           e.currentTarget.style.background = 'transparent';
-          e.currentTarget.style.borderLeftColor = 'transparent';
-          e.currentTarget.style.transition = 'all 0.03s ease';
         }}
       >
-        {this.renderText()}
+        <div
+          style={{
+            background: isCurrentPlayer ? 'rgba(139, 92, 246, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+            borderRadius: isCurrentPlayer ? '12px 12px 12px 4px' : '12px 12px 4px 12px',
+            padding: '6px 10px',
+            maxWidth: '80%',
+            wordWrap: 'break-word',
+            border: isCurrentPlayer
+              ? '1px solid rgba(139, 92, 246, 0.2)'
+              : '1px solid rgba(107, 114, 128, 0.2)',
+            transition: 'all 0.03s ease',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = isCurrentPlayer
+              ? 'rgba(139, 92, 246, 0.15)'
+              : 'rgba(107, 114, 128, 0.15)';
+            e.currentTarget.style.borderColor = isCurrentPlayer
+              ? 'rgba(139, 92, 246, 0.3)'
+              : 'rgba(107, 114, 128, 0.3)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = isCurrentPlayer
+              ? 'rgba(139, 92, 246, 0.1)'
+              : 'rgba(107, 114, 128, 0.1)';
+            e.currentTarget.style.borderColor = isCurrentPlayer
+              ? 'rgba(139, 92, 246, 0.2)'
+              : 'rgba(107, 114, 128, 0.2)';
+          }}
+        >
+          {this.renderText()}
+        </div>
       </div>
     );
   }

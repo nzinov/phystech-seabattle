@@ -302,10 +302,10 @@ const Actions = {
       );
     },
     take({ G, events }: ActionContext, from: Position, to: Position) {
+      addLog(G, 'move', from, to, { player: getPos(G, from)!.player });
       setPos(G, to, getPos(G, from));
       setPos(G, from, null);
       events.endStage();
-      addLog(G, 'move', from, to);
     },
     key: 'm',
     name: 'Move',
@@ -320,8 +320,8 @@ const Actions = {
       return opponent && opponent.player != player && dist(from, to) == 1;
     },
     take({ G, ctx, events }: ActionContext, from: Position, to: Position) {
-      addLog(G, 'attack', from, to);
       let fig = getPos(G, from);
+      addLog(G, 'attack', from, to, { player: fig!.player });
       let targetFig = getPos(G, to);
       let ship = getShip(G, from);
       let targetShip = getShip(G, to);
@@ -335,7 +335,11 @@ const Actions = {
         return;
       }
       if (targetShip?.compare) {
-        addLog(G, 'response', undefined, undefined, { size: 1, ship_type: targetFig?.type });
+        addLog(G, 'response', undefined, undefined, {
+          size: 1,
+          ship_type: targetFig?.type,
+          player: targetFig!.player,
+        });
         let res = targetShip.compare(fig!);
         battle({ G, ctx, events }, -res, from, to, [from], [to]);
         return;
@@ -392,7 +396,7 @@ const Actions = {
       if (!ship || !ship.shoot) {
         throw new Error('Ship not found');
       }
-      addLog(G, 'shoot', from, to, { ship: getPos(G, from) });
+      addLog(G, 'shoot', from, to, { ship: getPos(G, from), player: getPos(G, from)!.player });
       ship.shoot({ G, ctx, events }, from, to);
     },
     key: 's',
@@ -415,7 +419,11 @@ const Actions = {
       return isStraight(from, to) && dist(from, to) <= 2;
     },
     take(bgctx: ActionContext, from: Position, to: Position) {
-      addLog(bgctx.G, 'shoot', from, to, { ship: getPos(bgctx.G, from), area: true });
+      addLog(bgctx.G, 'shoot', from, to, {
+        ship: getPos(bgctx.G, from),
+        area: true,
+        player: getPos(bgctx.G, from)!.player,
+      });
       Effects.Explode(bgctx, from, to);
       repeatTurn(bgctx);
     },
@@ -434,7 +442,7 @@ const Effects = {
     if (!sq) {
       return;
     }
-    addLog(G, 'die', pos, pos, { ship: sq });
+    addLog(G, 'die', pos, pos, { ship: sq, player: sq.player });
     setPos(G, pos, null);
   },
   Win(bgctx: ActionContext, _from: Position, to: Position) {
@@ -455,7 +463,10 @@ const Effects = {
     if (!ship || !ship.blastRadius || !ship.blastSquare) {
       throw new Error('Ship has no blast radius');
     }
-    addLog(bgctx.G, 'explode', from, to, { ship: getPos(bgctx.G, from) });
+    addLog(bgctx.G, 'explode', from, to, {
+      ship: getPos(bgctx.G, from),
+      player: getPos(bgctx.G, from)!.player,
+    });
     Effects.Die(bgctx, from);
     for (let dx = -ship.blastRadius; dx <= ship.blastRadius; ++dx) {
       for (let dy = -ship.blastRadius; dy <= ship.blastRadius; ++dy) {
@@ -788,7 +799,11 @@ const ResponseBlockMove = ({ G, playerID }: any, block: any): typeof INVALID_MOV
   ) {
     return INVALID_MOVE;
   }
-  addLog(G, 'response', undefined, undefined, { size: block.size, ship_type: block.type });
+  addLog(G, 'response', undefined, undefined, {
+    size: block.size,
+    ship_type: block.type,
+    player: parseInt(playerID!),
+  });
   G.responseBlock = block;
 };
 ResponseBlockMove.redact = true;
