@@ -5,7 +5,7 @@ import deepcopy from 'deepcopy';
 
 const SIZE = 14;
 
-type Position = [number, number];
+export type Position = [number, number];
 
 interface Ship {
   type: string;

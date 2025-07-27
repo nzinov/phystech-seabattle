@@ -250,8 +250,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       return;
     }
     if (event.key == 'Control') {
-      this.setState({ trace: true });
-      this.HighlightTrace();
+      this.setState({ trace: true }, () => {
+        this.HighlightTrace();
+      });
       return;
     }
     if (event.key == 'Shift') {
@@ -284,8 +285,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   };
 
   hoverSquare = (_event: any, coords: any) => {
-    this.setState({ hoveredCoords: coords });
-    this.HighlightTrace();
+    this.setState({ hoveredCoords: coords }, () => {
+      this.HighlightTrace();
+    });
   };
 
   leaveSquare = (_event: any) => {
@@ -432,7 +434,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       <DndProvider backend={HTML5Backend}>
         <Tooltip
           id="ship-tooltip"
-          isOpen={this.state.tooltip}
+          isOpen={this.state.tooltip ?? false}
           place="right"
           style={{
             maxWidth: '300px',
