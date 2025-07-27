@@ -6,6 +6,14 @@ import Cookies from 'universal-cookie';
 import { v4 as uuid } from 'uuid';
 import React from 'react';
 
+// Store invite link globally for BoardWrapper access
+let globalInviteLink: string | null = null;
+
+// Wrapper component to pass invite link to Board
+const BoardWrapper = (props: any) => {
+  return <Board {...props} inviteLink={globalInviteLink} />;
+};
+
 const cookies = new Cookies();
 const search = window.location.search;
 let params = new URLSearchParams(search);
@@ -20,17 +28,24 @@ if (cookies.get('token') != params.get('token')) {
 
 let matchID = params.get('match');
 let playerID = params.get('player');
+let inviteLink: string | null = null;
+
 if (!matchID) {
   matchID = uuid();
   playerID = '0';
   params.set('match', matchID);
   params.set('player', playerID);
   window.location.search = params.toString();
+}
+
+// Generate invite link for player 0 (without token for security)
+if (playerID === '0') {
   let other = new URL(window.location.href);
-  params.set('player', '1');
-  other.search = params.toString();
-  params.set('player', '0');
-  prompt('Link to join (copy to clipboard): ', other.toString());
+  let otherParams = new URLSearchParams(other.search);
+  otherParams.set('player', '1');
+  otherParams.delete('token'); // Remove token from invite link for security
+  other.search = otherParams.toString();
+  inviteLink = other.toString();
 }
 if (!params.get('token')) {
   params.set('token', cookies.get('token'));
@@ -50,13 +65,18 @@ const getServerUrl = (): string => {
 
 const SeabattleClient = Client({
   game: GameRules,
-  board: Board,
+  board: BoardWrapper,
   multiplayer: SocketIO({ server: getServerUrl() }),
   debug: import.meta.env.DEV || window.location.hostname === 'localhost',
 });
 
 const App: React.FC = () => {
   try {
+    // Store invite link globally for BoardWrapper access
+    if (inviteLink) {
+      globalInviteLink = inviteLink;
+    }
+
     return (
       <div>
         <SeabattleClient matchID={matchID} playerID={playerID} credentials={cookies.get('token')} />

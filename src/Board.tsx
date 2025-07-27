@@ -322,6 +322,7 @@ interface BoardPropsLocal {
   credentials?: string;
   trace?: any;
   hoveredCoords?: any;
+  inviteLink?: string;
 }
 
 interface BoardState {
@@ -337,6 +338,8 @@ interface BoardState {
   highlightedBlock?: any;
   pendingMove?: boolean;
   lastMoveTimestamp?: number;
+  linkCopied?: boolean;
+  readyConfirmPending?: boolean;
 }
 
 class Board extends React.Component<BoardPropsLocal, BoardState> {
@@ -348,15 +351,43 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       traceArrows: [],
       logArrows: [],
       blockArrows: [],
+      linkCopied: false,
+      readyConfirmPending: false,
     };
   }
 
   Ready = () => {
-    this.props.moves.Ready();
+    if (!this.state.readyConfirmPending) {
+      // First click - show confirmation state
+      this.setState({ readyConfirmPending: true });
+      // Auto-reset after 5 seconds if no second click
+      setTimeout(() => {
+        this.setState({ readyConfirmPending: false });
+      }, 5000);
+    } else {
+      // Second click - actually ready up
+      this.props.moves.Ready();
+      this.setState({ readyConfirmPending: false });
+    }
   };
 
   Skip = () => {
     this.props.moves.Skip();
+  };
+
+  copyInviteLink = async () => {
+    if (this.props.inviteLink) {
+      try {
+        await navigator.clipboard.writeText(this.props.inviteLink);
+        this.setState({ linkCopied: true });
+        // Reset after 2 seconds
+        setTimeout(() => {
+          this.setState({ linkCopied: false });
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy link:', err);
+      }
+    }
   };
 
   HighlightTrace = () => {
@@ -1203,7 +1234,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
               <button
                 onClick={this.Ready}
                 style={{
-                  background: 'var(--cell-active)',
+                  background: this.state.readyConfirmPending
+                    ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                    : 'var(--cell-active)',
                   border: 'none',
                   padding: '16px 32px',
                   borderRadius: 'var(--border-radius-lg)',
@@ -1232,7 +1265,49 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   e.currentTarget.style.transition = 'var(--transition-fast)';
                 }}
               >
-                <span style={{ position: 'relative', zIndex: 1 }}>✅ Ready to Battle</span>
+                <span style={{ position: 'relative', zIndex: 1 }}>
+                  {this.state.readyConfirmPending ? '🎯 Confirm Ready?' : '✅ Ready to Battle'}
+                </span>
+              </button>
+            )}
+            {this.props.inviteLink && stage === 'place' && this.props.playerID === '0' && (
+              <button
+                onClick={this.copyInviteLink}
+                style={{
+                  background: this.state.linkCopied
+                    ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
+                    : 'linear-gradient(135deg, var(--accent-secondary, #4338ca) 0%, var(--accent-primary) 100%)',
+                  border: 'none',
+                  padding: '16px 32px',
+                  borderRadius: 'var(--border-radius-lg)',
+                  color: 'var(--text-light)',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  boxShadow: 'var(--shadow-md)',
+                  transition: 'var(--transition-fast)',
+                  marginBottom: '24px',
+                  width: '100%',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.075em',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                  e.currentTarget.style.transition = 'var(--transition-fast)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                  e.currentTarget.style.transition = 'var(--transition-fast)';
+                }}
+              >
+                <span style={{ position: 'relative', zIndex: 1 }}>
+                  {this.state.linkCopied ? '✅ Link Copied!' : '🔗 Copy Invite Link'}
+                </span>
               </button>
             )}
             <div style={{ ...blocksStyle, flexShrink: 0 }}>
