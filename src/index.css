@@ -10,6 +10,16 @@
   --cell-active: #10b981;
   --cell-attack: #ef4444;
   --cell-defend: #3b82f6;
+  --action-move-bg: #e2dbff;
+  --action-move-border: #8b5cf6;
+  --action-attack-bg: #fecaca;
+  --action-attack-border: #dc2626;
+  --action-shoot-bg: #fed7aa;
+  --action-shoot-border: #ea580c;
+  --action-explode-bg: #fca5a5;
+  --action-explode-border: #b91c1c;
+  --action-rocket-bg: #fca5a5;
+  --action-rocket-border: #b91c1c;
   --accent-primary: #8b5cf6;
   --accent-secondary: #06b6d4;
   --text-primary: #0f172a;

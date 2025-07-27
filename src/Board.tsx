@@ -62,7 +62,9 @@ const Square: React.FC<SquareProps> = props => {
       type: 'square',
       item: () => ({ coord: props.coord, figure: props.figure }),
       canDrag: () => {
-        let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', props.coord);
+        // Explicitly depend on mode for immediate updates
+        const currentMode = props.mode || '';
+        let action = getModeAction(props.G, props.ctx, props.player, currentMode, props.coord);
         return action && action.canFrom(props.G, parseInt(props.player), props.coord);
       },
       collect: monitor => ({
@@ -70,10 +72,10 @@ const Square: React.FC<SquareProps> = props => {
         isDragging: monitor.isDragging(),
       }),
     }),
-    [props.G, props.ctx, props.player, props.mode, props.coord, props.figure]
+    [props.G, props.ctx, props.player, props.mode, props.coord, props.figure, props.pendingMove]
   );
 
-  const [{ canDrop, isOver }, dropRef] = useDrop(
+  const [{ canDrop, isOver, dragItem }, dropRef] = useDrop(
     () => ({
       accept: 'square',
       drop: (item: DragItem) => {
@@ -83,7 +85,9 @@ const Square: React.FC<SquareProps> = props => {
         takeMove(props.G, props.ctx, props.moves, props.mode || '', item.coord, props.coord);
       },
       canDrop: (item: DragItem) => {
-        let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', item.coord);
+        // Explicitly depend on mode for immediate updates
+        const currentMode = props.mode || '';
+        let action = getModeAction(props.G, props.ctx, props.player, currentMode, item.coord);
         if (!action) {
           return false;
         }
@@ -92,9 +96,10 @@ const Square: React.FC<SquareProps> = props => {
       collect: monitor => ({
         canDrop: monitor.canDrop(),
         isOver: monitor.isOver(),
+        dragItem: monitor.getItem(),
       }),
     }),
-    [props.G, props.ctx, props.player, props.mode, props.moves, props.coord]
+    [props.G, props.ctx, props.player, props.mode, props.moves, props.coord, props.pendingMove]
   );
 
   let backgroundColor = 'var(--cell-default)';
@@ -108,19 +113,103 @@ const Square: React.FC<SquareProps> = props => {
     elevation = 3;
     transform = 'scale(0.95)';
   }
-  if (canDrop && isOver) {
-    backgroundColor = 'var(--cell-active)';
-    borderColor = 'var(--cell-active)';
+  if (canDrop && isOver && dragItem) {
+    // Get the drag item action type for active drop zone highlighting - action background color
+    let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', dragItem.coord);
+    if (action) {
+      switch (action.key) {
+        case 'a': // Attack
+          backgroundColor = 'var(--action-attack-bg)';
+          borderColor = 'var(--action-attack-border)';
+          break;
+        case 's': // Shoot
+          backgroundColor = 'var(--action-shoot-bg)';
+          borderColor = 'var(--action-shoot-border)';
+          break;
+        case 'e': // Explode
+          backgroundColor = 'var(--action-explode-bg)';
+          borderColor = 'var(--action-explode-border)';
+          break;
+        case 'r': // Rocket/Area
+          backgroundColor = 'var(--action-rocket-bg)';
+          borderColor = 'var(--action-rocket-border)';
+          break;
+        case 'm': // Move
+        default:
+          backgroundColor = 'var(--action-move-bg)';
+          borderColor = 'var(--action-move-border)';
+          break;
+      }
+    } else {
+      backgroundColor = 'var(--cell-active)';
+      borderColor = 'var(--cell-active)';
+    }
     elevation = 2;
     transform = 'scale(1.02)';
+  } else if (canDrop && dragItem) {
+    // Get the drag item action type for subtle drop zone highlighting - always grey background with action border
+    let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', dragItem.coord);
+    backgroundColor = 'var(--cell-hover)';
+    if (action) {
+      switch (action.key) {
+        case 'a': // Attack
+          borderColor = 'var(--action-attack-border)';
+          break;
+        case 's': // Shoot
+          borderColor = 'var(--action-shoot-border)';
+          break;
+        case 'e': // Explode
+          borderColor = 'var(--action-explode-border)';
+          break;
+        case 'r': // Rocket/Area
+          borderColor = 'var(--action-rocket-border)';
+          break;
+        case 'm': // Move
+        default:
+          borderColor = 'var(--action-move-border)';
+          break;
+      }
+    } else {
+      borderColor = 'var(--cell-active)';
+    }
+    elevation = 1;
   } else if (canDrop) {
+    // Fallback for canDrop without dragItem
     backgroundColor = 'var(--cell-hover)';
     borderColor = 'var(--cell-active)';
     elevation = 1;
   }
   if (canDrag && !isDragging && !props.pendingMove) {
-    backgroundColor = 'var(--cell-hover)';
-    borderColor = 'var(--accent-primary)';
+    // Get action type and set color accordingly
+    let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', props.coord);
+    if (action) {
+      switch (action.key) {
+        case 'a': // Attack
+          backgroundColor = 'var(--action-attack-bg)';
+          borderColor = 'var(--action-attack-border)';
+          break;
+        case 's': // Shoot
+          backgroundColor = 'var(--action-shoot-bg)';
+          borderColor = 'var(--action-shoot-border)';
+          break;
+        case 'e': // Explode
+          backgroundColor = 'var(--action-explode-bg)';
+          borderColor = 'var(--action-explode-border)';
+          break;
+        case 'r': // Rocket/Area
+          backgroundColor = 'var(--action-rocket-bg)';
+          borderColor = 'var(--action-rocket-border)';
+          break;
+        case 'm': // Move
+        default:
+          backgroundColor = 'var(--action-move-bg)';
+          borderColor = 'var(--accent-primary)';
+          break;
+      }
+    } else {
+      backgroundColor = 'var(--action-move-bg)';
+      borderColor = 'var(--accent-primary)';
+    }
     elevation = 1;
   }
   if (props.G.attackFrom && dist(props.G.attackFrom, props.coord) == 0) {
@@ -404,7 +493,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       for (let j = 0; j < 14; j++) {
         cells.push(
           <Square
-            key={`${i}-${j}`}
+            key={`${i}-${j}-${this.state.mode || 'default'}`}
             coord={[i, j]}
             figure={this.props.G.cells[i][j]}
             mode={this.state.mode}
