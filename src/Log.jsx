@@ -7,9 +7,10 @@ function getShipDescr(ship, player) {
 class LogEvent extends React.Component {
   getHighlight = () => {
     let event = this.props.event;
+    // Use purple shades to match arrow colors
     let hl = [
-      [event.from, '#88AA88'],
-      [event.to, '#669966'],
+      [event.from, 'rgba(147, 51, 234, 0.4)'], // Light purple for origin
+      [event.to, 'rgba(147, 51, 234, 0.6)'], // Darker purple for destination
     ];
     switch (event.type) {
       case 'move':
@@ -19,9 +20,9 @@ class LogEvent extends React.Component {
       case 'attack':
         return hl;
       case 'die':
-        return [[event.from, '#BB8888']];
+        return [[event.from, 'rgba(239, 68, 68, 0.5)']];
       case 'explode':
-        return [[event.from, '#BB8888']];
+        return [[event.from, 'rgba(239, 68, 68, 0.5)']];
       case 'response':
         return [];
       default:

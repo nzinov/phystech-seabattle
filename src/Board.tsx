@@ -243,13 +243,13 @@ const Square: React.FC<SquareProps> = props => {
       elevation = 1;
     }
     if (props.G.attackFrom && dist(props.G.attackFrom, props.coord) == 0) {
-      backgroundColor = 'var(--cell-defend)';
-      borderColor = 'var(--cell-defend)';
+      backgroundColor = 'rgba(59, 130, 246, 0.15)';
+      borderColor = 'rgba(59, 130, 246, 0.6)';
       elevation = 2;
     }
     if (props.G.attackTo && dist(props.G.attackTo, props.coord) == 0) {
-      backgroundColor = 'var(--cell-attack)';
-      borderColor = 'var(--cell-attack)';
+      backgroundColor = 'rgba(168, 85, 247, 0.15)';
+      borderColor = 'rgba(168, 85, 247, 0.6)';
       elevation = 2;
     }
     if (
@@ -329,6 +329,9 @@ interface BoardState {
   trace?: boolean;
   hoveredCoords?: any;
   highlight?: any[];
+  traceArrows?: any[];
+  logArrows?: any[];
+  blockArrows?: any[];
   tooltip?: boolean;
   showRemaining?: boolean;
   highlightedBlock?: any;
@@ -339,7 +342,13 @@ interface BoardState {
 class Board extends React.Component<BoardPropsLocal, BoardState> {
   constructor(props: BoardPropsLocal) {
     super(props);
-    this.state = { mode: undefined, pendingMove: false };
+    this.state = {
+      mode: undefined,
+      pendingMove: false,
+      traceArrows: [],
+      logArrows: [],
+      blockArrows: [],
+    };
   }
 
   Ready = () => {
@@ -359,27 +368,51 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       return;
     }
     let trace = [];
+    let traceArrows = [];
     let count = 0;
+    let moveSequence = []; // Store the full sequence of positions
+
+    // First, collect all positions in the movement sequence
+    moveSequence.push(coords);
+    let currentCoords = coords;
+
     for (let i = this.props.G.log.length - 1; i >= 0; i--) {
       let event = this.props.G.log[i];
-      if (event.type == 'move' && dist(coords, event.from) == 0) {
+      if (event.type == 'move' && dist(currentCoords, event.from) == 0) {
         return;
       }
-      if (event.type == 'move' && dist(coords, event.to) == 0) {
-        let fade = count * 25;
-        trace.push([coords, 'rgb(' + fade + ', ' + (255 - fade) + ', 50)']);
-        coords = event.from;
+      if (event.type == 'move' && dist(currentCoords, event.to) == 0) {
+        currentCoords = event.from;
+        moveSequence.push(currentCoords);
         count++;
         if (count == 10) {
           break;
         }
       }
     }
-    if (count > 0) {
-      let fade = count * 25;
-      trace.push([coords, 'rgb(' + fade + ', ' + (255 - fade) + ', 50)']);
+
+    // Now create highlights and arrows for the sequence
+    for (let i = 0; i < moveSequence.length; i++) {
+      // Create a nice gradient from bright cyan to deep purple
+      let alpha = Math.max(0.3, 1 - i * 0.08);
+      let hue = 180 + i * 15; // Cyan to purple gradient
+      let saturation = Math.max(40, 70 - i * 3);
+      let lightness = Math.max(35, 55 - i * 2);
+      let color = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
+
+      trace.push([moveSequence[i], color]);
+
+      // Add arrow from this position to the next (showing direction towards current position)
+      if (i < moveSequence.length - 1) {
+        traceArrows.push({
+          from: moveSequence[i + 1], // From older position
+          to: moveSequence[i], // To newer position (towards current)
+          opacity: alpha,
+        });
+      }
     }
-    this.setState({ highlight: trace });
+
+    this.setState({ highlight: trace, traceArrows });
   };
 
   CalcRemainingShips = () => {
@@ -437,9 +470,12 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       mode: undefined,
       tooltip: false,
       highlight: [],
+      traceArrows: [],
+      logArrows: [],
       trace: false,
       showRemaining: false,
     });
+    // Don't clear blockArrows on key up - they should persist during block declaration
     event.preventDefault();
   };
 
@@ -458,7 +494,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   };
 
   leaveSquare = (_event: any) => {
-    this.setState({ hoveredCoords: undefined, highlight: [] });
+    this.setState({ hoveredCoords: undefined, highlight: [], traceArrows: [], logArrows: [] });
+    // Don't clear blockArrows on square leave - they should persist during block declaration
   };
 
   clickBlock = (event: any, block: any) => {
@@ -473,7 +510,140 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   };
 
   highlight = (highlight: any) => {
-    this.setState({ highlight: highlight });
+    // Check if this highlight represents a move event and add arrow
+    let logArrows = [];
+    if (highlight && highlight.length >= 2) {
+      const from = highlight.find((h: any) => h[1] === 'rgba(147, 51, 234, 0.4)')?.[0];
+      const to = highlight.find((h: any) => h[1] === 'rgba(147, 51, 234, 0.6)')?.[0];
+      if (from && to) {
+        logArrows.push({
+          from: from,
+          to: to,
+          opacity: 0.9,
+        });
+      }
+    }
+    this.setState({ highlight: highlight, logArrows });
+  };
+
+  renderArrows = () => {
+    const allArrows = [
+      ...(this.state.traceArrows || []),
+      ...(this.state.logArrows || []),
+      ...(this.state.blockArrows || []),
+    ];
+    if (allArrows.length === 0) {
+      return null;
+    }
+
+    const boardSize = 14;
+
+    return (
+      <svg
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 10,
+        }}
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient
+            id="blockArrowGradient"
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+            gradientUnits="objectBoundingBox"
+          >
+            <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="rgb(168, 85, 247)" stopOpacity="0.9" />
+          </linearGradient>
+          <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="5.5" refY="2" orient="auto">
+            <polygon
+              points="0 0, 6 2, 0 4"
+              fill="rgba(147, 51, 234, 0.9)"
+              stroke="rgba(147, 51, 234, 1)"
+              strokeWidth="0.3"
+            />
+          </marker>
+          <marker
+            id="bigarrowhead"
+            markerWidth="6.5"
+            markerHeight="4.5"
+            refX="6"
+            refY="2.25"
+            orient="auto"
+          >
+            <defs>
+              <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="rgba(59, 130, 246, 0.9)" />
+                <stop offset="100%" stopColor="rgba(168, 85, 247, 0.9)" />
+              </linearGradient>
+            </defs>
+            <polygon
+              points="0 0, 6.5 2.25, 0 4.5"
+              fill="rgb(99, 102, 241)"
+              stroke="rgb(79, 70, 229)"
+              strokeWidth="0.2"
+            />
+          </marker>
+        </defs>
+        {allArrows.map((arrow, index) => {
+          const fromX = (arrow.from[1] + 0.5) * (100 / boardSize);
+          const fromY = (arrow.from[0] + 0.5) * (100 / boardSize);
+          const toX = (arrow.to[1] + 0.5) * (100 / boardSize);
+          const toY = (arrow.to[0] + 0.5) * (100 / boardSize);
+
+          const isBigArrow = arrow.type === 'block';
+          const strokeColor = isBigArrow
+            ? 'rgb(99, 102, 241)'
+            : `rgba(147, 51, 234, ${Math.max(0.7, arrow.opacity)})`;
+          const strokeWidth = isBigArrow ? '0.8' : '0.5';
+          const markerEnd = isBigArrow ? 'url(#bigarrowhead)' : 'url(#arrowhead)';
+
+          return (
+            <line
+              key={`arrow-${index}`}
+              x1={fromX}
+              y1={fromY}
+              x2={toX}
+              y2={toY}
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              markerEnd={markerEnd}
+              style={{
+                filter: isBigArrow
+                  ? 'drop-shadow(0 0 8px rgba(99, 102, 241, 0.4)) drop-shadow(0 3px 12px rgba(0, 0, 0, 0.25))'
+                  : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
+                animation: isBigArrow ? 'blockArrowGlow 3s ease-in-out infinite' : 'none',
+              }}
+            />
+          );
+        })}
+      </svg>
+    );
+  };
+
+  updateBlockArrows = () => {
+    let blockArrows = [];
+
+    // Show block arrow for both players when attack is happening
+    if (this.props.G.attackFrom && this.props.G.attackTo) {
+      blockArrows.push({
+        from: this.props.G.attackFrom,
+        to: this.props.G.attackTo,
+        opacity: 1.0,
+        type: 'block',
+      });
+    }
+
+    this.setState({ blockArrows });
   };
 
   onMoveStart = () => {
@@ -486,6 +656,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyDown);
     document.addEventListener('keyup', this.handleKeyUp);
+    this.updateBlockArrows();
   }
 
   componentDidUpdate(prevProps: BoardPropsLocal) {
@@ -506,9 +677,15 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       this.setState({ pendingMove: false });
     }
 
-    // Auto-declare blocks when there's only one possible block
+    // Update block arrows when attackFrom/attackTo change
     const currentStage = this.props.ctx.activePlayers?.[this.props.playerID];
     const prevStage = prevProps.ctx.activePlayers?.[this.props.playerID];
+    const attackFromChanged = prevProps.G?.attackFrom !== this.props.G?.attackFrom;
+    const attackToChanged = prevProps.G?.attackTo !== this.props.G?.attackTo;
+
+    if (attackFromChanged || attackToChanged || currentStage !== prevStage) {
+      this.updateBlockArrows();
+    }
 
     // Check if we just entered a block declaration stage
     if (
@@ -821,6 +998,45 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
     return (
       <DndProvider backend={HTML5Backend}>
+        <style>
+          {`
+            
+            @keyframes fadeInSlide {
+              0% {
+                opacity: 0;
+                transform: translate(-50%, -45%) scale(0.95);
+              }
+              100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+              }
+            }
+            
+            @keyframes shimmer {
+              0% {
+                transform: translateX(-100%);
+              }
+              100% {
+                transform: translateX(100%);
+              }
+            }
+            
+            @keyframes blockArrowGlow {
+              0% {
+                filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.3)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+                opacity: 0.8;
+              }
+              50% {
+                filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6)) drop-shadow(0 4px 16px rgba(0, 0, 0, 0.3));
+                opacity: 1;
+              }
+              100% {
+                filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.3)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+                opacity: 0.8;
+              }
+            }
+          `}
+        </style>
         <Tooltip
           id="ship-tooltip"
           isOpen={this.state.tooltip ?? false}
@@ -874,20 +1090,23 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 pointerEvents: 'none',
               }}
             />
-            <table
-              id="board"
-              style={{
-                borderCollapse: 'separate',
-                borderSpacing: '2px',
-                background: 'transparent',
-                borderRadius: 'var(--border-radius-lg)',
-                padding: '12px',
-                position: 'relative',
-                zIndex: 1,
-              }}
-            >
-              <tbody>{tbody}</tbody>
-            </table>
+            <div style={{ position: 'relative' }}>
+              <table
+                id="board"
+                style={{
+                  borderCollapse: 'separate',
+                  borderSpacing: '2px',
+                  background: 'transparent',
+                  borderRadius: 'var(--border-radius-lg)',
+                  padding: '12px',
+                  position: 'relative',
+                  zIndex: 1,
+                }}
+              >
+                <tbody>{tbody}</tbody>
+              </table>
+              {this.renderArrows()}
+            </div>
           </div>
           <div style={sidebarStyle}>
             {this.props.ctx?.gameover && (
