@@ -6,5 +6,5 @@ import registerServiceWorker from './registerServiceWorker.js';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
-root.render(<App/>);
+root.render(<App />);
 registerServiceWorker();

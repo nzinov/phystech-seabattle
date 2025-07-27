@@ -6,7 +6,8 @@
   },
   "extends": [
     "react-app",
-    "react-app/jest"
+    "react-app/jest",
+    "prettier"
   ],
   "parserOptions": {
     "ecmaFeatures": {
@@ -16,12 +17,14 @@
     "sourceType": "module"
   },
   "plugins": [
-    "react"
+    "react",
+    "prettier"
   ],
   "rules": {
     "no-console": "off",
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "eqeqeq": "off"
+    "eqeqeq": "off",
+    "prettier/prettier": "error"
   },
   "settings": {
     "react": {

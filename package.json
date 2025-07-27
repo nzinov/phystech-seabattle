@@ -32,7 +32,9 @@
     "serve": "node src/server.js",
     "lint": "eslint src/ --ext .js,.jsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src/ --ext .js,.jsx --fix",
-    "pre-commit": "npm run lint && npm run build",
+    "format": "prettier --write \"src/**/*.{js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,json,css,md}\"",
+    "pre-commit": "npm run lint && npm run format:check && npm run build",
     "prepare": "husky",
     "lint-staged": "npm run lint"
   },
@@ -51,7 +53,10 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/register": "^7.12.10",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2"
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2"
   }
 }

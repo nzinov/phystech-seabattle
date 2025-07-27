@@ -1,0 +1,43 @@
+{
+  // ESLint configuration
+  "eslint.enable": true,
+  "eslint.workingDirectories": ["."],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact"
+  ],
+  
+  // Auto-fix ESLint issues on save
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  
+  // Format configuration
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  
+  // Show linting errors in problems panel
+  "eslint.alwaysShowStatus": true,
+  "eslint.debug": false,
+  
+  // File associations
+  "files.associations": {
+    "*.js": "javascript",
+    "*.jsx": "javascriptreact"
+  },
+  
+  // Emmet for JSX
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  
+  // Auto-save
+  "files.autoSave": "onFocusChange",
+  
+  // Exclude node_modules from file watcher
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true
+  }
+}
