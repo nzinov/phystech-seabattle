@@ -561,8 +561,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       backdropFilter: 'blur(20px)',
       borderRadius: 'var(--border-radius-lg)',
       padding: '20px',
-      boxShadow: 'var(--shadow-lg)',
+      boxShadow: 'var(--shadow-xl)',
       border: '1px solid var(--border-light)',
+      zIndex: 1000,
     };
 
     let sidebarStyle: React.CSSProperties = {
@@ -625,9 +626,11 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
           }
         />
         <div style={outStyle}>
-          <table id="remaining" style={remainingStyle}>
-            <tbody>{remaining_tbody}</tbody>
-          </table>
+          {this.state.showRemaining && (
+            <table id="remaining" style={remainingStyle}>
+              <tbody>{remaining_tbody}</tbody>
+            </table>
+          )}
           <div
             style={{
               padding: '24px',
@@ -686,6 +689,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   color: 'var(--text-light)',
                   position: 'relative',
                   overflow: 'hidden',
+                  flexShrink: 0,
                 }}
               >
                 <div
@@ -729,6 +733,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 color: 'var(--text-light)',
                 position: 'relative',
                 overflow: 'hidden',
+                flexShrink: 0,
               }}
             >
               <div
@@ -777,6 +782,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   letterSpacing: '0.075em',
                   position: 'relative',
                   overflow: 'hidden',
+                  flexShrink: 0,
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.transform = 'translateY(-1px)';
@@ -792,7 +798,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 <span style={{ position: 'relative', zIndex: 1 }}>✅ Ready to Battle</span>
               </button>
             )}
-            <div style={blocksStyle}>
+            <div style={{ ...blocksStyle, flexShrink: 0 }}>
               {blocks &&
                 blocks.map((block, i) => (
                   <button
@@ -839,11 +845,13 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   </button>
                 ))}
             </div>
-            <Log
-              events={this.props.G.log}
-              player={parseInt(this.props.playerID)}
-              highlight={this.highlight}
-            />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <Log
+                events={this.props.G.log}
+                player={parseInt(this.props.playerID)}
+                highlight={this.highlight}
+              />
+            </div>
           </div>
         </div>
       </DndProvider>

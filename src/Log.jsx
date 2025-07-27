@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 function getShipDescr(ship, player) {
   return (ship.player == player ? 'your ' : "opponent's ") + ship.type;
@@ -63,35 +63,25 @@ class LogEvent extends React.Component {
     return (
       <div
         style={{
-          padding: '12px 16px',
-          margin: '6px 0',
-          background: 'var(--surface-2)',
-          borderRadius: 'var(--border-radius-sm)',
-          border: '1px solid var(--border-light)',
+          padding: '8px 0',
+          margin: '0',
           cursor: 'pointer',
           transition: 'all 0.03s ease',
           fontSize: '0.875rem',
           color: 'var(--text-primary)',
           lineHeight: '1.5',
-          position: 'relative',
-          overflow: 'hidden',
+          borderLeft: '3px solid transparent',
         }}
         onMouseEnter={e => {
           this.props.highlight(this.getHighlight());
-          e.currentTarget.style.background = 'var(--accent-primary)';
-          e.currentTarget.style.color = 'var(--text-light)';
-          e.currentTarget.style.transform = 'translateX(2px)';
-          e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-          e.currentTarget.style.borderColor = 'var(--accent-primary)';
+          e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
+          e.currentTarget.style.borderLeftColor = 'var(--accent-primary)';
           e.currentTarget.style.transition = 'all 0.03s ease';
         }}
         onMouseLeave={e => {
           this.props.highlight([]);
-          e.currentTarget.style.background = 'var(--surface-2)';
-          e.currentTarget.style.color = 'var(--text-primary)';
-          e.currentTarget.style.transform = 'translateX(0)';
-          e.currentTarget.style.boxShadow = 'none';
-          e.currentTarget.style.borderColor = 'var(--border-light)';
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.borderLeftColor = 'transparent';
           e.currentTarget.style.transition = 'all 0.03s ease';
         }}
       >
@@ -103,60 +93,164 @@ class LogEvent extends React.Component {
 
 const style = {
   width: '100%',
-  maxHeight: '400px',
+  height: '100%',
   overflowY: 'auto',
-  background: 'var(--surface-1)',
-  borderRadius: 'var(--border-radius-lg)',
-  padding: '16px',
-  margin: '20px 0',
-  border: '1px solid var(--border-light)',
-  boxShadow: 'var(--shadow-sm)',
+  padding: '0',
+  margin: '0',
+  minHeight: 0,
+  flex: 1,
+  scrollBehavior: 'smooth',
+  borderTop: '1px solid var(--border-light)',
+  borderBottom: '1px solid var(--border-light)',
 };
 
-export class Log extends React.Component {
-  render() {
-    return (
-      <div>
-        <h3
+export const Log = ({ events, player, highlight }) => {
+  const scrollRef = useRef(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [showTopArrow, setShowTopArrow] = useState(false);
+  const [showBottomArrow, setShowBottomArrow] = useState(false);
+  const prevEventsLength = useRef(events.length);
+  const isAutoScrolling = useRef(false);
+
+  const checkScrollPosition = () => {
+    if (!scrollRef.current || isAutoScrolling.current) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - 5; // 5px tolerance
+
+    setIsAtBottom(atBottom);
+    setShowTopArrow(scrollTop > 5);
+    setShowBottomArrow(!atBottom && scrollHeight > clientHeight);
+  };
+
+  useEffect(() => {
+    // Auto-scroll to bottom when new events are added and user is at bottom
+    if (events.length > prevEventsLength.current && isAtBottom && scrollRef.current) {
+      isAutoScrolling.current = true;
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      // Wait for auto-scroll to complete before checking position
+      setTimeout(() => {
+        isAutoScrolling.current = false;
+        checkScrollPosition();
+      }, 150);
+    } else {
+      // Check scroll position after content changes (but not during auto-scroll)
+      setTimeout(checkScrollPosition, 0);
+    }
+    prevEventsLength.current = events.length;
+  }, [events, isAtBottom]);
+
+  useEffect(() => {
+    // Check scroll position after initial setup
+    setTimeout(checkScrollPosition, 100);
+  }, []);
+
+  useEffect(() => {
+    // Scroll to bottom on initial load when events first become available
+    if (scrollRef.current && events.length > 0 && prevEventsLength.current === 0) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      setTimeout(checkScrollPosition, 100);
+    }
+  }, [events.length]);
+
+  const scrollToTop = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
+
+  return (
+    <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {showTopArrow && (
+        <div
+          onClick={scrollToTop}
           style={{
-            margin: '0 0 16px 0',
-            color: 'var(--text-primary)',
-            fontSize: '1.125rem',
-            fontWeight: '600',
-            textTransform: 'uppercase',
-            letterSpacing: '0.075em',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+            cursor: 'pointer',
+            background: 'var(--accent-primary)',
+            color: 'white',
+            borderRadius: '0 0 8px 8px',
+            padding: '4px 12px',
+            fontSize: '12px',
+            boxShadow: 'var(--shadow-md)',
+            transition: 'var(--transition-fast)',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'var(--accent-secondary)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'var(--accent-primary)';
           }}
         >
-          <span style={{ fontSize: '1.25rem' }}>🕰️</span>
-          Battle Log
-        </h3>
-        <div style={style}>
-          {this.props.events.length === 0 ? (
-            <div
-              style={{
-                color: 'var(--text-secondary)',
-                fontStyle: 'italic',
-                textAlign: 'center',
-                padding: '20px',
-              }}
-            >
-              No events yet...
-            </div>
-          ) : (
-            this.props.events.map((event, index) => (
-              <LogEvent
-                key={index}
-                event={event}
-                player={this.props.player}
-                highlight={this.props.highlight}
-              />
-            ))
-          )}
+          ↑
         </div>
+      )}
+
+      <div
+        ref={scrollRef}
+        style={{
+          ...style,
+          position: 'relative',
+        }}
+        onScroll={checkScrollPosition}
+      >
+        {events.length === 0 ? (
+          <div
+            style={{
+              color: 'var(--text-secondary)',
+              fontStyle: 'italic',
+              textAlign: 'left',
+              padding: '8px 0',
+              fontSize: '0.875rem',
+            }}
+          >
+            No events yet...
+          </div>
+        ) : (
+          events.map((event, index) => (
+            <LogEvent key={index} event={event} player={player} highlight={highlight} />
+          ))
+        )}
       </div>
-    );
-  }
-}
+
+      {showBottomArrow && (
+        <div
+          onClick={scrollToBottom}
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+            cursor: 'pointer',
+            background: 'var(--accent-primary)',
+            color: 'white',
+            borderRadius: '8px 8px 0 0',
+            padding: '4px 12px',
+            fontSize: '12px',
+            boxShadow: 'var(--shadow-md)',
+            transition: 'var(--transition-fast)',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.background = 'var(--accent-secondary)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.background = 'var(--accent-primary)';
+          }}
+        >
+          ↓
+        </div>
+      )}
+    </div>
+  );
+};
