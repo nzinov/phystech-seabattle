@@ -111,6 +111,7 @@ export const Log = ({ events, player, highlight }) => {
   const [showBottomArrow, setShowBottomArrow] = useState(false);
   const prevEventsLength = useRef(events.length);
   const isAutoScrolling = useRef(false);
+  const hasInitiallyScrolled = useRef(false);
 
   const checkScrollPosition = () => {
     if (!scrollRef.current || isAutoScrolling.current) return;
@@ -141,15 +142,59 @@ export const Log = ({ events, player, highlight }) => {
   }, [events, isAtBottom]);
 
   useEffect(() => {
-    // Check scroll position after initial setup
-    setTimeout(checkScrollPosition, 100);
+    // Scroll to bottom on initial mount
+    const scrollToBottomOnMount = () => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        setIsAtBottom(true);
+        setTimeout(checkScrollPosition, 100);
+      }
+    };
+
+    // Use requestAnimationFrame to ensure DOM is fully rendered
+    requestAnimationFrame(() => {
+      setTimeout(scrollToBottomOnMount, 50);
+    });
   }, []);
 
   useEffect(() => {
     // Scroll to bottom on initial load when events first become available
-    if (scrollRef.current && events.length > 0 && prevEventsLength.current === 0) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      setTimeout(checkScrollPosition, 100);
+    if (scrollRef.current && events.length > 0 && !hasInitiallyScrolled.current) {
+      // Use requestAnimationFrame to ensure content is rendered
+      requestAnimationFrame(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+          setIsAtBottom(true);
+          hasInitiallyScrolled.current = true;
+          setTimeout(checkScrollPosition, 100);
+        }
+      });
+    }
+  }, [events.length]);
+
+  // Additional effect to ensure scroll on mount when events are already present
+  useEffect(() => {
+    if (scrollRef.current && events.length > 0 && !hasInitiallyScrolled.current) {
+      // Multiple attempts to ensure we scroll to bottom
+      const scrollToBottom = () => {
+        if (scrollRef.current && !hasInitiallyScrolled.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+          setIsAtBottom(true);
+          hasInitiallyScrolled.current = true;
+          setTimeout(checkScrollPosition, 100);
+        }
+      };
+
+      // Try immediately
+      scrollToBottom();
+
+      // Try again after a short delay
+      setTimeout(scrollToBottom, 100);
+
+      // Try once more after content has had time to render
+      requestAnimationFrame(() => {
+        setTimeout(scrollToBottom, 200);
+      });
     }
   }, [events.length]);
 
