@@ -1,9 +1,10 @@
 import { Client } from 'boardgame.io/dist/cjs/react.js';
 import { SocketIO } from 'boardgame.io/dist/cjs/multiplayer.js';
-import Board from './Board.js';
-import GameRules from './Game.js';
+import Board from './Board';
+import GameRules from './Game';
 import Cookies from 'universal-cookie';
 import { v4 as uuid } from 'uuid';
+import React from 'react';
 
 const cookies = new Cookies();
 const search = window.location.search;
@@ -25,7 +26,7 @@ if (!matchID) {
   params.set('match', matchID);
   params.set('player', playerID);
   window.location.search = params.toString();
-  let other = new URL(window.location);
+  let other = new URL(window.location.href);
   params.set('player', '1');
   other.search = params.toString();
   params.set('player', '0');
@@ -38,7 +39,7 @@ if (!params.get('token')) {
 console.log(matchID, playerID);
 
 // Determine server URL based on environment
-const getServerUrl = () => {
+const getServerUrl = (): string => {
   // In development, use localhost:8000
   if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
     return 'http://localhost:8000';
@@ -54,16 +55,16 @@ const SeabattleClient = Client({
   debug: process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost',
 });
 
-const App = () => {
+const App: React.FC = () => {
   try {
     return (
       <div>
         <SeabattleClient matchID={matchID} playerID={playerID} credentials={cookies.get('token')} />
       </div>
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('App render error:', error);
-    return <div>Error loading game: {error.message}</div>;
+    return <div>Error loading game: {(error as Error).message}</div>;
   }
 };
 

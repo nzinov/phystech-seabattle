@@ -2,12 +2,33 @@ import deepcopy from 'deepcopy';
 import React from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { getBlocks, getModeAction, takeMove, dist, InitialShips } from './Game.js';
+import { getBlocks, getModeAction, takeMove, dist, InitialShips } from './Game';
 import { Log } from './Log.js';
-import { stageDescr, shipInfo } from './Texts.js';
+import { stageDescr, shipInfo } from './Texts';
 import { Tooltip } from 'react-tooltip';
 
-const CellStyle = {
+interface DragItem {
+  coord: [number, number];
+}
+
+interface SquareProps {
+  figure?: any;
+  G: any;
+  moves: any;
+  coord: [number, number];
+  playerID: number;
+  player: number;
+  mode?: string;
+  trace?: any;
+  hoveredCoords?: any;
+  ctx: any;
+  hover?: (e: any) => void;
+  leave?: (e: any) => void;
+  highlightedBlock?: any;
+  highlight?: any[];
+}
+
+const CellStyle: React.CSSProperties = {
   border: '1px solid #555',
   margin: 0,
   width: 'min(6.5vh, 5vw)',
@@ -18,7 +39,7 @@ const CellStyle = {
   overflow: 'hidden',
 };
 
-const Square = props => {
+const Square: React.FC<SquareProps> = props => {
   const click = () => {
     if (['Unknown', 'Sinking'].includes(props.figure?.type) && !props.G.attackFrom) {
       props.moves.Label(props.coord, prompt('Enter label'));
@@ -44,10 +65,10 @@ const Square = props => {
   const [{ canDrop }, dropRef] = useDrop(
     () => ({
       accept: 'square',
-      drop: item => {
-        takeMove(props.G, props.ctx, props.moves, props.mode, item.coord, props.coord);
+      drop: (item: DragItem) => {
+        takeMove(props.G, props.ctx, props.moves, props.mode || '', item.coord, props.coord);
       },
-      canDrop: item => {
+      canDrop: (item: DragItem) => {
         let action = getModeAction(props.G, props.ctx, props.player, props.mode, item.coord);
         if (!action) {
           return false;
@@ -79,7 +100,7 @@ const Square = props => {
   }
   if (
     props.highlightedBlock &&
-    props.highlightedBlock.coords.some(el => dist(el, props.coord) == 0)
+    props.highlightedBlock.coords.some((el: any) => dist(el, props.coord) == 0)
   ) {
     color = '#CCFFCC';
   }
@@ -110,7 +131,7 @@ const Square = props => {
     }
   }
 
-  const combinedRef = el => {
+  const combinedRef = (el: any) => {
     dragRef(el);
     dropRef(el);
   };
@@ -119,7 +140,7 @@ const Square = props => {
     <td ref={combinedRef}>
       <div
         data-tooltip-id="ship-tooltip"
-        data-tooltip-content={shipInfo?.[props.figure?.type]}
+        data-tooltip-content={shipInfo?.[props.figure?.type as keyof typeof shipInfo]}
         onClick={click}
         style={cellStyle}
         onMouseEnter={props.hover}
@@ -131,8 +152,27 @@ const Square = props => {
   );
 };
 
-class Board extends React.Component {
-  constructor(props) {
+interface BoardProps {
+  G: any;
+  ctx: any;
+  moves: any;
+  playerID: number;
+  trace?: any;
+  hoveredCoords?: any;
+}
+
+interface BoardState {
+  mode: string | undefined;
+  trace?: boolean;
+  hoveredCoords?: any;
+  highlight?: any[];
+  tooltip?: boolean;
+  showRemaining?: boolean;
+  highlightedBlock?: any;
+}
+
+class Board extends React.Component<BoardProps, BoardState> {
+  constructor(props: BoardProps) {
     super(props);
     this.state = { mode: undefined };
   }
@@ -178,7 +218,7 @@ class Board extends React.Component {
   };
 
   CalcRemainingShips = () => {
-    let my_remaining = {};
+    let my_remaining: Record<string, number> = {};
     for (const [ship] of InitialShips) {
       my_remaining[ship] = 0;
     }
@@ -190,9 +230,9 @@ class Board extends React.Component {
         }
       }
     }
-    let other_remaining = {};
+    let other_remaining: Record<string, number> = {};
     for (const [ship, count] of InitialShips) {
-      other_remaining[ship] = count;
+      other_remaining[ship] = count as number;
     }
     for (let event of this.props.G.log) {
       if (event.type == 'die' && event.ship.player != this.props.playerID) {
@@ -202,7 +242,7 @@ class Board extends React.Component {
     return [my_remaining, other_remaining];
   };
 
-  handleKeyDown = event => {
+  handleKeyDown = (event: KeyboardEvent) => {
     if (event.key == ' ') {
       this.Skip();
       return;
@@ -226,7 +266,7 @@ class Board extends React.Component {
     event.preventDefault();
   };
 
-  handleKeyUp = event => {
+  handleKeyUp = (event: KeyboardEvent) => {
     this.setState({
       mode: undefined,
       tooltip: false,
@@ -237,24 +277,24 @@ class Board extends React.Component {
     event.preventDefault();
   };
 
-  hoverBlock = (_event, block) => {
+  hoverBlock = (_event: any, block: any) => {
     this.setState({ highlightedBlock: block });
   };
 
-  leaveBlock = _event => {
+  leaveBlock = (_event: any) => {
     this.setState({ highlightedBlock: undefined });
   };
 
-  hoverSquare = (_event, coords) => {
+  hoverSquare = (_event: any, coords: any) => {
     this.setState({ hoveredCoords: coords });
     this.HighlightTrace();
   };
 
-  leaveSquare = _event => {
+  leaveSquare = (_event: any) => {
     this.setState({ hoveredCoords: undefined, highlight: [] });
   };
 
-  clickBlock = (event, block) => {
+  clickBlock = (event: any, block: any) => {
     this.setState({ highlightedBlock: undefined });
     let stage = this.props.ctx.activePlayers && this.props.ctx.activePlayers[this.props.playerID];
     if (stage == 'attackBlock') {
@@ -265,7 +305,7 @@ class Board extends React.Component {
     }
   };
 
-  highlight = highlight => {
+  highlight = (highlight: any) => {
     this.setState({ highlight: highlight });
   };
 
@@ -296,6 +336,7 @@ class Board extends React.Component {
             figure={this.props.G.cells[i][j]}
             mode={this.state.mode}
             player={this.props.playerID}
+            playerID={this.props.playerID}
             G={this.props.G}
             ctx={this.props.ctx}
             moves={this.props.moves}
@@ -312,8 +353,8 @@ class Board extends React.Component {
     let remaining_tbody = [];
     if (this.state.showRemaining) {
       let [my_remaining, other_remaining] = this.CalcRemainingShips();
-      let AddShips = (ships, row, color) => {
-        for (const [ship, count] of Object.entries(ships)) {
+      let AddShips = (ships: any, row: any, color: any) => {
+        for (const [ship, count] of Object.entries(ships) as [string, number][]) {
           let style = {
             ...CellStyle,
             width: '4vw',
@@ -321,7 +362,7 @@ class Board extends React.Component {
             backgroundColor: count ? color : '#FFFFFF',
             backgroundImage: 'url(' + process.env.PUBLIC_URL + 'figures/' + ship + '.png)',
           };
-          let fontStyle = {
+          let fontStyle: React.CSSProperties = {
             color: 'black',
             position: 'relative',
             fontSize: '3vw',
@@ -346,14 +387,14 @@ class Board extends React.Component {
       remaining_tbody.push(<tr key="other">{row}</tr>);
     }
 
-    let remainingStyle = {
+    let remainingStyle: React.CSSProperties = {
       position: 'absolute',
       top: '20px',
       tableLayout: 'fixed',
       color: 'black',
     };
 
-    let sidebarStyle = {
+    let sidebarStyle: React.CSSProperties = {
       padding: '10px',
       backgroundColor: '#FFEEEE',
       width: 'min(300px, 25vw)',
@@ -365,7 +406,7 @@ class Board extends React.Component {
       margin: 0,
     };
 
-    let outStyle = {
+    let outStyle: React.CSSProperties = {
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'center',
@@ -374,14 +415,14 @@ class Board extends React.Component {
       margin: 0,
     };
 
-    let blocksStyle = {
+    let blocksStyle: React.CSSProperties = {
       display: 'flex',
       flexDirection: 'row',
       flexWrap: 'wrap',
     };
 
     let stage = this.props.ctx.activePlayers && this.props.ctx.activePlayers[this.props.playerID];
-    let blocks = [];
+    let blocks: any[] = [];
     if (stage == 'attackBlock') {
       blocks = getBlocks(this.props.G, this.props.playerID, this.props.G.attackFrom);
     }
@@ -424,7 +465,7 @@ class Board extends React.Component {
               </h1>
             )}
             {!stage && <h2>Wait</h2>}
-            {stage && <h2>{stageDescr[stage]}</h2>}
+            {stage && <h2>{stageDescr[stage as keyof typeof stageDescr]}</h2>}
             {stage == 'place' && <button onClick={this.Ready}>Finish placement</button>}
             <div style={blocksStyle}>
               {blocks &&
@@ -432,7 +473,6 @@ class Board extends React.Component {
                   <button
                     key={i}
                     style={{ padding: '5px', margin: '2px' }}
-                    idx={i}
                     onMouseEnter={e => this.hoverBlock(e, block)}
                     onMouseLeave={this.leaveBlock}
                     onClick={e => this.clickBlock(e, block)}

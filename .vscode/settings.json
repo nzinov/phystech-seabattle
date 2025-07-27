@@ -4,7 +4,9 @@
   "eslint.workingDirectories": ["."],
   "eslint.validate": [
     "javascript",
-    "javascriptreact"
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
   ],
   
   // Auto-fix ESLint issues on save
@@ -20,15 +22,24 @@
   "eslint.alwaysShowStatus": true,
   "eslint.debug": false,
   
+  // TypeScript settings
+  "typescript.suggest.autoImports": true,
+  "typescript.validate.enable": true,
+  "javascript.validate.enable": true,
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  
   // File associations
   "files.associations": {
     "*.js": "javascript",
-    "*.jsx": "javascriptreact"
+    "*.jsx": "javascriptreact",
+    "*.ts": "typescript",
+    "*.tsx": "typescriptreact"
   },
   
   // Emmet for JSX
   "emmet.includeLanguages": {
-    "javascript": "javascriptreact"
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
   },
   
   // Auto-save

@@ -3,47 +3,93 @@ import deepcopy from 'deepcopy';
 
 const SIZE = 14;
 
-function addLog(G, type, from, to, options) {
+type Position = [number, number];
+
+interface Ship {
+  type: string;
+  player: number;
+  state?: any;
+  label?: any;
+}
+
+interface GameState {
+  cells: (Ship | null)[][];
+  log: any[];
+  phase: string;
+  ready: number;
+  usedBrander: number[];
+  attackFrom?: Position;
+  attackTo?: Position;
+  attackBlock?: any;
+  responseBlock?: any;
+}
+
+interface ActionContext {
+  G: GameState;
+  ctx?: any;
+  events?: any;
+  playerID?: number;
+}
+
+interface ShipDefinition {
+  actions: {
+    place: any[];
+    move: any[];
+    attack: any[];
+  };
+  maxMove: number;
+  strength?: number;
+  patron?: string;
+  canShoot?: (G: GameState, player: number, from: Position, to: Position) => boolean;
+  onAttack?: (ctx: ActionContext, from: Position, to?: Position) => void;
+  onShoot?: (ctx: ActionContext, from: Position, to?: Position) => void;
+  shoot?: (ctx: ActionContext, from: Position, to: Position) => void;
+  blastRadius?: number;
+  blastSquare?: (G: GameState, pos: Position) => void;
+  compare?: (target: Ship | null) => number;
+}
+
+function addLog(G: GameState, type: string, from?: Position, to?: Position, options?: any): void {
   options = options || {};
   G.log.push({ type, from, to, ...options });
 }
 
-function valid(pos) {
+function valid(pos: Position): boolean {
   return 0 <= pos[0] && pos[0] < SIZE && 0 <= pos[1] && pos[1] < SIZE;
 }
 
-function vector(from, to) {
+function vector(from: Position, to: Position): Position {
   return [to[0] - from[0], to[1] - from[1]];
 }
 
-function isStraight(from, to) {
+function isStraight(from: Position, to: Position): boolean {
   let v = vector(from, to);
   return v[0] == 0 || v[1] == 0;
 }
 
-export function dist(from, to) {
+export function dist(from: Position, to: Position): number {
   return Math.abs(from[0] - to[0]) + Math.abs(from[1] - to[1]);
 }
 
-function getPos(G, pos) {
+function getPos(G: GameState, pos: Position): Ship | null {
   return G.cells[pos[0]][pos[1]];
 }
 
-function setPos(G, pos, fig) {
+function setPos(G: GameState, pos: Position, fig: Ship | null): void {
   G.cells[pos[0]][pos[1]] = fig;
 }
 
-function checkSide(G, player, pos) {
+function checkSide(G: GameState, player: number, pos: Position): boolean {
   //return true; // TODO: just for testing
   let low = player == 1 ? 9 : 0;
   let high = player == 1 ? 14 : 5;
   return low <= pos[0] && pos[0] < high;
 }
 
-function patronNear(G, type, player, pos) {
+function patronNear(G: GameState, type: string, player: number, pos: Position): boolean {
   for (let dx = -1; dx < 2; ++dx) {
     for (let dy = -1; dy < 2; ++dy) {
-      let newPos = [pos[0] + dx, pos[1] + dy];
+      let newPos: Position = [pos[0] + dx, pos[1] + dy];
       if (valid(newPos)) {
         let ship = getPos(G, newPos);
         if (ship && ship.player == player && (ship.type == type || ship.type == 'Tp')) {
@@ -55,11 +101,18 @@ function patronNear(G, type, player, pos) {
   return false;
 }
 
-function checkPatron(G, player, ship, from) {
-  return !(ship.patron && !patronNear(G, ship.patron, player, from));
+function checkPatron(G: GameState, player: number, ship: any, from: Position): boolean {
+  return !(ship?.patron && !patronNear(G, ship.patron, player, from));
 }
 
-function checkPath(G, forceEmpty, forcePatron, player, from, to) {
+function checkPath(
+  G: GameState,
+  forceEmpty: boolean,
+  forcePatron: string | boolean,
+  player: number,
+  from: Position,
+  to: Position
+): boolean {
   let v = vector(from, to);
   let dx = Math.sign(v[0]);
   let dy = Math.sign(v[1]);
@@ -69,7 +122,7 @@ function checkPath(G, forceEmpty, forcePatron, player, from, to) {
   if (forceEmpty && getPos(G, from)) {
     return false;
   }
-  if (forcePatron && !patronNear(G, forcePatron, player, from)) {
+  if (forcePatron && !patronNear(G, forcePatron as string, player, from)) {
     return false;
   }
   if (dx != 0 && checkPath(G, true, forcePatron, player, [from[0] + dx, from[1]], to)) {
@@ -81,7 +134,13 @@ function checkPath(G, forceEmpty, forcePatron, player, from, to) {
   return false;
 }
 
-export function checkBlock(G, player, type, size, coords) {
+export function checkBlock(
+  G: GameState,
+  player: number,
+  type: string,
+  size: number,
+  coords: Position[]
+): boolean {
   if (size < 1 || size > 3 || size != coords.length) {
     return false;
   }
@@ -107,7 +166,7 @@ export function checkBlock(G, player, type, size, coords) {
     }
     block.push(sq.type);
   }
-  function matchBlock(block, pattern) {
+  function matchBlock(block: any[], pattern: any[]) {
     return (
       block.length == pattern.length &&
       block
@@ -120,7 +179,8 @@ export function checkBlock(G, player, type, size, coords) {
   console.log(type, block);
   console.log(
     block.every(el => el == type),
-    block.every(el => [type, 'Rd'].includes(el)) && Ships[type].strength <= Ships['Rd'].strength,
+    block.every(el => [type, 'Rd'].includes(el)) &&
+      Ships[type]?.strength! <= Ships['Rd']?.strength!,
     type == 'Es' && matchBlock(block, ['Rd', 'St']),
     type == 'Es' &&
       matchBlock(block, ['Es', 'Rd', 'St']) &&
@@ -129,7 +189,7 @@ export function checkBlock(G, player, type, size, coords) {
   return (
     block.every(el => el == type) ||
     (block.every(el => [type, 'Rd'].includes(el)) &&
-      Ships[type].strength <= Ships['Rd'].strength) ||
+      Ships[type]?.strength! <= Ships['Rd']?.strength!) ||
     (type == 'Es' && matchBlock(block, ['Rd', 'St'])) ||
     (type == 'Es' &&
       matchBlock(block, ['Es', 'Rd', 'St']) &&
@@ -137,8 +197,8 @@ export function checkBlock(G, player, type, size, coords) {
   );
 }
 
-export function getBlocks(G, player, coord) {
-  let blocks = [];
+export function getBlocks(G: GameState, player: number, coord: Position): any[] {
+  let blocks: any[] = [];
   blocks.push([coord]);
   for (let dx = -1; dx < 2; ++dx) {
     for (let dy = -1; dy < 2; ++dy) {
@@ -173,18 +233,25 @@ export function getBlocks(G, player, coord) {
   return validBlocks;
 }
 
-function getBlockStrength(block) {
-  return block.size * Ships[block.type].strength;
+function getBlockStrength(block: any): number {
+  return block.size * Ships[block.type]?.strength!;
 }
 
-function battle({ G, ctx, events }, res, from, to, fromBlock, toBlock) {
+function battle(
+  { G, ctx, events }: ActionContext,
+  res: number,
+  from: Position,
+  to: Position,
+  fromBlock: any,
+  toBlock: any
+): void {
   //addLog(ctx, 'battle', from, to, {fromShip: getPos(G, from).type, toShip: getPos(G, to).type, res});
   if (Math.abs(res) < 1e-7) {
-    Effects.Draw({ G, ctx, events }, fromBlock, toBlock);
+    Effects.Draw({ G, _ctx: ctx, events }, fromBlock, toBlock);
   } else if (res > 0) {
     Effects.Win({ G, ctx, events }, from, to);
   } else {
-    Effects.Loose({ G, ctx, events }, from, to);
+    Effects.Loose({ G, _ctx: ctx, events }, from, to);
   }
 }
 
@@ -279,7 +346,7 @@ const Actions = {
       return dist(from, to) == 0;
     },
     take({ G, ctx, events }, from, to) {
-      Effects.Explode({ G, ctx, events }, from, to);
+      Effects.Explode({ G }, from, to);
       repeatTurn({ ctx, events });
     },
     key: 'e',
@@ -325,7 +392,7 @@ const Actions = {
     },
     take({ G, ctx, events }, from, to) {
       addLog(G, 'shoot', from, to, { ship: getPos(G, from), area: true });
-      Effects.Explode({ G, ctx, events }, from, to);
+      Effects.Explode({ G }, from, to);
       repeatTurn({ ctx, events });
     },
     key: 'r',
@@ -365,7 +432,7 @@ const Effects = {
     Effects.Die({ G }, from);
     for (let dx = -ship.blastRadius; dx <= ship.blastRadius; ++dx) {
       for (let dy = -ship.blastRadius; dy <= ship.blastRadius; ++dy) {
-        let newPos = [to[0] + dx, to[1] + dy];
+        let newPos: Position = [to[0] + dx, to[1] + dy];
         if (valid(newPos)) {
           ship.blastSquare(G, newPos);
         }
@@ -399,7 +466,7 @@ const Effects = {
   },
 };
 
-const Ship = {
+const BaseShip = {
   actions: {
     place: [Actions.Place],
     move: [Actions.Move],
@@ -451,7 +518,7 @@ const Bomb = {
   onShoot: Effects.ExplodeBomb,
 };
 
-const Ships = {
+const Ships: Record<string, ShipDefinition> = {
   Av: { ...AttackingShip, strength: 11.390625 },
   Sm: {
     ...Missile,
@@ -484,10 +551,10 @@ const Ships = {
     maxMove: 2,
     patron: 'Tk',
     canShoot: (G, player, from, to) =>
-      dist(from, to) <= 4 && isStraight(from, to) && checkPath(G, false, false, false, from, to),
+      dist(from, to) <= 4 && isStraight(from, to) && checkPath(G, false, false, player, from, to),
   },
   Rd: { ...AttackingShip, strength: 5 },
-  Mn: { ...Ship, patron: 'Es', onAttack: Effects.ExplodeMine },
+  Mn: { ...BaseShip, patron: 'Es', onAttack: Effects.ExplodeMine },
   Es: { ...AttackingShip, strength: 3.375 },
   Br: {
     ...Missile,
@@ -524,6 +591,7 @@ const Ships = {
   Tk: { ...AttackingShip, maxMove: 2, strength: 1.5 },
   F: {
     actions: { place: [Actions.Place], move: [], attack: [] },
+    maxMove: 0,
     onAttack({ G, ctx, events }, from, to) {
       Effects.Win({ G, ctx, events }, from, to);
     },
@@ -568,11 +636,11 @@ export const InitialShips = [
   ['Pl', 4],
 ];
 
-function getShip(G, from) {
+function getShip(G: GameState, from: Position): ShipDefinition | undefined {
   return Ships[getPos(G, from)?.type];
 }
 
-export function getStageActions(G, ctx, stage, from) {
+export function getStageActions(G: GameState, ctx: any, stage: string, from: Position): any[] {
   let ship = getShip(G, from);
   if (!ship) {
     return [];
@@ -697,7 +765,14 @@ const Label = {
   client: false,
 };
 
-export function takeMove(G, ctx, moves, mode, from, to) {
+export function takeMove(
+  G: GameState,
+  ctx: any,
+  moves: any,
+  mode: string,
+  from: Position,
+  to: Position
+): void {
   if (ctx.phase == 'place') {
     moves.Place(mode, from, to);
     return;
@@ -725,14 +800,14 @@ export const GameRules = {
     }
     let i = 0;
     for (let el of InitialShips) {
-      for (let num = 0; num < el[1]; ++num) {
+      for (let num = 0; num < (el[1] as number); ++num) {
         cells[Math.floor(i / SIZE)][i % SIZE] = { type: el[0], player: 0, state: {}, label: {} };
         i += 1;
       }
     }
     i = SIZE * SIZE - 1;
     for (let el of InitialShips) {
-      for (let num = 0; num < el[1]; ++num) {
+      for (let num = 0; num < (el[1] as number); ++num) {
         cells[Math.floor(i / SIZE)][i % SIZE] = { type: el[0], player: 1, state: {}, label: {} };
         i -= 1;
       }
@@ -822,7 +897,7 @@ export const GameRules = {
     }
   },
 
-  playerView({ G, ctx, playerID }) {
+  playerView({ G, ctx, playerID }: { G: GameState; ctx: any; playerID: number }): GameState {
     G = deepcopy(G);
     for (let i = 0; i < SIZE; ++i) {
       for (let j = 0; j < SIZE; ++j) {

@@ -4,7 +4,7 @@ import GameRules from './Game.js';
 import path from 'path';
 import serve from 'koa-static';
 
-const authenticateCredentials = (credentials, playerMetadata) => {
+const authenticateCredentials = (credentials: any, playerMetadata: any): boolean => {
   console.log(credentials);
   if (!playerMetadata) {
     return true;
@@ -21,7 +21,7 @@ const authenticateCredentials = (credentials, playerMetadata) => {
   return false;
 };
 
-let conf = { games: [GameRules], authenticateCredentials };
+let conf: any = { games: [GameRules], authenticateCredentials };
 
 if (process.env.DATABASE_URL) {
   const db = new PostgresStore(process.env.DATABASE_URL, {
@@ -32,7 +32,7 @@ if (process.env.DATABASE_URL) {
       },
     },
   });
-  conf['db'] = db;
+  conf.db = db;
 }
 
 const server = Server(conf);
@@ -44,7 +44,7 @@ const PORT = process.env.PORT || 8000;
 
 server.run(PORT, () => {
   server.app.use(
-    async (ctx, next) =>
+    async (ctx: any, next: any) =>
       await serve(frontEndAppBuildPath)(Object.assign(ctx, { path: 'index.html' }), next)
   );
 });

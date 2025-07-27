@@ -1,5 +1,4 @@
 {
-  "type": "module",
   "proxy": "http://localhost:8000",
   "name": "game",
   "version": "0.1.0",
@@ -29,11 +28,13 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "serve": "node src/server.js",
-    "lint": "eslint src/ --ext .js,.jsx --report-unused-disable-directives --max-warnings 0",
-    "lint:fix": "eslint src/ --ext .js,.jsx --fix",
-    "format": "prettier --write \"src/**/*.{js,jsx,json,css,md}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,json,css,md}\"",
+    "build-server": "npx tsc src/server.ts --outDir build --target es2020 --module commonjs --esModuleInterop --skipLibCheck",
+    "serve": "npm run build-server && node build/server.js",
+    "lint": "eslint src/ --ext .ts,.tsx,.js,.jsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src/ --ext .ts,.tsx,.js,.jsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "type-check": "tsc --noEmit",
     "pre-commit": "npm run lint && npm run format:check && npm run build",
     "prepare": "husky",
     "lint-staged": "npm run lint"
@@ -53,10 +54,16 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/register": "^7.12.10",
+    "@types/node": "^24.1.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   }
 }
