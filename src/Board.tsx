@@ -505,6 +505,32 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     ) {
       this.setState({ pendingMove: false });
     }
+
+    // Auto-declare blocks when there's only one possible block
+    const currentStage = this.props.ctx.activePlayers?.[this.props.playerID];
+    const prevStage = prevProps.ctx.activePlayers?.[this.props.playerID];
+
+    // Check if we just entered a block declaration stage
+    if (
+      currentStage !== prevStage &&
+      (currentStage === 'attackBlock' || currentStage === 'responseBlock')
+    ) {
+      let blocks: any[] = [];
+
+      if (currentStage === 'attackBlock') {
+        blocks = getBlocks(this.props.G, parseInt(this.props.playerID), this.props.G.attackFrom);
+        // Auto-declare if only one possible block
+        if (blocks.length === 1) {
+          setTimeout(() => this.props.moves.AttackBlock(blocks[0]), 100);
+        }
+      } else if (currentStage === 'responseBlock') {
+        blocks = getBlocks(this.props.G, parseInt(this.props.playerID), this.props.G.attackTo);
+        // Auto-declare if only one possible block
+        if (blocks.length === 1) {
+          setTimeout(() => this.props.moves.ResponseBlock(blocks[0]), 100);
+        }
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -552,22 +578,22 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
       let headerStyle: React.CSSProperties = {
         textAlign: 'center',
-        fontSize: 'min(2vh, 1.4vw)',
+        fontSize: 'min(3vh, 2vw)',
         fontWeight: '700',
         color: '#1e293b',
-        paddingBottom: '8px',
+        paddingBottom: '12px',
         borderBottom: '2px solid rgba(99, 102, 241, 0.3)',
         letterSpacing: '0.025em',
         textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)',
         background:
           'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%)',
-        padding: '12px 16px 8px 16px',
+        padding: '18px 24px 12px 24px',
         borderRadius: 'var(--border-radius-lg) var(--border-radius-lg) 0 0',
       };
 
       let shipIconStyle: React.CSSProperties = {
-        width: 'min(3.5vh, 2.8vw)',
-        height: 'min(3.5vh, 2.8vw)',
+        width: 'min(5vh, 4vw)',
+        height: 'min(5vh, 4vw)',
         backgroundSize: 'contain',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -575,34 +601,34 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
         borderRadius: 'var(--border-radius-sm)',
         backgroundColor: 'rgba(248, 250, 252, 0.9)',
         boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
-        margin: '2px',
+        margin: '4px',
       };
 
       let labelStyle: React.CSSProperties = {
-        padding: '6px 8px',
+        padding: '10px 12px',
         fontWeight: '600',
-        fontSize: 'min(1.6vh, 1.2vw)',
+        fontSize: 'min(2.2vh, 1.6vw)',
         color: '#1e293b',
         textAlign: 'center',
         verticalAlign: 'middle',
         borderRadius: 'var(--border-radius-sm)',
-        minWidth: '50px',
+        minWidth: '70px',
         textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)',
         letterSpacing: '0.025em',
-        margin: '2px',
+        margin: '4px',
       };
 
       let numberCellStyle: React.CSSProperties = {
         textAlign: 'center',
         verticalAlign: 'middle',
-        padding: '4px 2px',
+        padding: '8px 4px',
         fontWeight: '700',
-        fontSize: 'min(1.8vh, 1.4vw)',
+        fontSize: 'min(2.4vh, 1.8vw)',
         fontFamily: '"Inter", "SF Pro Display", system-ui, sans-serif',
         borderRadius: 'var(--border-radius-sm)',
-        minWidth: 'min(3.5vh, 2.8vw)',
+        minWidth: 'min(5vh, 4vw)',
         letterSpacing: '-0.02em',
-        margin: '2px',
+        margin: '4px',
       };
 
       // Header row
@@ -616,13 +642,13 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
       // Ship icons row
       let shipIconRow = [
-        <td key="ship-label" style={{ ...labelStyle, padding: '8px' }}>
+        <td key="ship-label" style={{ ...labelStyle, padding: '12px' }}>
           Ships
         </td>,
       ];
       for (const [ship] of Object.entries(my_remaining) as [string, number][]) {
         shipIconRow.push(
-          <td key={`icon-${ship}`} style={{ padding: '4px' }}>
+          <td key={`icon-${ship}`} style={{ padding: '6px' }}>
             <div
               style={{
                 ...shipIconStyle,
@@ -651,7 +677,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       ];
       for (const [ship, count] of Object.entries(my_remaining) as [string, number][]) {
         yourRow.push(
-          <td key={`you-${ship}`} style={{ padding: '4px' }}>
+          <td key={`you-${ship}`} style={{ padding: '6px' }}>
             <div
               style={{
                 ...numberCellStyle,
@@ -694,7 +720,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       ];
       for (const [ship, count] of Object.entries(other_remaining) as [string, number][]) {
         enemyRow.push(
-          <td key={`enemy-${ship}`} style={{ padding: '4px' }}>
+          <td key={`enemy-${ship}`} style={{ padding: '6px' }}>
             <div
               style={{
                 ...numberCellStyle,
@@ -723,7 +749,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       // Add bottom padding row
       remaining_tbody.push(
         <tr key="bottom-padding">
-          <td colSpan={Object.keys(my_remaining).length + 1} style={{ padding: '8px 0' }}></td>
+          <td colSpan={Object.keys(my_remaining).length + 1} style={{ padding: '12px 0' }}></td>
         </tr>
       );
     }
@@ -748,7 +774,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       animation: 'fadeInSlide 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
       borderCollapse: 'separate',
       borderSpacing: '0',
-      fontSize: '12px',
+      fontSize: '16px',
     };
 
     let sidebarStyle: React.CSSProperties = {
@@ -805,6 +831,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             whiteSpace: 'normal',
             wordWrap: 'break-word',
             lineHeight: '1.4',
+            zIndex: 9999,
           }}
           render={({ content }) =>
             content ? <div dangerouslySetInnerHTML={{ __html: content }} /> : null
@@ -816,7 +843,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
               id="remaining"
               style={{
                 ...remainingStyle,
-                borderSpacing: '4px 2px',
+                borderSpacing: '6px 4px',
               }}
             >
               <tbody>{remaining_tbody}</tbody>
@@ -1020,7 +1047,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                       e.currentTarget.style.transition = 'var(--transition-fast)';
                     }}
                     onMouseLeave={e => {
-                      this.leaveBlock();
+                      this.leaveBlock(e);
                       e.currentTarget.style.background = 'var(--surface-1)';
                       e.currentTarget.style.color = 'var(--text-primary)';
                       e.currentTarget.style.transform = 'translateY(0)';
