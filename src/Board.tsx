@@ -3,6 +3,7 @@ import React from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { getBlocks, getModeAction, takeMove, dist, InitialShips } from './Game';
+import type { Ctx } from 'boardgame.io';
 import { Log } from './Log.js';
 import { stageDescr, shipInfo } from './Texts';
 import { Tooltip } from 'react-tooltip';
@@ -14,14 +15,14 @@ interface DragItem {
 interface SquareProps {
   figure?: any;
   G: any;
-  moves: any;
+  moves: Record<string, (...args: any[]) => void>;
   coord: [number, number];
-  playerID: number;
-  player: number;
+  playerID: string;
+  player: string;
   mode?: string;
   trace?: any;
   hoveredCoords?: any;
-  ctx: any;
+  ctx: Ctx;
   hover?: (e: any) => void;
   leave?: (e: any) => void;
   highlightedBlock?: any;
@@ -52,7 +53,7 @@ const Square: React.FC<SquareProps> = props => {
       item: { coord: props.coord, figure: props.figure },
       canDrag: () => {
         let action = getModeAction(props.G, props.ctx, props.player, props.mode, props.coord);
-        return action && action.canFrom(props.G, props.player, props.coord);
+        return action && action.canFrom(props.G, parseInt(props.player), props.coord);
       },
       collect: monitor => ({
         canDrag: monitor.canDrag(),
@@ -73,7 +74,7 @@ const Square: React.FC<SquareProps> = props => {
         if (!action) {
           return false;
         }
-        return action.can(props.G, props.player, item.coord, props.coord);
+        return action.can(props.G, parseInt(props.player), item.coord, props.coord);
       },
       collect: monitor => ({
         canDrop: monitor.canDrop(),
@@ -152,11 +153,15 @@ const Square: React.FC<SquareProps> = props => {
   );
 };
 
-interface BoardProps {
+interface BoardPropsLocal {
   G: any;
-  ctx: any;
-  moves: any;
-  playerID: number;
+  ctx: Ctx;
+  moves: Record<string, (...args: any[]) => void>;
+  playerID: string;
+  isActive?: boolean;
+  isMultiplayer?: boolean;
+  isConnected?: boolean;
+  credentials?: string;
   trace?: any;
   hoveredCoords?: any;
 }
@@ -171,8 +176,8 @@ interface BoardState {
   highlightedBlock?: any;
 }
 
-class Board extends React.Component<BoardProps, BoardState> {
-  constructor(props: BoardProps) {
+class Board extends React.Component<BoardPropsLocal, BoardState> {
+  constructor(props: BoardPropsLocal) {
     super(props);
     this.state = { mode: undefined };
   }
@@ -225,7 +230,7 @@ class Board extends React.Component<BoardProps, BoardState> {
     for (let i = 0; i < 14; ++i) {
       for (let j = 0; j < 14; ++j) {
         let ship = this.props.G.cells[i][j];
-        if (ship?.player == this.props.playerID) {
+        if (ship?.player == parseInt(this.props.playerID)) {
           ++my_remaining[ship.type];
         }
       }
@@ -235,7 +240,7 @@ class Board extends React.Component<BoardProps, BoardState> {
       other_remaining[ship] = count as number;
     }
     for (let event of this.props.G.log) {
-      if (event.type == 'die' && event.ship.player != this.props.playerID) {
+      if (event.type == 'die' && event.ship.player != parseInt(this.props.playerID)) {
         --other_remaining[event.ship.type];
       }
     }
@@ -296,7 +301,7 @@ class Board extends React.Component<BoardProps, BoardState> {
 
   clickBlock = (event: any, block: any) => {
     this.setState({ highlightedBlock: undefined });
-    let stage = this.props.ctx.activePlayers && this.props.ctx.activePlayers[this.props.playerID];
+    let stage = this.props.ctx.activePlayers?.[this.props.playerID];
     if (stage == 'attackBlock') {
       this.props.moves.AttackBlock(block);
     }
@@ -421,13 +426,13 @@ class Board extends React.Component<BoardProps, BoardState> {
       flexWrap: 'wrap',
     };
 
-    let stage = this.props.ctx.activePlayers && this.props.ctx.activePlayers[this.props.playerID];
+    let stage = this.props.ctx.activePlayers?.[this.props.playerID];
     let blocks: any[] = [];
     if (stage == 'attackBlock') {
-      blocks = getBlocks(this.props.G, this.props.playerID, this.props.G.attackFrom);
+      blocks = getBlocks(this.props.G, parseInt(this.props.playerID), this.props.G.attackFrom);
     }
     if (stage == 'responseBlock') {
-      blocks = getBlocks(this.props.G, this.props.playerID, this.props.G.attackTo);
+      blocks = getBlocks(this.props.G, parseInt(this.props.playerID), this.props.G.attackTo);
     }
 
     return (
@@ -459,7 +464,7 @@ class Board extends React.Component<BoardProps, BoardState> {
               <h1>
                 {this.props.ctx.gameover.winner === undefined
                   ? 'Draw'
-                  : this.props.ctx.gameover.winner == this.props.playerID
+                  : this.props.ctx.gameover.winner == parseInt(this.props.playerID)
                     ? 'You win!'
                     : 'You loose…'}
               </h1>
@@ -483,7 +488,7 @@ class Board extends React.Component<BoardProps, BoardState> {
             </div>
             <Log
               events={this.props.G.log}
-              player={this.props.playerID}
+              player={parseInt(this.props.playerID)}
               highlight={this.highlight}
             />
           </div>

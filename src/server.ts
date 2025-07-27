@@ -1,4 +1,4 @@
-import { Server } from 'boardgame.io/dist/cjs/server.js';
+import { Server } from 'boardgame.io/server';
 import { PostgresStore } from 'bgio-postgres';
 import GameRules from './Game.js';
 import path from 'path';
@@ -40,7 +40,7 @@ const server = Server(conf);
 const frontEndAppBuildPath = path.resolve('./build');
 server.app.use(serve(frontEndAppBuildPath));
 
-const PORT = process.env.PORT || 8000;
+const PORT = parseInt(process.env.PORT || '8000');
 
 server.run(PORT, () => {
   server.app.use(

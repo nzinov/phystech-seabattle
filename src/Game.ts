@@ -1,5 +1,6 @@
-import { INVALID_MOVE, TurnOrder } from 'boardgame.io/dist/cjs/core.js';
+import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import deepcopy from 'deepcopy';
+import type { Ctx } from 'boardgame.io';
 
 const SIZE = 14;
 
@@ -26,9 +27,9 @@ interface GameState {
 
 interface ActionContext {
   G: GameState;
-  ctx?: any;
+  ctx: Ctx;
   events?: any;
-  playerID?: number;
+  playerID?: string;
 }
 
 interface ShipDefinition {
@@ -400,8 +401,8 @@ const Actions = {
   },
 };
 
-function repeatTurn({ ctx, events }) {
-  events.endTurn({ next: ctx.currentPlayer });
+function repeatTurn({ events }: { ctx: Ctx; events: any }) {
+  events.endTurn();
 }
 
 const Effects = {
@@ -527,7 +528,8 @@ const Ships: Record<string, ShipDefinition> = {
       let v = vector(from, to);
       return isStraight(from, to) || Math.abs(v[0]) == Math.abs(v[1]);
     },
-    onAttack: Effects.ExplodeSm,
+    onAttack: ({ G, ctx, events }: ActionContext, from: Position, to?: Position) =>
+      Effects.ExplodeSm({ G, _ctx: ctx, events }, from, to),
   },
   Lk: { ...AttackingShip, strength: 7.59375 },
   Rk: {
@@ -559,9 +561,9 @@ const Ships: Record<string, ShipDefinition> = {
   Br: {
     ...Missile,
     canShoot: (G, player, from, to) => !G.usedBrander[player] && dist(from, to) == 1,
-    shoot({ G, playerID }, from, to) {
-      G.usedBrander[playerID] = 2;
-      getPos(G, to).player = playerID;
+    shoot({ G, playerID }: ActionContext, from: Position, to: Position) {
+      G.usedBrander[parseInt(playerID!)] = 2;
+      getPos(G, to)!.player = parseInt(playerID!);
     },
   },
   KrPl: {
@@ -651,8 +653,8 @@ export function getStageActions(G: GameState, ctx: any, stage: string, from: Pos
   return ship.actions[stage] || [];
 }
 
-export function getActions(G, ctx, player, from) {
-  if (getPos(G, from)?.player != player || !ctx.activePlayers) {
+export function getActions(G: GameState, ctx: Ctx, player: string, from: Position) {
+  if (getPos(G, from)?.player != parseInt(player) || !ctx.activePlayers) {
     return [];
   }
   let stage = ctx.activePlayers[player];
@@ -662,7 +664,13 @@ export function getActions(G, ctx, player, from) {
   return getStageActions(G, ctx, stage, from);
 }
 
-export function getModeAction(G, ctx, player, mode, from) {
+export function getModeAction(
+  G: GameState,
+  ctx: Ctx,
+  player: string,
+  mode: string,
+  from: Position
+) {
   let actions = getActions(G, ctx, player, from);
   if (!actions) {
     return false;
@@ -680,7 +688,13 @@ export function getModeAction(G, ctx, player, mode, from) {
   return action;
 }
 
-function makeMove({ G, ctx, playerID, events }, stage, mode, from, to) {
+function makeMove(
+  { G, ctx, playerID, events }: any,
+  stage: string,
+  mode: string,
+  from: Position,
+  to: Position
+): typeof INVALID_MOVE | void {
   if (!valid(from) || !valid(to)) {
     return INVALID_MOVE;
   }
@@ -703,82 +717,72 @@ function makeMove({ G, ctx, playerID, events }, stage, mode, from, to) {
   action.take({ G, ctx, playerID, events }, from, to);
 }
 
-function Ready({ G, _ctx, events }) {
+function Ready({ G, events }: any) {
   G.ready++;
   events.endStage();
 }
 
-const Place = {
-  move(all_data, mode, from, to) {
-    makeMove(all_data, 'place', mode, from, to);
-  },
-  redact: true,
+const PlaceMove = (all_data: any, mode: string, from: Position, to: Position) => {
+  makeMove(all_data, 'place', mode, from, to);
 };
+PlaceMove.redact = true;
 
-function Move(all_data, mode, from, to) {
+function Move(all_data: any, mode: string, from: Position, to: Position) {
   makeMove(all_data, 'move', mode, from, to);
 }
 
-function Skip({ events }) {
+function Skip({ events }: any) {
   events.endTurn();
 }
 
-const Attack = {
-  move(all_data, mode, from, to) {
-    makeMove(all_data, 'attack', mode, from, to);
-  },
-  client: false,
+const AttackMove = (all_data: any, mode: string, from: Position, to: Position) => {
+  makeMove(all_data, 'attack', mode, from, to);
 };
+AttackMove.client = false;
 
-const AttackBlock = {
-  move({ G, playerID }, block) {
-    if (
-      !block.coords.some(el => dist(el, G.attackFrom) == 0) ||
-      !checkBlock(G, playerID, block.type, block.size, block.coords)
-    ) {
-      return INVALID_MOVE;
-    }
-    G.attackBlock = block;
-  },
-  redact: true,
+const AttackBlockMove = ({ G, playerID }: any, block: any): typeof INVALID_MOVE | void => {
+  if (
+    !block.coords.some((el: Position) => dist(el, G.attackFrom!) == 0) ||
+    !checkBlock(G, parseInt(playerID!), block.type, block.size, block.coords)
+  ) {
+    return INVALID_MOVE;
+  }
+  G.attackBlock = block;
 };
+AttackBlockMove.redact = true;
 
-const ResponseBlock = {
-  move({ G, playerID }, block) {
-    if (
-      !block.coords.some(el => dist(el, G.attackTo) == 0) ||
-      !checkBlock(G, playerID, block.type, block.size, block.coords)
-    ) {
-      return INVALID_MOVE;
-    }
-    addLog(G, 'response', null, null, { size: block.size, ship_type: block.type });
-    G.responseBlock = block;
-  },
-  redact: true,
+const ResponseBlockMove = ({ G, playerID }: any, block: any): typeof INVALID_MOVE | void => {
+  if (
+    !block.coords.some((el: Position) => dist(el, G.attackTo!) == 0) ||
+    !checkBlock(G, parseInt(playerID!), block.type, block.size, block.coords)
+  ) {
+    return INVALID_MOVE;
+  }
+  addLog(G, 'response', undefined, undefined, { size: block.size, ship_type: block.type });
+  G.responseBlock = block;
 };
+ResponseBlockMove.redact = true;
 
-const Label = {
-  move({ G, playerID }, pos, label) {
-    getPos(G, pos).label[playerID] = label;
-  },
-  redact: true,
-  client: false,
+const LabelMove = ({ G, playerID }: any, pos: Position, label: string): void => {
+  getPos(G, pos)!.label![playerID!] = label;
 };
+LabelMove.redact = true;
+LabelMove.client = false;
 
 export function takeMove(
   G: GameState,
-  ctx: any,
-  moves: any,
+  _ctx: Ctx,
+  moves: Record<string, (...args: any[]) => void>,
   mode: string,
   from: Position,
   to: Position
 ): void {
-  if (ctx.phase == 'place') {
+  if (_ctx.phase == 'place') {
     moves.Place(mode, from, to);
     return;
   }
   let player = getPos(G, from)?.player;
-  let stage = ctx.activePlayers[player];
+  let stage = _ctx.activePlayers?.[player!];
   if (stage == 'move') {
     moves.Move(mode, from, to);
   } else if (stage == 'attack') {
@@ -786,11 +790,11 @@ export function takeMove(
   }
 }
 
-export const GameRules = {
+export const GameRules: any = {
   name: 'PhystechSeaBattle',
   minPlayers: 2,
   maxPlayers: 2,
-  setup({ _ctx }) {
+  setup({ ctx: _ctx }: { ctx: Ctx }): GameState {
     let cells = [];
     for (let x = 0; x < SIZE; ++x) {
       cells.push([]);
@@ -812,56 +816,55 @@ export const GameRules = {
         i -= 1;
       }
     }
-    return { cells, ready: 0, usedBrander: { 0: 0, 1: 0 }, log: [] };
+    return { cells, ready: 0, usedBrander: [0, 0], log: [], phase: 'place' };
   },
   phases: {
     place: {
       start: true,
       turn: {
-        activePlayers: { all: 'place' },
         stages: {
-          place: { moves: { Ready, Place } },
+          place: { moves: { Ready, Place: PlaceMove } },
         },
       },
+      activePlayers: { all: 'place' },
       endIf: ({ G }) => G.ready >= 2,
       next: 'play',
     },
     play: {
       turn: {
         order: TurnOrder.RESET,
-        activePlayers: { currentPlayer: 'move', others: 'wait' },
         stages: {
-          move: { next: 'attack', moves: { Move, Label } },
-          attack: { moves: { Attack, Skip, Label } },
-          attackBlock: { moves: { AttackBlock, Label } },
-          responseBlock: { moves: { ResponseBlock, Label } },
-          wait: { moves: { Label } },
+          move: { next: 'attack', moves: { Move, Label: LabelMove } },
+          attack: { moves: { Attack: AttackMove, Skip, Label: LabelMove } },
+          attackBlock: { moves: { AttackBlock: AttackBlockMove, Label: LabelMove } },
+          responseBlock: { moves: { ResponseBlock: ResponseBlockMove, Label: LabelMove } },
+          wait: { moves: { Label: LabelMove } },
         },
-        onBegin({ G }) {
+        onBegin({ G }: any) {
           for (let i = 0; i < 2; ++i) {
             G.usedBrander[i] = Math.max(0, G.usedBrander[i] - 1);
           }
         },
-        onMove({ G, ctx, events }) {
+        onMove({ G, ctx, events }: any) {
           if (G.attackBlock && G.responseBlock) {
             let ship = getShip(G, G.attackFrom);
-            if (ship.compare) {
+            if (ship?.compare) {
               let res = ship.compare(getPos(G, G.attackTo));
               battle(
                 { G, ctx, events },
                 res,
-                G.attackFrom,
-                G.attackTo,
-                [G.attackFrom],
-                [G.attackTo]
+                G.attackFrom!,
+                G.attackTo!,
+                [G.attackFrom!],
+                [G.attackTo!]
               );
             } else {
               let res = getBlockStrength(G.attackBlock) - getBlockStrength(G.responseBlock);
               battle(
                 { G, ctx, events },
                 res,
-                G.attackFrom,
-                G.attackTo,
+                G.attackFrom!,
+                G.attackTo!,
                 G.attackBlock.coords,
                 G.responseBlock.coords
               );
@@ -873,11 +876,12 @@ export const GameRules = {
           }
         },
       },
+      activePlayers: { currentPlayer: 'move', others: 'wait' },
     },
   },
   moves: {},
 
-  endIf: ({ G, _ctx }) => {
+  endIf: ({ G }: any) => {
     let fortCount = [0, 0];
     for (let i = 0; i < 14; ++i) {
       for (let j = 0; j < 14; ++j) {
@@ -897,21 +901,21 @@ export const GameRules = {
     }
   },
 
-  playerView({ G, ctx, playerID }: { G: GameState; ctx: any; playerID: number }): GameState {
+  playerView({ G, ctx, playerID }: any): GameState {
     G = deepcopy(G);
     for (let i = 0; i < SIZE; ++i) {
       for (let j = 0; j < SIZE; ++j) {
-        if (ctx.phase == 'place' && !checkSide(G, playerID, [i, j])) {
+        if (ctx.phase == 'place' && !checkSide(G, parseInt(playerID), [i, j])) {
           G.cells[i][j] = null;
           continue;
         }
         let cell = G.cells[i][j];
-        if (cell && cell.player != playerID) {
+        if (cell && cell.player != parseInt(playerID)) {
           cell.type = cell.player == -1 ? 'Sinking' : 'Unknown';
           cell.state = {};
         }
         if (cell) {
-          cell.label = cell.label[playerID];
+          cell.label = cell.label?.[playerID];
         }
         G.cells[i][j] = cell;
       }

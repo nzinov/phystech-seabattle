@@ -1,5 +1,5 @@
-import { Client } from 'boardgame.io/dist/cjs/react.js';
-import { SocketIO } from 'boardgame.io/dist/cjs/multiplayer.js';
+import { Client } from 'boardgame.io/react';
+import { SocketIO } from 'boardgame.io/multiplayer';
 import Board from './Board';
 import GameRules from './Game';
 import Cookies from 'universal-cookie';
