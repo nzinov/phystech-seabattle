@@ -6,12 +6,14 @@ import deepcopy from 'deepcopy';
 export type Position = [number, number];
 
 export interface GameConfig {
+  name: string;
   fieldSize: number;
   placementZoneSize: number; // Number of rows for each player's placement zone
   initialShips: [string, number][];
 }
 
 export const DefaultGameConfig: GameConfig = {
+  name: 'Default',
   fieldSize: 14,
   placementZoneSize: 5, // Player 0: rows 0-4, Player 1: rows 9-13
   initialShips: [
@@ -38,6 +40,7 @@ export const DefaultGameConfig: GameConfig = {
 };
 
 export const MiniGameConfig: GameConfig = {
+  name: 'Mini',
   fieldSize: 10,
   placementZoneSize: 3, // Player 0: rows 0-2, Player 1: rows 7-9
   initialShips: [
@@ -871,7 +874,7 @@ export function takeMove(
 
 export function createGameRules(config: GameConfig = DefaultGameConfig): Game<GameState> {
   return {
-    name: 'PhystechSeaBattle',
+    name: 'PhystechSeaBattle' + config.name,
     minPlayers: 2,
     maxPlayers: 2,
     setup({ ctx: _ctx }: { ctx: Ctx }): GameState {
@@ -1036,6 +1039,5 @@ export function createGameRules(config: GameConfig = DefaultGameConfig): Game<Ga
   };
 }
 
-export const GameRules = createGameRules(MiniGameConfig);
-
-export default GameRules;
+export const DefaultGame = createGameRules(DefaultGameConfig);
+export const MiniGame = createGameRules(MiniGameConfig);

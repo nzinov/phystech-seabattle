@@ -2,7 +2,7 @@ import { PostgresStore } from 'bgio-postgres';
 import { Server } from 'boardgame.io/server';
 import serve from 'koa-static';
 import path from 'path';
-import GameRules from './Game.js';
+import { DefaultGame, MiniGame } from './Game';
 
 const authenticateCredentials = (credentials: any, playerMetadata: any): boolean => {
   if (!playerMetadata) {
@@ -18,7 +18,10 @@ const authenticateCredentials = (credentials: any, playerMetadata: any): boolean
   return false;
 };
 
-let conf: any = { games: [GameRules], authenticateCredentials };
+let conf: any = {
+  games: [DefaultGame, MiniGame],
+  authenticateCredentials,
+};
 
 if (process.env.DATABASE_URL) {
   const db = new PostgresStore(process.env.DATABASE_URL, {

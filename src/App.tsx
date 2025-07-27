@@ -1,10 +1,10 @@
-import { Client } from 'boardgame.io/react';
 import { SocketIO } from 'boardgame.io/multiplayer';
-import Board from './Board';
-import GameRules from './Game';
+import { Client } from 'boardgame.io/react';
+import React from 'react';
 import Cookies from 'universal-cookie';
 import { v4 as uuid } from 'uuid';
-import React from 'react';
+import Board from './Board';
+import { DefaultGame, MiniGame } from './Game';
 
 // Store invite link globally for BoardWrapper access
 let globalInviteLink: string | null = null;
@@ -64,7 +64,7 @@ const getServerUrl = (): string => {
 };
 
 const SeabattleClient = Client({
-  game: GameRules,
+  game: params.get('mini') == '1' ? MiniGame : DefaultGame,
   board: BoardWrapper,
   multiplayer: SocketIO({ server: getServerUrl() }),
   debug: import.meta.env.DEV || window.location.hostname === 'localhost',
