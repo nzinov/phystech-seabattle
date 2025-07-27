@@ -3,9 +3,65 @@ import { INVALID_MOVE, TurnOrder } from 'boardgame.io/core';
 import { EventsAPI } from 'boardgame.io/dist/types/src/plugins/plugin-events';
 import deepcopy from 'deepcopy';
 
-const SIZE = 14;
-
 export type Position = [number, number];
+
+export interface GameConfig {
+  fieldSize: number;
+  placementZoneSize: number; // Number of rows for each player's placement zone
+  initialShips: [string, number][];
+}
+
+export const DefaultGameConfig: GameConfig = {
+  fieldSize: 14,
+  placementZoneSize: 5, // Player 0: rows 0-4, Player 1: rows 9-13
+  initialShips: [
+    ['Av', 1],
+    ['Sm', 1],
+    ['Lk', 2],
+    ['Rk', 1],
+    ['Kr', 6],
+    ['T', 4],
+    ['Rd', 2],
+    ['Mn', 7],
+    ['Es', 6],
+    ['Br', 2],
+    ['KrPl', 1],
+    ['AB', 1],
+    ['St', 7],
+    ['NB', 1],
+    ['Tk', 6],
+    ['F', 2],
+    ['Tr', 7],
+    ['Tp', 1],
+    ['Pl', 4],
+  ],
+};
+
+export const MiniGameConfig: GameConfig = {
+  fieldSize: 10,
+  placementZoneSize: 3, // Player 0: rows 0-2, Player 1: rows 7-9
+  initialShips: [
+    ['Av', 1],
+    ['Sm', 1],
+    ['Lk', 1],
+    ['Rk', 1],
+    ['Kr', 2],
+    ['T', 2],
+    ['Rd', 1],
+    ['Mn', 3],
+    ['Es', 3],
+    ['Br', 0],
+    ['KrPl', 1],
+    ['AB', 0],
+    ['St', 3],
+    ['NB', 0],
+    ['Tk', 3],
+    ['F', 2],
+    ['Tr', 3],
+    ['Tp', 1],
+    ['Pl', 2],
+  ],
+};
 
 interface Ship {
   type: string;
@@ -24,6 +80,7 @@ interface GameState {
   attackTo?: Position;
   attackBlock?: any;
   responseBlock?: any;
+  config?: GameConfig;
 }
 
 interface ActionContext {
@@ -67,7 +124,7 @@ function addLog(G: GameState, type: string, from?: Position, to?: Position, opti
 }
 
 function valid(G: GameState, pos: Position): boolean {
-  const size = G.cells.length;
+  const size = G.config?.fieldSize || DefaultGameConfig.fieldSize;
   return 0 <= pos[0] && pos[0] < size && 0 <= pos[1] && pos[1] < size;
 }
 
@@ -92,9 +149,17 @@ function setPos(G: GameState, pos: Position, fig: Ship | null): void {
   G.cells[pos[0]][pos[1]] = fig;
 }
 
+export function getPlacementZone(config: GameConfig, player: number): [number, number] {
+  if (player == 0) {
+    return [0, config.placementZoneSize];
+  } else {
+    return [config.fieldSize - config.placementZoneSize, config.fieldSize];
+  }
+}
+
 function checkSide(G: GameState, player: number, pos: Position): boolean {
-  let low = player == 1 ? 9 : 0;
-  let high = player == 1 ? 14 : 5;
+  const config = G.config || DefaultGameConfig;
+  const [low, high] = getPlacementZone(config, player);
   return low <= pos[0] && pos[0] < high;
 }
 
@@ -647,28 +712,6 @@ const Ships: Record<string, ShipDefinition> = {
   },
 };
 
-export const InitialShips = [
-  ['Av', 1],
-  ['Sm', 1],
-  ['Lk', 2],
-  ['Rk', 1],
-  ['Kr', 6],
-  ['T', 4],
-  ['Rd', 2],
-  ['Mn', 7],
-  ['Es', 6],
-  ['Br', 2],
-  ['KrPl', 1],
-  ['AB', 1],
-  ['St', 7],
-  ['NB', 1],
-  ['Tk', 6],
-  ['F', 2],
-  ['Tr', 7],
-  ['Tp', 1],
-  ['Pl', 4],
-];
-
 function getShip(G: GameState, from: Position): ShipDefinition | undefined {
   const ship = getPos(G, from);
   return ship ? Ships[ship.type] : undefined;
@@ -826,159 +869,173 @@ export function takeMove(
   }
 }
 
-export const GameRules: Game<GameState> = {
-  name: 'PhystechSeaBattle',
-  minPlayers: 2,
-  maxPlayers: 2,
-  setup({ ctx: _ctx }: { ctx: Ctx }): GameState {
-    let cells: (Ship | null)[][] = [];
-    for (let x = 0; x < SIZE; ++x) {
-      cells.push([]);
-      for (let y = 0; y < SIZE; ++y) {
-        cells[x].push(null);
+export function createGameRules(config: GameConfig = DefaultGameConfig): Game<GameState> {
+  return {
+    name: 'PhystechSeaBattle',
+    minPlayers: 2,
+    maxPlayers: 2,
+    setup({ ctx: _ctx }: { ctx: Ctx }): GameState {
+      let cells: (Ship | null)[][] = [];
+      for (let x = 0; x < config.fieldSize; ++x) {
+        cells.push([]);
+        for (let y = 0; y < config.fieldSize; ++y) {
+          cells[x].push(null);
+        }
       }
-    }
-    let i = 0;
-    for (let el of InitialShips) {
-      for (let num = 0; num < (el[1] as number); ++num) {
-        cells[Math.floor(i / SIZE)][i % SIZE] = {
-          type: el[0] as string,
-          player: 0,
-          state: {},
-          label: {},
-        };
-        i += 1;
+      let i = 0;
+      for (let el of config.initialShips) {
+        for (let num = 0; num < (el[1] as number); ++num) {
+          cells[Math.floor(i / config.fieldSize)][i % config.fieldSize] = {
+            type: el[0] as string,
+            player: 0,
+            state: {},
+            label: {},
+          };
+          i += 1;
+        }
       }
-    }
-    i = SIZE * SIZE - 1;
-    for (let el of InitialShips) {
-      for (let num = 0; num < (el[1] as number); ++num) {
-        cells[Math.floor(i / SIZE)][i % SIZE] = {
-          type: el[0] as string,
-          player: 1,
-          state: {},
-          label: {},
-        };
-        i -= 1;
+      i = config.fieldSize * config.fieldSize - 1;
+      for (let el of config.initialShips) {
+        for (let num = 0; num < (el[1] as number); ++num) {
+          cells[Math.floor(i / config.fieldSize)][i % config.fieldSize] = {
+            type: el[0] as string,
+            player: 1,
+            state: {},
+            label: {},
+          };
+          i -= 1;
+        }
       }
-    }
-    return { cells, ready: 0, usedBrander: [0, 0], log: [], phase: 'place' };
-  },
-  phases: {
-    place: {
-      start: true,
-      turn: {
-        stages: {
-          place: { moves: { Ready, Place: PlaceMove } },
-        },
-        activePlayers: { all: 'place' },
-      },
-      endIf: ({ G }) => G.ready >= 2,
-      next: 'play',
+      return { cells, ready: 0, usedBrander: [0, 0], log: [], phase: 'place', config };
     },
-    play: {
-      turn: {
-        order: TurnOrder.RESET,
-        stages: {
-          move: { next: 'attack', moves: { Move, Label: LabelMove } },
-          attack: { moves: { Attack: AttackMove, Skip, Label: LabelMove } },
-          attackBlock: { moves: { AttackBlock: AttackBlockMove, Label: LabelMove } },
-          responseBlock: { moves: { ResponseBlock: ResponseBlockMove, Label: LabelMove } },
-          wait: { moves: { Label: LabelMove } },
+    phases: {
+      place: {
+        start: true,
+        turn: {
+          stages: {
+            place: { moves: { Ready, Place: PlaceMove } },
+          },
+          activePlayers: { all: 'place' },
         },
-        onBegin({ G }: ActionContext) {
-          for (let i = 0; i < 2; ++i) {
-            G.usedBrander[i] = Math.max(0, G.usedBrander[i] - 1);
-          }
-        },
-        onMove({ G, ctx, events }: ActionContext) {
-          if (G.attackBlock && G.responseBlock) {
-            let ship = getShip(G, G.attackFrom!);
-            if (ship?.compare) {
-              let res = ship.compare(getPos(G, G.attackTo!)!);
-              battle(
-                { G, ctx, events },
-                res,
-                G.attackFrom!,
-                G.attackTo!,
-                [G.attackFrom!],
-                [G.attackTo!]
-              );
-            } else {
-              let res = getBlockStrength(G.attackBlock) - getBlockStrength(G.responseBlock);
-              battle(
-                { G, ctx, events },
-                res,
-                G.attackFrom!,
-                G.attackTo!,
-                G.attackBlock.coords,
-                G.responseBlock.coords
-              );
+        endIf: ({ G }) => G.ready >= 2,
+        next: 'play',
+      },
+      play: {
+        turn: {
+          order: TurnOrder.RESET,
+          stages: {
+            move: { next: 'attack', moves: { Move, Label: LabelMove } },
+            attack: { moves: { Attack: AttackMove, Skip, Label: LabelMove } },
+            attackBlock: { moves: { AttackBlock: AttackBlockMove, Label: LabelMove } },
+            responseBlock: { moves: { ResponseBlock: ResponseBlockMove, Label: LabelMove } },
+            wait: { moves: { Label: LabelMove } },
+          },
+          onBegin({ G }: ActionContext) {
+            for (let i = 0; i < 2; ++i) {
+              G.usedBrander[i] = Math.max(0, G.usedBrander[i] - 1);
             }
-            G.attackFrom = undefined;
-            G.attackTo = undefined;
-            G.attackBlock = undefined;
-            G.responseBlock = undefined;
-          }
+          },
+          onMove({ G, ctx, events }: ActionContext) {
+            if (G.attackBlock && G.responseBlock) {
+              let ship = getShip(G, G.attackFrom!);
+              if (ship?.compare) {
+                let res = ship.compare(getPos(G, G.attackTo!)!);
+                battle(
+                  { G, ctx, events },
+                  res,
+                  G.attackFrom!,
+                  G.attackTo!,
+                  [G.attackFrom!],
+                  [G.attackTo!]
+                );
+              } else {
+                let res = getBlockStrength(G.attackBlock) - getBlockStrength(G.responseBlock);
+                battle(
+                  { G, ctx, events },
+                  res,
+                  G.attackFrom!,
+                  G.attackTo!,
+                  G.attackBlock.coords,
+                  G.responseBlock.coords
+                );
+              }
+              G.attackFrom = undefined;
+              G.attackTo = undefined;
+              G.attackBlock = undefined;
+              G.responseBlock = undefined;
+            }
+          },
+          activePlayers: { currentPlayer: 'move', others: 'wait' },
         },
-        activePlayers: { currentPlayer: 'move', others: 'wait' },
       },
     },
-  },
-  moves: {},
+    moves: {},
 
-  endIf: ({ G }: ActionContext) => {
-    let fortCount = [0, 0];
-    for (let i = 0; i < 14; ++i) {
-      for (let j = 0; j < 14; ++j) {
-        let cell = G.cells[i][j];
-        if (cell?.type == 'F' && cell.player != -1) {
-          fortCount[cell.player]++;
+    endIf: ({ G }: ActionContext) => {
+      let fortCount = [0, 0];
+      const fieldSize = G.config?.fieldSize || DefaultGameConfig.fieldSize;
+      for (let i = 0; i < fieldSize; ++i) {
+        for (let j = 0; j < fieldSize; ++j) {
+          let cell = G.cells[i][j];
+          if (cell?.type == 'F' && cell.player != -1) {
+            fortCount[cell.player]++;
+          }
         }
       }
-    }
-    if (fortCount[0] == 0 && fortCount[1] == 0) {
-      return { winner: undefined };
-    }
-    for (let i = 0; i < 2; ++i) {
-      if (fortCount[i] == 0) {
-        return { winner: 1 - i };
+      if (fortCount[0] == 0 && fortCount[1] == 0) {
+        return { winner: undefined };
       }
-    }
-  },
+      for (let i = 0; i < 2; ++i) {
+        if (fortCount[i] == 0) {
+          return { winner: 1 - i };
+        }
+      }
+    },
 
-  playerView({ G, ctx, playerID }: { G: GameState; ctx: Ctx; playerID: string | null }): GameState {
-    G = deepcopy(G);
-    for (let i = 0; i < SIZE; ++i) {
-      for (let j = 0; j < SIZE; ++j) {
-        if (ctx.phase == 'place' && !checkSide(G, parseInt(playerID!), [i, j])) {
-          G.cells[i][j] = null;
-          continue;
+    playerView({
+      G,
+      ctx,
+      playerID,
+    }: {
+      G: GameState;
+      ctx: Ctx;
+      playerID: string | null;
+    }): GameState {
+      G = deepcopy(G);
+      const fieldSize = G.config?.fieldSize || DefaultGameConfig.fieldSize;
+      for (let i = 0; i < fieldSize; ++i) {
+        for (let j = 0; j < fieldSize; ++j) {
+          if (ctx.phase == 'place' && !checkSide(G, parseInt(playerID!), [i, j])) {
+            G.cells[i][j] = null;
+            continue;
+          }
+          let cell = G.cells[i][j];
+          if (cell && cell.player != parseInt(playerID!)) {
+            cell.type = cell.player == -1 ? 'Sinking' : 'Unknown';
+            cell.state = {};
+          }
+          if (cell) {
+            cell.label = cell.label?.[playerID!];
+          }
+          G.cells[i][j] = cell;
         }
-        let cell = G.cells[i][j];
-        if (cell && cell.player != parseInt(playerID!)) {
-          cell.type = cell.player == -1 ? 'Sinking' : 'Unknown';
-          cell.state = {};
-        }
-        if (cell) {
-          cell.label = cell.label?.[playerID!];
-        }
-        G.cells[i][j] = cell;
       }
-    }
-    return G;
-  },
-  events: {
-    endGame: false,
-    endPhase: false,
-    setPhase: false,
-    endTurn: false,
-    pass: false,
-    setActivePlayers: false,
-    endStage: false,
-    setStage: false,
-  },
-  disableUndo: true,
-};
+      return G;
+    },
+    events: {
+      endGame: false,
+      endPhase: false,
+      setPhase: false,
+      endTurn: false,
+      pass: false,
+      setActivePlayers: false,
+      endStage: false,
+      setStage: false,
+    },
+    disableUndo: true,
+  };
+}
+
+export const GameRules = createGameRules(MiniGameConfig);
 
 export default GameRules;

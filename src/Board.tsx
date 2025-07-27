@@ -4,7 +4,14 @@ import React from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Tooltip } from 'react-tooltip';
-import { dist, getBlocks, getModeAction, InitialShips, takeMove } from './Game';
+import {
+  DefaultGameConfig,
+  dist,
+  getBlocks,
+  getModeAction,
+  getPlacementZone,
+  takeMove,
+} from './Game';
 import { Log } from './Log.jsx';
 import { shipInfo, stageDescr } from './Texts';
 
@@ -112,8 +119,9 @@ const Square: React.FC<SquareProps> = props => {
   if (props.stage === 'place') {
     const playerNum = parseInt(props.playerID);
     const [row] = props.coord;
-    const isPlayerSide =
-      (playerNum === 0 && row >= 0 && row <= 4) || (playerNum === 1 && row >= 9 && row <= 13);
+    const config = props.G.config || DefaultGameConfig;
+    const [low, high] = getPlacementZone(config, playerNum);
+    const isPlayerSide = row >= low && row < high;
 
     if (isPlayerSide) {
       backgroundColor = 'rgba(34, 197, 94, 0.15)'; // Light green background
@@ -447,12 +455,15 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   };
 
   CalcRemainingShips = () => {
+    const initialShips = this.props.G.config?.initialShips || DefaultGameConfig.initialShips;
+    const fieldSize = this.props.G.config?.fieldSize || DefaultGameConfig.fieldSize;
+
     let my_remaining: Record<string, number> = {};
-    for (const [ship] of InitialShips) {
+    for (const [ship] of initialShips) {
       my_remaining[ship] = 0;
     }
-    for (let i = 0; i < 14; ++i) {
-      for (let j = 0; j < 14; ++j) {
+    for (let i = 0; i < fieldSize; ++i) {
+      for (let j = 0; j < fieldSize; ++j) {
         let ship = this.props.G.cells[i][j];
         if (ship?.player == parseInt(this.props.playerID)) {
           ++my_remaining[ship.type];
@@ -460,7 +471,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       }
     }
     let other_remaining: Record<string, number> = {};
-    for (const [ship, count] of InitialShips) {
+    for (const [ship, count] of initialShips) {
       other_remaining[ship] = count as number;
     }
     for (let event of this.props.G.log) {
@@ -753,9 +764,10 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
 
     let tbody = [];
-    for (let i = 0; i < 14; i++) {
+    const fieldSize = this.props.G.config.fieldSize;
+    for (let i = 0; i < fieldSize; i++) {
       let cells = [];
-      for (let j = 0; j < 14; j++) {
+      for (let j = 0; j < fieldSize; j++) {
         cells.push(
           <Square
             key={`${i}-${j}-${this.state.mode || 'default'}`}
