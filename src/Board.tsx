@@ -549,53 +549,206 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     let remaining_tbody = [];
     if (this.state.showRemaining) {
       let [my_remaining, other_remaining] = this.CalcRemainingShips();
-      let AddShips = (ships: any, row: any, color: any) => {
-        for (const [ship, count] of Object.entries(ships) as [string, number][]) {
-          let style = {
-            ...CellStyle,
-            width: '4vw',
-            height: '4vw',
-            backgroundColor: count ? color : '#FFFFFF',
-            backgroundImage: 'url(/figures/' + ship + '.png)',
-          };
-          let fontStyle: React.CSSProperties = {
-            color: 'black',
-            position: 'relative',
-            fontSize: '3vw',
-            textShadow: '#FFFFFF 0px 0px 20px',
-          };
-          row.push(
-            <td key={ship}>
-              <div style={style}>
-                <span style={fontStyle}>
-                  <b>{count}</b>
-                </span>
-              </div>
-            </td>
-          );
-        }
+
+      let headerStyle: React.CSSProperties = {
+        textAlign: 'center',
+        fontSize: 'min(2vh, 1.4vw)',
+        fontWeight: '700',
+        color: '#1e293b',
+        paddingBottom: '8px',
+        borderBottom: '2px solid rgba(99, 102, 241, 0.3)',
+        letterSpacing: '0.025em',
+        textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)',
+        background:
+          'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%)',
+        padding: '12px 16px 8px 16px',
+        borderRadius: 'var(--border-radius-lg) var(--border-radius-lg) 0 0',
       };
-      let row = [<td key="you">You</td>];
-      AddShips(my_remaining, row, '#AAFFAA');
-      remaining_tbody.push(<tr key="my">{row}</tr>);
-      row = [<td key="enemy">Enemy</td>];
-      AddShips(other_remaining, row, '#FFAAAA');
-      remaining_tbody.push(<tr key="other">{row}</tr>);
+
+      let shipIconStyle: React.CSSProperties = {
+        width: 'min(3.5vh, 2.8vw)',
+        height: 'min(3.5vh, 2.8vw)',
+        backgroundSize: 'contain',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        border: '1px solid rgba(139, 92, 246, 0.4)',
+        borderRadius: 'var(--border-radius-sm)',
+        backgroundColor: 'rgba(248, 250, 252, 0.9)',
+        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
+        margin: '2px',
+      };
+
+      let labelStyle: React.CSSProperties = {
+        padding: '6px 8px',
+        fontWeight: '600',
+        fontSize: 'min(1.6vh, 1.2vw)',
+        color: '#1e293b',
+        textAlign: 'center',
+        verticalAlign: 'middle',
+        borderRadius: 'var(--border-radius-sm)',
+        minWidth: '50px',
+        textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)',
+        letterSpacing: '0.025em',
+        margin: '2px',
+      };
+
+      let numberCellStyle: React.CSSProperties = {
+        textAlign: 'center',
+        verticalAlign: 'middle',
+        padding: '4px 2px',
+        fontWeight: '700',
+        fontSize: 'min(1.8vh, 1.4vw)',
+        fontFamily: '"Inter", "SF Pro Display", system-ui, sans-serif',
+        borderRadius: 'var(--border-radius-sm)',
+        minWidth: 'min(3.5vh, 2.8vw)',
+        letterSpacing: '-0.02em',
+        margin: '2px',
+      };
+
+      // Header row
+      remaining_tbody.push(
+        <tr key="header">
+          <td colSpan={Object.keys(my_remaining).length + 1} style={headerStyle}>
+            🚢 Fleet Status
+          </td>
+        </tr>
+      );
+
+      // Ship icons row
+      let shipIconRow = [
+        <td key="ship-label" style={{ ...labelStyle, padding: '8px' }}>
+          Ships
+        </td>,
+      ];
+      for (const [ship] of Object.entries(my_remaining) as [string, number][]) {
+        shipIconRow.push(
+          <td key={`icon-${ship}`} style={{ padding: '4px' }}>
+            <div
+              style={{
+                ...shipIconStyle,
+                backgroundImage: `url(/figures/${ship}.png)`,
+              }}
+            />
+          </td>
+        );
+      }
+      remaining_tbody.push(<tr key="ship-icons">{shipIconRow}</tr>);
+
+      // Your numbers row
+      let yourRow = [
+        <td
+          key="you-label"
+          style={{
+            ...labelStyle,
+            background:
+              'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.12) 100%)',
+            border: '2px solid rgba(16, 185, 129, 0.25)',
+            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+          }}
+        >
+          You
+        </td>,
+      ];
+      for (const [ship, count] of Object.entries(my_remaining) as [string, number][]) {
+        yourRow.push(
+          <td key={`you-${ship}`} style={{ padding: '4px' }}>
+            <div
+              style={{
+                ...numberCellStyle,
+                color: count > 0 ? '#065f46' : '#9ca3af',
+                background:
+                  count > 0
+                    ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)'
+                    : 'rgba(248, 250, 252, 0.6)',
+                border:
+                  count > 0
+                    ? '1px solid rgba(16, 185, 129, 0.4)'
+                    : '1px solid rgba(148, 163, 184, 0.4)',
+                textShadow:
+                  count > 0
+                    ? '0 1px 2px rgba(255, 255, 255, 0.9)'
+                    : '0 1px 2px rgba(255, 255, 255, 0.5)',
+              }}
+            >
+              {count}
+            </div>
+          </td>
+        );
+      }
+      remaining_tbody.push(<tr key="your-counts">{yourRow}</tr>);
+
+      // Enemy numbers row
+      let enemyRow = [
+        <td
+          key="enemy-label"
+          style={{
+            ...labelStyle,
+            background:
+              'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 127, 0.12) 100%)',
+            border: '2px solid rgba(239, 68, 68, 0.25)',
+            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+          }}
+        >
+          Enemy
+        </td>,
+      ];
+      for (const [ship, count] of Object.entries(other_remaining) as [string, number][]) {
+        enemyRow.push(
+          <td key={`enemy-${ship}`} style={{ padding: '4px' }}>
+            <div
+              style={{
+                ...numberCellStyle,
+                color: count > 0 ? '#7f1d1d' : '#9ca3af',
+                background:
+                  count > 0
+                    ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 127, 0.1) 100%)'
+                    : 'rgba(248, 250, 252, 0.6)',
+                border:
+                  count > 0
+                    ? '1px solid rgba(239, 68, 68, 0.4)'
+                    : '1px solid rgba(148, 163, 184, 0.4)',
+                textShadow:
+                  count > 0
+                    ? '0 1px 2px rgba(255, 255, 255, 0.9)'
+                    : '0 1px 2px rgba(255, 255, 255, 0.5)',
+              }}
+            >
+              {count}
+            </div>
+          </td>
+        );
+      }
+      remaining_tbody.push(<tr key="enemy-counts">{enemyRow}</tr>);
+
+      // Add bottom padding row
+      remaining_tbody.push(
+        <tr key="bottom-padding">
+          <td colSpan={Object.keys(my_remaining).length + 1} style={{ padding: '8px 0' }}></td>
+        </tr>
+      );
     }
 
     let remainingStyle: React.CSSProperties = {
       position: 'absolute',
-      top: '24px',
-      left: '24px',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
       tableLayout: 'fixed',
       color: 'var(--text-primary)',
-      background: 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(20px)',
+      background: 'rgba(255, 255, 255, 0.98)',
+      backdropFilter: 'blur(24px)',
       borderRadius: 'var(--border-radius-lg)',
-      padding: '20px',
-      boxShadow: 'var(--shadow-xl)',
-      border: '1px solid var(--border-light)',
+      padding: '0',
+      boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
       zIndex: 1000,
+      maxWidth: '90vw',
+      maxHeight: '85vh',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      animation: 'fadeInSlide 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+      borderCollapse: 'separate',
+      borderSpacing: '0',
+      fontSize: '12px',
     };
 
     let sidebarStyle: React.CSSProperties = {
@@ -659,7 +812,13 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
         />
         <div style={outStyle}>
           {this.state.showRemaining && (
-            <table id="remaining" style={remainingStyle}>
+            <table
+              id="remaining"
+              style={{
+                ...remainingStyle,
+                borderSpacing: '4px 2px',
+              }}
+            >
               <tbody>{remaining_tbody}</tbody>
             </table>
           )}
