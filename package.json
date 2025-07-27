@@ -29,7 +29,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "serve": "node src/server.js"
+    "serve": "node src/server.js",
+    "lint": "eslint src/ --ext .js,.jsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src/ --ext .js,.jsx --fix",
+    "pre-commit": "npm run lint && npm run build"
   },
   "browserslist": {
     "production": [
