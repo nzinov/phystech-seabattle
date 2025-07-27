@@ -1,12 +1,12 @@
+import type { Ctx } from 'boardgame.io';
 import deepcopy from 'deepcopy';
 import React from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { getBlocks, getModeAction, takeMove, dist, InitialShips } from './Game';
-import type { Ctx } from 'boardgame.io';
-import { Log } from './Log.js';
-import { stageDescr, shipInfo } from './Texts';
 import { Tooltip } from 'react-tooltip';
+import { dist, getBlocks, getModeAction, InitialShips, takeMove } from './Game';
+import { Log } from './Log.js';
+import { shipInfo, stageDescr } from './Texts';
 
 interface DragItem {
   coord: [number, number];
@@ -52,7 +52,7 @@ const Square: React.FC<SquareProps> = props => {
       type: 'square',
       item: { coord: props.coord, figure: props.figure },
       canDrag: () => {
-        let action = getModeAction(props.G, props.ctx, props.player, props.mode, props.coord);
+        let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', props.coord);
         return action && action.canFrom(props.G, parseInt(props.player), props.coord);
       },
       collect: monitor => ({
@@ -70,7 +70,7 @@ const Square: React.FC<SquareProps> = props => {
         takeMove(props.G, props.ctx, props.moves, props.mode || '', item.coord, props.coord);
       },
       canDrop: (item: DragItem) => {
-        let action = getModeAction(props.G, props.ctx, props.player, props.mode, item.coord);
+        let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', item.coord);
         if (!action) {
           return false;
         }
