@@ -29,6 +29,7 @@ interface SquareProps {
   highlight?: any[];
   pendingMove?: boolean;
   onMoveStart?: () => void;
+  stage?: string;
 }
 
 const CellStyle: React.CSSProperties = {
@@ -107,131 +108,161 @@ const Square: React.FC<SquareProps> = props => {
   let elevation = 0;
   let transform = 'scale(1)';
 
-  if (isDragging) {
-    backgroundColor = 'var(--accent-primary)';
-    borderColor = 'var(--accent-primary)';
-    elevation = 3;
-    transform = 'scale(0.95)';
-  }
-  if (canDrop && isOver && dragItem) {
-    // Get the drag item action type for active drop zone highlighting - action background color
-    let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', dragItem.coord);
-    if (action) {
-      switch (action.key) {
-        case 'a': // Attack
-          backgroundColor = 'var(--action-attack-bg)';
-          borderColor = 'var(--action-attack-border)';
-          break;
-        case 's': // Shoot
-          backgroundColor = 'var(--action-shoot-bg)';
-          borderColor = 'var(--action-shoot-border)';
-          break;
-        case 'e': // Explode
-          backgroundColor = 'var(--action-explode-bg)';
-          borderColor = 'var(--action-explode-border)';
-          break;
-        case 'r': // Rocket/Area
-          backgroundColor = 'var(--action-rocket-bg)';
-          borderColor = 'var(--action-rocket-border)';
-          break;
-        case 'm': // Move
-        default:
-          backgroundColor = 'var(--action-move-bg)';
-          borderColor = 'var(--action-move-border)';
-          break;
+  // During placement phase, set light green background for player's side and disable all drag/drop effects
+  if (props.stage === 'place') {
+    const playerNum = parseInt(props.playerID);
+    const [row] = props.coord;
+    const isPlayerSide =
+      (playerNum === 0 && row >= 0 && row <= 4) || (playerNum === 1 && row >= 9 && row <= 13);
+
+    if (isPlayerSide) {
+      backgroundColor = 'rgba(34, 197, 94, 0.15)'; // Light green background
+    }
+    // No drag/drop effects during placement phase
+  } else {
+    // Normal drag/drop behavior for non-placement phases
+    if (isDragging) {
+      backgroundColor = 'var(--accent-primary)';
+      borderColor = 'var(--accent-primary)';
+      elevation = 3;
+      transform = 'scale(0.95)';
+    }
+    if (canDrop && isOver && dragItem) {
+      // Get the drag item action type for active drop zone highlighting - action background color
+      let action = getModeAction(
+        props.G,
+        props.ctx,
+        props.player,
+        props.mode || '',
+        dragItem.coord
+      );
+      if (action) {
+        switch (action.key) {
+          case 'a': // Attack
+            backgroundColor = 'var(--action-attack-bg)';
+            borderColor = 'var(--action-attack-border)';
+            break;
+          case 's': // Shoot
+            backgroundColor = 'var(--action-shoot-bg)';
+            borderColor = 'var(--action-shoot-border)';
+            break;
+          case 'e': // Explode
+            backgroundColor = 'var(--action-explode-bg)';
+            borderColor = 'var(--action-explode-border)';
+            break;
+          case 'r': // Rocket/Area
+            backgroundColor = 'var(--action-rocket-bg)';
+            borderColor = 'var(--action-rocket-border)';
+            break;
+          case 'm': // Move
+          default:
+            backgroundColor = 'var(--action-move-bg)';
+            borderColor = 'var(--action-move-border)';
+            break;
+        }
+      } else {
+        backgroundColor = 'var(--cell-active)';
+        borderColor = 'var(--cell-active)';
       }
-    } else {
+      elevation = 2;
+      transform = 'scale(1.02)';
+    } else if (canDrop && dragItem) {
+      // Get the drag item action type for subtle drop zone highlighting - always grey background with action border
+      let action = getModeAction(
+        props.G,
+        props.ctx,
+        props.player,
+        props.mode || '',
+        dragItem.coord
+      );
+      backgroundColor = 'var(--cell-hover)';
+      if (action) {
+        switch (action.key) {
+          case 'a': // Attack
+            borderColor = 'var(--action-attack-border)';
+            break;
+          case 's': // Shoot
+            borderColor = 'var(--action-shoot-border)';
+            break;
+          case 'e': // Explode
+            borderColor = 'var(--action-explode-border)';
+            break;
+          case 'r': // Rocket/Area
+            borderColor = 'var(--action-rocket-border)';
+            break;
+          case 'm': // Move
+          default:
+            borderColor = 'var(--action-move-border)';
+            break;
+        }
+      } else {
+        borderColor = 'var(--cell-active)';
+      }
+      elevation = 1;
+    } else if (canDrop) {
+      // Fallback for canDrop without dragItem
+      backgroundColor = 'var(--cell-hover)';
+      borderColor = 'var(--cell-active)';
+      elevation = 1;
+    }
+  }
+
+  // Apply additional highlights only if NOT in placement phase
+  if (props.stage !== 'place') {
+    if (canDrag && !isDragging && !props.pendingMove) {
+      // Get action type and set color accordingly
+      let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', props.coord);
+      if (action) {
+        switch (action.key) {
+          case 'a': // Attack
+            backgroundColor = 'var(--action-attack-bg)';
+            borderColor = 'var(--action-attack-border)';
+            break;
+          case 's': // Shoot
+            backgroundColor = 'var(--action-shoot-bg)';
+            borderColor = 'var(--action-shoot-border)';
+            break;
+          case 'e': // Explode
+            backgroundColor = 'var(--action-explode-bg)';
+            borderColor = 'var(--action-explode-border)';
+            break;
+          case 'r': // Rocket/Area
+            backgroundColor = 'var(--action-rocket-bg)';
+            borderColor = 'var(--action-rocket-border)';
+            break;
+          case 'm': // Move
+          default:
+            backgroundColor = 'var(--action-move-bg)';
+            borderColor = 'var(--accent-primary)';
+            break;
+        }
+      } else {
+        backgroundColor = 'var(--action-move-bg)';
+        borderColor = 'var(--accent-primary)';
+      }
+      elevation = 1;
+    }
+    if (props.G.attackFrom && dist(props.G.attackFrom, props.coord) == 0) {
+      backgroundColor = 'var(--cell-defend)';
+      borderColor = 'var(--cell-defend)';
+      elevation = 2;
+    }
+    if (props.G.attackTo && dist(props.G.attackTo, props.coord) == 0) {
+      backgroundColor = 'var(--cell-attack)';
+      borderColor = 'var(--cell-attack)';
+      elevation = 2;
+    }
+    if (
+      props.highlightedBlock &&
+      props.highlightedBlock.coords.some((el: any) => dist(el, props.coord) == 0)
+    ) {
       backgroundColor = 'var(--cell-active)';
       borderColor = 'var(--cell-active)';
     }
-    elevation = 2;
-    transform = 'scale(1.02)';
-  } else if (canDrop && dragItem) {
-    // Get the drag item action type for subtle drop zone highlighting - always grey background with action border
-    let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', dragItem.coord);
-    backgroundColor = 'var(--cell-hover)';
-    if (action) {
-      switch (action.key) {
-        case 'a': // Attack
-          borderColor = 'var(--action-attack-border)';
-          break;
-        case 's': // Shoot
-          borderColor = 'var(--action-shoot-border)';
-          break;
-        case 'e': // Explode
-          borderColor = 'var(--action-explode-border)';
-          break;
-        case 'r': // Rocket/Area
-          borderColor = 'var(--action-rocket-border)';
-          break;
-        case 'm': // Move
-        default:
-          borderColor = 'var(--action-move-border)';
-          break;
+    for (let pair of props.highlight || []) {
+      if (dist(props.coord, pair[0]) == 0) {
+        backgroundColor = pair[1];
       }
-    } else {
-      borderColor = 'var(--cell-active)';
-    }
-    elevation = 1;
-  } else if (canDrop) {
-    // Fallback for canDrop without dragItem
-    backgroundColor = 'var(--cell-hover)';
-    borderColor = 'var(--cell-active)';
-    elevation = 1;
-  }
-  if (canDrag && !isDragging && !props.pendingMove) {
-    // Get action type and set color accordingly
-    let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', props.coord);
-    if (action) {
-      switch (action.key) {
-        case 'a': // Attack
-          backgroundColor = 'var(--action-attack-bg)';
-          borderColor = 'var(--action-attack-border)';
-          break;
-        case 's': // Shoot
-          backgroundColor = 'var(--action-shoot-bg)';
-          borderColor = 'var(--action-shoot-border)';
-          break;
-        case 'e': // Explode
-          backgroundColor = 'var(--action-explode-bg)';
-          borderColor = 'var(--action-explode-border)';
-          break;
-        case 'r': // Rocket/Area
-          backgroundColor = 'var(--action-rocket-bg)';
-          borderColor = 'var(--action-rocket-border)';
-          break;
-        case 'm': // Move
-        default:
-          backgroundColor = 'var(--action-move-bg)';
-          borderColor = 'var(--accent-primary)';
-          break;
-      }
-    } else {
-      backgroundColor = 'var(--action-move-bg)';
-      borderColor = 'var(--accent-primary)';
-    }
-    elevation = 1;
-  }
-  if (props.G.attackFrom && dist(props.G.attackFrom, props.coord) == 0) {
-    backgroundColor = 'var(--cell-defend)';
-    borderColor = 'var(--cell-defend)';
-    elevation = 2;
-  }
-  if (props.G.attackTo && dist(props.G.attackTo, props.coord) == 0) {
-    backgroundColor = 'var(--cell-attack)';
-    borderColor = 'var(--cell-attack)';
-    elevation = 2;
-  }
-  if (
-    props.highlightedBlock &&
-    props.highlightedBlock.coords.some((el: any) => dist(el, props.coord) == 0)
-  ) {
-    backgroundColor = 'var(--cell-active)';
-    borderColor = 'var(--cell-active)';
-  }
-  for (let pair of props.highlight || []) {
-    if (dist(props.coord, pair[0]) == 0) {
-      backgroundColor = pair[1];
     }
   }
 
@@ -508,6 +539,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             highlight={this.state.highlight}
             pendingMove={this.state.pendingMove}
             onMoveStart={this.onMoveStart}
+            stage={this.props.ctx.activePlayers?.[this.props.playerID]}
           ></Square>
         );
       }

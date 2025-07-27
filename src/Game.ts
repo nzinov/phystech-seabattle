@@ -424,8 +424,8 @@ const Actions = {
   },
 };
 
-function repeatTurn({ events }: { ctx: Ctx; events: any }) {
-  events.endTurn();
+function repeatTurn({ ctx, events }: ActionContext) {
+  events.endTurn({ next: ctx.currentPlayer });
 }
 
 const Effects = {
