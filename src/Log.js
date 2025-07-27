@@ -1,5 +1,4 @@
 import React from 'react';
-import ScrollToBottom from 'react-scroll-to-bottom';
 
 function getShipDescr(ship, player) {
     return (ship.player == player ? "your " : "opponent's ") + ship.type;
@@ -16,6 +15,7 @@ class LogEvent extends React.Component {
             case 'die': return [[event.from, '#BB8888']];
             case 'explode': return [[event.from, '#BB8888']];
             case 'response': return [];
+            default: return [];
         }
     }
 
@@ -28,11 +28,12 @@ class LogEvent extends React.Component {
             case 'die': return <span>{getShipDescr(event.ship, this.props.player)} was destroyed</span>;
             case 'explode': return <span>{getShipDescr(event.ship, this.props.player)} exploded</span>;
             case 'response': return <span><b>{event.size} x {event.ship_type} block was declared</b></span>;
+            default: return <span>unknown event</span>;
         }
     }
 
     render() {
-        return <p onMouseEnter={(e) => this.props.highlight(this.getHighlight())} onMouseLeave={(e) => this.props.highlight([])}>{this.renderText()}</p>
+        return <p onMouseEnter={(_e) => this.props.highlight(this.getHighlight())} onMouseLeave={(_e) => this.props.highlight([])}>{this.renderText()}</p>
     }
 }
 

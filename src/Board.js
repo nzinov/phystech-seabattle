@@ -90,7 +90,7 @@ const Square = (props) => {
 				height: '70%',
 				backgroundColor: '#F0F0FF'
 			}
-			label = <img style={labelStyle} src={process.env.PUBLIC_URL+"figures/"+props.figure.label+".png"}/>;
+			label = <img style={labelStyle} src={process.env.PUBLIC_URL+"figures/"+props.figure.label+".png"} alt=""/>;
 		}
 	}
 
@@ -163,7 +163,7 @@ class Board extends React.Component {
 
 	CalcRemainingShips = () => {
 		let my_remaining = {};
-		for (const [ship, _] of InitialShips) {
+		for (const [ship, ] of InitialShips) {
 			my_remaining[ship] = 0;
 		}
 		for (let i = 0; i < 14; ++i) {
@@ -215,20 +215,20 @@ class Board extends React.Component {
 		event.preventDefault();
 	}
 
-	hoverBlock = (event, block) => {
+	hoverBlock = (_event, block) => {
 		this.setState({highlightedBlock: block});
 	}
 
-	leaveBlock = (event) => {
+	leaveBlock = (_event) => {
 		this.setState({highlightedBlock: undefined});
 	}
 
-	hoverSquare = (event, coords) => {
+	hoverSquare = (_event, coords) => {
 		this.setState({hoveredCoords: coords});
 		this.HighlightTrace();
 	}
 
-	leaveSquare = (event) => {
+	leaveSquare = (_event) => {
 		this.setState({hoveredCoords: undefined, highlight: []});
 	}
 

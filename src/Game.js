@@ -5,7 +5,7 @@ const SIZE = 14;
 
 function addLog(G, type, from, to, options) {
     options = options || {};
-    G.log.push({type, from, to, ...options});
+    G.log.push({ type, from, to, ...options });
 }
 
 function valid(pos) {
@@ -86,7 +86,7 @@ export function checkBlock(G, player, type, size, coords) {
         return false;
     }
     if (!Ships[type].strength) {
-       return false;
+        return false;
     }
     for (let i = 1; i < coords.length; ++i) {
         if (dist(coords[i - 1], coords[i]) != 1) {
@@ -113,13 +113,13 @@ export function checkBlock(G, player, type, size, coords) {
 
     console.log(type, block);
     console.log((block.every((el) => el == type)),
-           (block.every((el) => [type, 'Rd'].includes(el)) && Ships[type].strength <= Ships['Rd'].strength),
-           (type == 'Es' && matchBlock(block, ['Rd', 'St'])),
-           (type == 'Es' && matchBlock(block, ['Es', 'Rd', 'St']) && Math.abs(block.indexOf('Rd') - block.indexOf('St')) == 1));
+        (block.every((el) => [type, 'Rd'].includes(el)) && Ships[type].strength <= Ships['Rd'].strength),
+        (type == 'Es' && matchBlock(block, ['Rd', 'St'])),
+        (type == 'Es' && matchBlock(block, ['Es', 'Rd', 'St']) && Math.abs(block.indexOf('Rd') - block.indexOf('St')) == 1));
     return (block.every(el => el == type)) ||
-           (block.every(el => [type, 'Rd'].includes(el)) && Ships[type].strength <= Ships['Rd'].strength) ||
-           (type == 'Es' && matchBlock(block, ['Rd', 'St'])) ||
-           (type == 'Es' && matchBlock(block, ['Es', 'Rd', 'St']) && Math.abs(block.indexOf('Rd') - block.indexOf('St')) == 1);
+        (block.every(el => [type, 'Rd'].includes(el)) && Ships[type].strength <= Ships['Rd'].strength) ||
+        (type == 'Es' && matchBlock(block, ['Rd', 'St'])) ||
+        (type == 'Es' && matchBlock(block, ['Es', 'Rd', 'St']) && Math.abs(block.indexOf('Rd') - block.indexOf('St')) == 1);
 };
 
 export function getBlocks(G, player, coord) {
@@ -147,7 +147,7 @@ export function getBlocks(G, player, coord) {
     for (let block of blocks) {
         for (let type in Ships) {
             if (checkBlock(G, player, type, block.length, block)) {
-                validBlocks.push({type: type, size: block.length, coords: block});
+                validBlocks.push({ type: type, size: block.length, coords: block });
             }
         }
     }
@@ -177,7 +177,7 @@ const Actions = {
         can(G, player, from, to) {
             return dist(from, to) > 0 && checkSide(G, player, to);
         },
-        take({ G, ctx }, from, to) {
+        take({ G, _ctx }, from, to) {
             let tmp = getPos(G, from);
             setPos(G, from, getPos(G, to));
             setPos(G, to, tmp);
@@ -195,7 +195,7 @@ const Actions = {
                 checkPatron(G, player, ship, to) &&
                 checkPath(G, false, ship.patron, player, from, to);
         },
-        take({ G, ctx, events }, from, to) {
+        take({ G, _ctx, events }, from, to) {
             setPos(G, to, getPos(G, from));
             setPos(G, from, null);
             events.endStage();
@@ -231,9 +231,9 @@ const Actions = {
                 return;
             }
             if (targetShip.compare) {
-                addLog(G, 'response', null, null, {size: 1, ship_type: targetFig.type});
+                addLog(G, 'response', null, null, { size: 1, ship_type: targetFig.type });
                 let res = targetShip.compare(fig);
-                battle({ G, ctx, events } - res, from, to, [from], [to]);
+                battle({ G, ctx, events }, -res, from, to, [from], [to]);
                 return;
             }
             G.attackFrom = from;
@@ -253,10 +253,10 @@ const Actions = {
         name: 'Attack'
     },
     Explode: {
-        canFrom(G, player, from) {
+        canFrom(_G, _player, _from) {
             return true;
         },
-        can(G, player, from, to) {
+        can(_G, _player, from, to) {
             return dist(from, to) == 0;
         },
         take({ G, ctx, events }, from, to) {
@@ -280,7 +280,7 @@ const Actions = {
         },
         take({ G, ctx, events, playerID }, from, to) {
             let ship = getShip(G, from);
-            addLog(G, 'shoot', from, to, {ship: getPos(G, from)});
+            addLog(G, 'shoot', from, to, { ship: getPos(G, from) });
             ship.shoot({ G, ctx, events, playerID }, from, to);
         },
         key: 's',
@@ -301,7 +301,7 @@ const Actions = {
             return isStraight(from, to) && dist(from, to) <= 2;
         },
         take({ G, ctx, events }, from, to) {
-            addLog(G, 'shoot', from, to, {ship: getPos(G, from), area: true});
+            addLog(G, 'shoot', from, to, { ship: getPos(G, from), area: true });
             Effects.Explode({ G, ctx, events }, from, to);
             repeatTurn({ ctx, events });
         },
@@ -320,25 +320,25 @@ const Effects = {
         if (!sq) {
             return;
         }
-        addLog(G, 'die', pos, pos, {ship: sq});
+        addLog(G, 'die', pos, pos, { ship: sq });
         setPos(G, pos, null);
     },
-    Win({ G, ctx, events }, from, to) {
+    Win({ G, ctx, events }, _from, to) {
         Effects.Die({ G }, to);
         repeatTurn({ ctx, events });
     },
-    Loose({ G, ctx, events }, from, to) {
+    Loose({ G, _ctx, events }, from, _to) {
         Effects.Die({ G }, from);
         events.endTurn();
     },
-    Draw({ G, ctx, events }, fromBlock, toBlock) {
+    Draw({ G, _ctx, events }, fromBlock, toBlock) {
         fromBlock.forEach(el => Effects.Die({ G }, el));
         toBlock.forEach(el => Effects.Die({ G }, el));
         events.endTurn();
     },
     Explode({ G }, from, to) {
         let ship = getShip(G, from);
-        addLog(G, 'explode', from, to, {ship: getPos(G, from)});
+        addLog(G, 'explode', from, to, { ship: getPos(G, from) });
         Effects.Die({ G }, from);
         for (let dx = -ship.blastRadius; dx <= ship.blastRadius; ++dx) {
             for (let dy = -ship.blastRadius; dy <= ship.blastRadius; ++dy) {
@@ -359,7 +359,7 @@ const Effects = {
             repeatTurn({ ctx, events });
         }
     },
-    ExplodeSm({ G, ctx, events }, from, to) {
+    ExplodeSm({ G, _ctx, events }, from, to) {
         Effects.Die({ G }, from);
         Effects.Die({ G }, to);
         events.endTurn();
@@ -383,7 +383,7 @@ const Ship = {
         move: [Actions.Move],
         attack: [],
     },
-    maxMove:  1,
+    maxMove: 1,
 };
 
 const AttackingShip = {
@@ -392,7 +392,7 @@ const AttackingShip = {
         move: [Actions.Move, Actions.Attack],
         attack: [Actions.Attack],
     },
-    maxMove:  1,
+    maxMove: 1,
 };
 
 const Missile = {
@@ -401,7 +401,7 @@ const Missile = {
         move: [Actions.Move, Actions.Shoot],
         attack: [],
     },
-    maxMove:  1,
+    maxMove: 1,
     onAttack: Effects.ExplodeMine,
     shoot({ G, ctx, events }, from, to) {
         Effects.Die({ G }, from);
@@ -424,67 +424,79 @@ const Bomb = {
         move: [Actions.Move, Actions.Explode],
         attack: [false, Actions.Explode],
     },
-    maxMove:  1,
+    maxMove: 1,
     onAttack: Effects.ExplodeBomb,
     onShoot: Effects.ExplodeBomb
 };
 
 const Ships = {
-    Av: {...AttackingShip, strength: 11.390625},
-    Sm: {...Missile, patron: "Av", canShoot(G, player, from, to) {
-        let v = vector(from, to);
-        return isStraight(from, to) || Math.abs(v[0]) == Math.abs(v[1]);
-    }, onAttack: Effects.ExplodeSm},
-    Lk: {...AttackingShip, strength: 7.59375},
+    Av: { ...AttackingShip, strength: 11.390625 },
+    Sm: {
+        ...Missile, patron: "Av", canShoot(G, player, from, to) {
+            let v = vector(from, to);
+            return isStraight(from, to) || Math.abs(v[0]) == Math.abs(v[1]);
+        }, onAttack: Effects.ExplodeSm
+    },
+    Lk: { ...AttackingShip, strength: 7.59375 },
     Rk: {
         actions: {
             place: [Actions.Place],
             move: [Actions.Move, Actions.Shoot, Actions.RocketShootArea],
             attack: [],
         },
-        maxMove:  1,
+        maxMove: 1,
         onAttack: Effects.ExplodeMine,
         patron: "KrPl",
         canShoot: (G, player, from, to) => (isStraight(from, to) && dist(from, to) <= 3),
         blastRadius: 1,
         blastSquare(G, pos) { Effects.Die({ G }, pos); }
     },
-    Kr: {...AttackingShip, strength: 5.0625},
-    T: {...Missile, maxMove: 2, patron: "Tk", canShoot: (G, player, from, to) =>
-        (dist(from, to) <= 4 && isStraight(from, to) && checkPath(G, false, false, false, from, to))
+    Kr: { ...AttackingShip, strength: 5.0625 },
+    T: {
+        ...Missile, maxMove: 2, patron: "Tk", canShoot: (G, player, from, to) =>
+            (dist(from, to) <= 4 && isStraight(from, to) && checkPath(G, false, false, false, from, to))
     },
-    Rd: {...AttackingShip, strength: 5},
-    Mn: {...Ship, patron: "Es", onAttack: Effects.ExplodeMine},
-    Es: {...AttackingShip, strength: 3.375},
-    Br: {...Missile,
+    Rd: { ...AttackingShip, strength: 5 },
+    Mn: { ...Ship, patron: "Es", onAttack: Effects.ExplodeMine },
+    Es: { ...AttackingShip, strength: 3.375 },
+    Br: {
+        ...Missile,
         canShoot: (G, player, from, to) => (!G.usedBrander[player] && dist(from, to) == 1),
         shoot({ G, playerID }, from, to) {
             G.usedBrander[playerID] = 2;
             getPos(G, to).player = playerID;
-    }},
-    KrPl: {...AttackingShip, compare(ship) {
-        if (ship.type == 'KrPl') return 0;
-        if (['Kr', 'Rd', 'Es'].includes(ship.type)) return -1;
-        return 1;
-    }},
+        }
+    },
+    KrPl: {
+        ...AttackingShip, compare(ship) {
+            if (ship.type == 'KrPl') return 0;
+            if (['Kr', 'Rd', 'Es'].includes(ship.type)) return -1;
+            return 1;
+        }
+    },
     AB: { ...Bomb, blastRadius: 2, blastSquare(G, pos) { Effects.Die({ G }, pos); } },
-    St: {...AttackingShip, strength: 2.25},
-    NB: {...Bomb, blastRadius: 2, blastSquare(G, pos) {let ship = getPos(G, pos); if (ship) ship.player = -1;}},
-    Tk: {...AttackingShip, maxMove: 2, strength: 1.5},
+    St: { ...AttackingShip, strength: 2.25 },
+    NB: { ...Bomb, blastRadius: 2, blastSquare(G, pos) { let ship = getPos(G, pos); if (ship) ship.player = -1; } },
+    Tk: { ...AttackingShip, maxMove: 2, strength: 1.5 },
     F: {
         actions: { place: [Actions.Place], move: [], attack: [] }, onAttack({ G, ctx, events }, from, to) {
             Effects.Win({ G, ctx, events }, from, to);
-    }},
-    Tr: {...AttackingShip, strength: 1},
-    Tp: {...AttackingShip, compare(ship) {
-        if (ship.type == 'Tp') return 0;
-        return -1;
-    }},
-    Pl: {...AttackingShip, compare(ship) {
-        if (ship.type == 'Pl') return 0;
-        if (['Lk', 'Tp'].includes(ship.type)) return 1;
-        return -1;
-    }},
+        }
+    },
+    Tr: { ...AttackingShip, strength: 1 },
+    Tp: {
+        ...AttackingShip, compare(ship) {
+            if (ship.type == 'Tp') return 0;
+            return -1;
+        }
+    },
+    Pl: {
+        ...AttackingShip, compare(ship) {
+            if (ship.type == 'Pl') return 0;
+            if (['Lk', 'Tp'].includes(ship.type)) return 1;
+            return -1;
+        }
+    },
 };
 
 export const InitialShips = [
@@ -518,7 +530,6 @@ export function getStageActions(G, ctx, stage, from) {
     if (!ship) {
         return [];
     }
-    let player = getPos(G, from).player;
     if (!ctx.activePlayers) {
         return [];
     }
@@ -577,7 +588,7 @@ function makeMove({ G, ctx, playerID, events }, stage, mode, from, to) {
     action.take({ G, ctx, playerID, events }, from, to);
 };
 
-function Ready({ G, ctx, events }) {
+function Ready({ G, _ctx, events }) {
     G.ready++;
     events.endStage();
 }
@@ -619,7 +630,7 @@ const ResponseBlock = {
         if (!block.coords.some(el => dist(el, G.attackTo) == 0) || !checkBlock(G, playerID, block.type, block.size, block.coords)) {
             return INVALID_MOVE;
         }
-        addLog(G, 'response', null, null, {size: block.size, ship_type: block.type});
+        addLog(G, 'response', null, null, { size: block.size, ship_type: block.type });
         G.responseBlock = block;
     },
     redact: true
@@ -636,6 +647,7 @@ const Label = {
 export function takeMove(G, ctx, moves, mode, from, to) {
     if (ctx.phase == 'place') {
         moves.Place(mode, from, to);
+        return;
     }
     let player = getPos(G, from)?.player;
     let stage = ctx.activePlayers[player];
@@ -650,7 +662,7 @@ export const GameRules = {
     name: 'PhystechSeaBattle',
     minPlayers: 2,
     maxPlayers: 2,
-    setup({ ctx }) {
+    setup({ _ctx }) {
         let cells = [];
         for (let x = 0; x < SIZE; ++x) {
             cells.push([]);
@@ -661,58 +673,63 @@ export const GameRules = {
         let i = 0;
         for (let el of InitialShips) {
             for (let num = 0; num < el[1]; ++num) {
-                cells[Math.floor(i / SIZE)][i % SIZE] = {type: el[0], player: 0, state: {}, label: {}};
+                cells[Math.floor(i / SIZE)][i % SIZE] = { type: el[0], player: 0, state: {}, label: {} };
                 i += 1;
             }
         }
-        i = SIZE*SIZE - 1;
+        i = SIZE * SIZE - 1;
         for (let el of InitialShips) {
             for (let num = 0; num < el[1]; ++num) {
-                cells[Math.floor(i / SIZE)][i % SIZE] = {type: el[0], player: 1, state: {}, label: {}};
+                cells[Math.floor(i / SIZE)][i % SIZE] = { type: el[0], player: 1, state: {}, label: {} };
                 i -= 1;
             }
         }
-        return {cells, ready: 0, usedBrander: {0: 0, 1: 0}, log: []};
+        return { cells, ready: 0, usedBrander: { 0: 0, 1: 0 }, log: [] };
     },
-    phases: {place: {
-        start: true,
-        turn: {activePlayers: {all: 'place'}, stages: {
-            place: {moves: { Ready, Place }},
-        }},
-        endIf: ({ G }) => (G.ready >= 2),
-        next: 'play'
-    }, play: {
-        turn: {order: TurnOrder.RESET, activePlayers: {currentPlayer: 'move', others: 'wait'}, stages: {
-            move: {next: 'attack', moves: { Move, Label }},
-            attack: {moves: { Attack, Skip, Label }},
-            attackBlock: {moves: { AttackBlock, Label }},
-            responseBlock: {moves: { ResponseBlock, Label }},
-            wait: {moves: { Label }}
-        }, onBegin({ G }) {
-            for (let i = 0; i < 2; ++i) {
-                G.usedBrander[i] = Math.max(0, G.usedBrander[i] - 1);
-            }
-            }, onMove({ G, ctx, events }) {
-            if (G.attackBlock && G.responseBlock) {
-                let ship = getShip(G, G.attackFrom);
-                let targetShip = getShip(G, G.attackTo);
-                if (ship.compare) {
-                    let res = ship.compare(getPos(G, G.attackTo));
-                    battle({ G, ctx, events }, res, G.attackFrom, G.attackTo, [G.attackFrom], [G.attackTo]);
-                } else {
-                    let res = getBlockStrength(G.attackBlock) - getBlockStrength(G.responseBlock);
-                    battle({ G, ctx, events }, res, G.attackFrom, G.attackTo, G.attackBlock.coords, G.responseBlock.coords)
+    phases: {
+        place: {
+            start: true,
+            turn: {
+                activePlayers: { all: 'place' }, stages: {
+                    place: { moves: { Ready, Place } },
                 }
-                G.attackFrom = undefined;
-                G.attackTo = undefined;
-                G.attackBlock = undefined;
-                G.responseBlock = undefined;
-            }
-        }},
-    }},
+            },
+            endIf: ({ G }) => (G.ready >= 2),
+            next: 'play'
+        }, play: {
+            turn: {
+                order: TurnOrder.RESET, activePlayers: { currentPlayer: 'move', others: 'wait' }, stages: {
+                    move: { next: 'attack', moves: { Move, Label } },
+                    attack: { moves: { Attack, Skip, Label } },
+                    attackBlock: { moves: { AttackBlock, Label } },
+                    responseBlock: { moves: { ResponseBlock, Label } },
+                    wait: { moves: { Label } }
+                }, onBegin({ G }) {
+                    for (let i = 0; i < 2; ++i) {
+                        G.usedBrander[i] = Math.max(0, G.usedBrander[i] - 1);
+                    }
+                }, onMove({ G, ctx, events }) {
+                    if (G.attackBlock && G.responseBlock) {
+                        let ship = getShip(G, G.attackFrom);
+                        if (ship.compare) {
+                            let res = ship.compare(getPos(G, G.attackTo));
+                            battle({ G, ctx, events }, res, G.attackFrom, G.attackTo, [G.attackFrom], [G.attackTo]);
+                        } else {
+                            let res = getBlockStrength(G.attackBlock) - getBlockStrength(G.responseBlock);
+                            battle({ G, ctx, events }, res, G.attackFrom, G.attackTo, G.attackBlock.coords, G.responseBlock.coords)
+                        }
+                        G.attackFrom = undefined;
+                        G.attackTo = undefined;
+                        G.attackBlock = undefined;
+                        G.responseBlock = undefined;
+                    }
+                }
+            },
+        }
+    },
     moves: {},
 
-    endIf: ({ G, ctx }) => {
+    endIf: ({ G, _ctx }) => {
         let fortCount = [0, 0];
         for (let i = 0; i < 14; ++i) {
             for (let j = 0; j < 14; ++j) {
@@ -723,11 +740,11 @@ export const GameRules = {
             }
         }
         if (fortCount[0] == 0 && fortCount[1] == 0) {
-            return {winner: undefined};
+            return { winner: undefined };
         }
         for (let i = 0; i < 2; ++i) {
             if (fortCount[i] == 0) {
-                return {winner: 1 - i};
+                return { winner: 1 - i };
             }
         }
     },
@@ -762,7 +779,7 @@ export const GameRules = {
         setActivePlayers: false,
         endStage: false,
         setStage: false,
-      },
+    },
     disableUndo: true
 };
 

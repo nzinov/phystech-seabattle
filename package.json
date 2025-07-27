@@ -32,7 +32,9 @@
     "serve": "node src/server.js",
     "lint": "eslint src/ --ext .js,.jsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src/ --ext .js,.jsx --fix",
-    "pre-commit": "npm run lint && npm run build"
+    "pre-commit": "npm run lint && npm run build",
+    "prepare": "husky",
+    "lint-staged": "npm run lint"
   },
   "browserslist": {
     "production": [
@@ -48,6 +50,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",
-    "@babel/register": "^7.12.10"
+    "@babel/register": "^7.12.10",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2"
   }
 }

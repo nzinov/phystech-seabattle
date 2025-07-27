@@ -24,8 +24,8 @@ function getItemStyles(initialOffset, currentOffset) {
         WebkitTransform: transform,
     };
 }
-export const CustomDragLayer = (props) => {
-    const { itemType, isDragging, item, initialOffset, currentOffset, } = useDragLayer((monitor) => ({
+export const CustomDragLayer = (_props) => {
+    const { itemType, isDragging, initialOffset, currentOffset, } = useDragLayer((monitor) => ({
         item: monitor.getItem(),
         itemType: monitor.getItemType(),
         initialOffset: monitor.getInitialSourceClientOffset(),
