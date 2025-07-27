@@ -61,29 +61,86 @@ class LogEvent extends React.Component {
 
   render() {
     return (
-      <p
-        onMouseEnter={_e => this.props.highlight(this.getHighlight())}
-        onMouseLeave={_e => this.props.highlight([])}
+      <div
+        style={{
+          padding: '8px 12px',
+          margin: '4px 0',
+          background: '#f5f5f5',
+          borderRadius: 'var(--border-radius)',
+          border: '1px solid #e0e0e0',
+          cursor: 'pointer',
+          transition: 'var(--transition)',
+          fontSize: '0.875rem',
+          color: 'var(--text-primary)',
+        }}
+        onMouseEnter={e => {
+          this.props.highlight(this.getHighlight());
+          e.currentTarget.style.background = 'var(--cell-hover)';
+          e.currentTarget.style.boxShadow = 'var(--shadow-light)';
+        }}
+        onMouseLeave={e => {
+          this.props.highlight([]);
+          e.currentTarget.style.background = '#f5f5f5';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
       >
         {this.renderText()}
-      </p>
+      </div>
     );
   }
 }
 
 const style = {
   width: '100%',
-  height: '100%',
+  maxHeight: '400px',
   overflowY: 'auto',
+  background: '#ffffff',
+  borderRadius: 'var(--border-radius)',
+  padding: '12px',
+  margin: '16px 0',
+  border: '1px solid #e0e0e0',
+  boxShadow: 'var(--shadow-light)',
 };
 
 export class Log extends React.Component {
   render() {
     return (
-      <div style={style}>
-        {this.props.events.map(event => (
-          <LogEvent event={event} player={this.props.player} highlight={this.props.highlight} />
-        ))}
+      <div>
+        <h3
+          style={{
+            margin: '0 0 8px 0',
+            color: 'var(--text-primary)',
+            fontSize: '1rem',
+            fontWeight: '500',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          }}
+        >
+          🕰️ Battle Log
+        </h3>
+        <div style={style}>
+          {this.props.events.length === 0 ? (
+            <div
+              style={{
+                color: 'var(--text-secondary)',
+                fontStyle: 'italic',
+                textAlign: 'center',
+                padding: '20px',
+              }}
+            >
+              No events yet...
+            </div>
+          ) : (
+            this.props.events.map((event, index) => (
+              <LogEvent
+                key={index}
+                event={event}
+                player={this.props.player}
+                highlight={this.props.highlight}
+              />
+            ))
+          )}
+        </div>
       </div>
     );
   }

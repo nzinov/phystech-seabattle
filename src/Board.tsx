@@ -30,14 +30,20 @@ interface SquareProps {
 }
 
 const CellStyle: React.CSSProperties = {
-  border: '1px solid #555',
-  margin: 0,
+  border: '1px solid #e0e0e0',
+  margin: '0',
   width: 'min(6.5vh, 5vw)',
   height: 'min(6.5vh, 5vw)',
   lineHeight: '50px',
   textAlign: 'center',
   backgroundSize: 'contain',
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center',
   overflow: 'hidden',
+  borderRadius: 'var(--border-radius)',
+  transition: 'var(--transition)',
+  cursor: 'pointer',
+  position: 'relative',
 };
 
 const Square: React.FC<SquareProps> = props => {
@@ -83,35 +89,45 @@ const Square: React.FC<SquareProps> = props => {
     [props.G, props.ctx, props.player, props.mode, props.moves, props.coord]
   );
 
-  let color = 'white';
+  let backgroundColor = 'var(--cell-default)';
+  let elevation = 0;
+
   if (isDragging) {
-    color = '#AAAAFF';
+    backgroundColor = 'var(--cell-defend)';
+    elevation = 2;
   }
   if (canDrop) {
-    color = '#CCFFCC';
+    backgroundColor = 'var(--cell-active)';
+    elevation = 1;
   }
   if (canDrag) {
-    color = '#EEFFEE';
+    backgroundColor = 'var(--cell-hover)';
   }
   if (props.G.attackFrom && dist(props.G.attackFrom, props.coord) == 0) {
-    color = '#BBAAFF';
+    backgroundColor = 'var(--cell-defend)';
   }
   if (props.G.attackTo && dist(props.G.attackTo, props.coord) == 0) {
-    color = '#FFAABB';
+    backgroundColor = 'var(--cell-attack)';
   }
   if (
     props.highlightedBlock &&
     props.highlightedBlock.coords.some((el: any) => dist(el, props.coord) == 0)
   ) {
-    color = '#CCFFCC';
+    backgroundColor = 'var(--cell-active)';
   }
   for (let pair of props.highlight || []) {
     if (dist(props.coord, pair[0]) == 0) {
-      color = pair[1];
+      backgroundColor = pair[1];
     }
   }
+
   let cellStyle = deepcopy(CellStyle);
-  cellStyle.backgroundColor = color;
+  cellStyle.backgroundColor = backgroundColor;
+  if (elevation === 1) {
+    cellStyle.boxShadow = 'var(--shadow-light)';
+  } else if (elevation === 2) {
+    cellStyle.boxShadow = 'var(--shadow-medium)';
+  }
   let label = undefined;
   if (props.figure) {
     cellStyle.backgroundImage = 'url(/figures/' + props.figure.type + '.png)';
@@ -322,7 +338,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   render() {
     // Wait for game state to initialize
     if (!this.props.G || !this.props.G.cells) {
-      return <div>Loading game...</div>;
+      return <div className="loading">Loading game</div>;
     }
 
     let tbody = [];
@@ -390,20 +406,28 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     let remainingStyle: React.CSSProperties = {
       position: 'absolute',
       top: '20px',
+      left: '20px',
       tableLayout: 'fixed',
-      color: 'black',
+      color: 'var(--text-primary)',
+      background: '#ffffff',
+      borderRadius: 'var(--border-radius)',
+      padding: '16px',
+      boxShadow: 'var(--shadow-medium)',
+      border: '1px solid #e0e0e0',
     };
 
     let sidebarStyle: React.CSSProperties = {
-      padding: '10px',
-      backgroundColor: '#FFEEEE',
-      width: 'min(300px, 25vw)',
+      padding: '24px',
+      background: '#ffffff',
+      width: 'min(320px, 25vw)',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'flex-start',
       alignItems: 'flex-start',
-      height: '99vh',
+      height: '100vh',
       margin: 0,
+      borderLeft: '1px solid #e0e0e0',
+      boxShadow: 'var(--shadow-light)',
     };
 
     let outStyle: React.CSSProperties = {
@@ -411,8 +435,10 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      height: '99vh',
+      height: '100vh',
       margin: 0,
+      background: '#fafafa',
+      overflow: 'hidden',
     };
 
     let blocksStyle: React.CSSProperties = {
@@ -451,33 +477,143 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
           <table id="remaining" style={remainingStyle}>
             <tbody>{remaining_tbody}</tbody>
           </table>
-          <table id="board">
-            <tbody>{tbody}</tbody>
-          </table>
+          <div
+            style={{
+              padding: '16px',
+              background: '#ffffff',
+              borderRadius: 'var(--border-radius)',
+              boxShadow: 'var(--shadow-medium)',
+              border: '1px solid #e0e0e0',
+            }}
+          >
+            <table
+              id="board"
+              style={{
+                borderCollapse: 'separate',
+                borderSpacing: '1px',
+                background: 'var(--bg-board)',
+                borderRadius: 'var(--border-radius)',
+                padding: '8px',
+              }}
+            >
+              <tbody>{tbody}</tbody>
+            </table>
+          </div>
           <div style={sidebarStyle}>
             {this.props.ctx?.gameover && (
-              <h1>
-                {this.props.ctx.gameover.winner === undefined
-                  ? 'Draw'
-                  : this.props.ctx.gameover.winner == parseInt(this.props.playerID)
-                    ? 'You win!'
-                    : 'You loose…'}
-              </h1>
+              <div
+                style={{
+                  background:
+                    this.props.ctx.gameover.winner == parseInt(this.props.playerID)
+                      ? '#4caf50'
+                      : this.props.ctx.gameover.winner === undefined
+                        ? '#ff9800'
+                        : '#f44336',
+                  padding: '16px',
+                  borderRadius: 'var(--border-radius)',
+                  margin: '0 0 16px 0',
+                  textAlign: 'center',
+                  boxShadow: 'var(--shadow-light)',
+                  color: '#ffffff',
+                }}
+              >
+                <h1
+                  style={{
+                    margin: 0,
+                    fontSize: '1.5rem',
+                    fontWeight: '500',
+                  }}
+                >
+                  {this.props.ctx.gameover.winner === undefined
+                    ? '🤝 Draw'
+                    : this.props.ctx.gameover.winner == parseInt(this.props.playerID)
+                      ? '🎉 You Win!'
+                      : '💥 You Lose'}
+                </h1>
+              </div>
             )}
-            {!stage && <h2>Wait</h2>}
-            {stage && <h2>{stageDescr[stage as keyof typeof stageDescr]}</h2>}
-            {stage == 'place' && <button onClick={this.Ready}>Finish placement</button>}
+            <div
+              style={{
+                background: 'var(--bg-primary)',
+                padding: '12px 16px',
+                borderRadius: 'var(--border-radius)',
+                margin: '0 0 16px 0',
+                textAlign: 'center',
+                boxShadow: 'var(--shadow-light)',
+                color: '#ffffff',
+              }}
+            >
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: '1.1rem',
+                  fontWeight: '500',
+                }}
+              >
+                {!stage ? '⏳ Waiting...' : `${stageDescr[stage as keyof typeof stageDescr]}`}
+              </h2>
+            </div>
+            {stage == 'place' && (
+              <button
+                onClick={this.Ready}
+                style={{
+                  background: 'var(--cell-active)',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: 'var(--border-radius)',
+                  color: '#ffffff',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  boxShadow: 'var(--shadow-light)',
+                  transition: 'var(--transition)',
+                  marginBottom: '16px',
+                  width: '100%',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.boxShadow = 'var(--shadow-medium)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.boxShadow = 'var(--shadow-light)';
+                }}
+              >
+                ✅ Finish Placement
+              </button>
+            )}
             <div style={blocksStyle}>
               {blocks &&
                 blocks.map((block, i) => (
                   <button
                     key={i}
-                    style={{ padding: '5px', margin: '2px' }}
-                    onMouseEnter={e => this.hoverBlock(e, block)}
-                    onMouseLeave={this.leaveBlock}
+                    style={{
+                      padding: '8px 16px',
+                      margin: '4px',
+                      background: '#ffffff',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: 'var(--border-radius)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'var(--transition)',
+                      boxShadow: 'var(--shadow-light)',
+                      minWidth: '80px',
+                    }}
+                    onMouseEnter={e => {
+                      this.hoverBlock(e, block);
+                      e.currentTarget.style.background = 'var(--cell-hover)';
+                      e.currentTarget.style.boxShadow = 'var(--shadow-medium)';
+                    }}
+                    onMouseLeave={e => {
+                      this.leaveBlock();
+                      e.currentTarget.style.background = '#ffffff';
+                      e.currentTarget.style.boxShadow = 'var(--shadow-light)';
+                    }}
                     onClick={e => this.clickBlock(e, block)}
                   >
-                    {block.size} x {block.type}
+                    {block.size} × {block.type}
                   </button>
                 ))}
             </div>
