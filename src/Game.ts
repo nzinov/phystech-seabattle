@@ -66,8 +66,9 @@ function addLog(G: GameState, type: string, from?: Position, to?: Position, opti
   G.log.push({ type, from, to, ...options });
 }
 
-function valid(pos: Position): boolean {
-  return 0 <= pos[0] && pos[0] < SIZE && 0 <= pos[1] && pos[1] < SIZE;
+function valid(G: GameState, pos: Position): boolean {
+  const size = G.cells.length;
+  return 0 <= pos[0] && pos[0] < size && 0 <= pos[1] && pos[1] < size;
 }
 
 function vector(from: Position, to: Position): Position {
@@ -101,7 +102,7 @@ function patronNear(G: GameState, type: string, player: number, pos: Position): 
   for (let dx = -1; dx < 2; ++dx) {
     for (let dy = -1; dy < 2; ++dy) {
       let newPos: Position = [pos[0] + dx, pos[1] + dy];
-      if (valid(newPos)) {
+      if (valid(G, newPos)) {
         let ship = getPos(G, newPos);
         if (ship && ship.player == player && (ship.type == type || ship.type == 'Tp')) {
           return true;
@@ -173,7 +174,7 @@ export function checkBlock(
   }
   let block = [];
   for (let coord of coords) {
-    if (!valid(coord)) {
+    if (!valid(G, coord)) {
       return false;
     }
     let sq = getPos(G, coord);
@@ -461,7 +462,7 @@ const Effects = {
     for (let dx = -ship.blastRadius; dx <= ship.blastRadius; ++dx) {
       for (let dy = -ship.blastRadius; dy <= ship.blastRadius; ++dy) {
         let newPos: Position = [to[0] + dx, to[1] + dy];
-        if (valid(newPos)) {
+        if (valid(bgctx.G, newPos)) {
           ship.blastSquare(bgctx, newPos);
         }
       }
@@ -726,7 +727,7 @@ function makeMove(
   from: Position,
   to: Position
 ): typeof INVALID_MOVE | void {
-  if (!valid(from) || !valid(to)) {
+  if (!valid(G, from) || !valid(G, to)) {
     return INVALID_MOVE;
   }
   let actions = getStageActions(G, ctx, stage, from);
