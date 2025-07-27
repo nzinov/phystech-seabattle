@@ -5,7 +5,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Tooltip } from 'react-tooltip';
 import { dist, getBlocks, getModeAction, InitialShips, takeMove } from './Game';
-import { Log } from './Log.js';
+import { Log } from './Log.jsx';
 import { shipInfo, stageDescr } from './Texts';
 
 interface DragItem {
@@ -114,21 +114,14 @@ const Square: React.FC<SquareProps> = props => {
   cellStyle.backgroundColor = color;
   let label = undefined;
   if (props.figure) {
-    cellStyle.backgroundImage =
-      'url(' + process.env.PUBLIC_URL + 'figures/' + props.figure.type + '.png)';
+    cellStyle.backgroundImage = 'url(/figures/' + props.figure.type + '.png)';
     if (props.figure.label) {
       let labelStyle = {
         width: '70%',
         height: '70%',
         backgroundColor: '#F0F0FF',
       };
-      label = (
-        <img
-          style={labelStyle}
-          src={process.env.PUBLIC_URL + 'figures/' + props.figure.label + '.png'}
-          alt=""
-        />
-      );
+      label = <img style={labelStyle} src={'/figures/' + props.figure.label + '.png'} alt="" />;
     }
   }
 
@@ -365,7 +358,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             width: '4vw',
             height: '4vw',
             backgroundColor: count ? color : '#FFFFFF',
-            backgroundImage: 'url(' + process.env.PUBLIC_URL + 'figures/' + ship + '.png)',
+            backgroundImage: 'url(/figures/' + ship + '.png)',
           };
           let fontStyle: React.CSSProperties = {
             color: 'black',

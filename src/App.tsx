@@ -41,7 +41,7 @@ console.log(matchID, playerID);
 // Determine server URL based on environment
 const getServerUrl = (): string => {
   // In development, use localhost:8000
-  if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost') {
+  if (import.meta.env.DEV || window.location.hostname === 'localhost') {
     return 'http://localhost:8000';
   }
   // In production, use the same protocol and hostname as the current page
@@ -52,7 +52,7 @@ const SeabattleClient = Client({
   game: GameRules,
   board: Board,
   multiplayer: SocketIO({ server: getServerUrl() }),
-  debug: process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost',
+  debug: import.meta.env.DEV || window.location.hostname === 'localhost',
 });
 
 const App: React.FC = () => {
