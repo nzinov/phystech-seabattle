@@ -27,10 +27,12 @@ interface SquareProps {
   leave?: (e: any) => void;
   highlightedBlock?: any;
   highlight?: any[];
+  pendingMove?: boolean;
+  onMoveStart?: () => void;
 }
 
 const CellStyle: React.CSSProperties = {
-  border: '1px solid #e0e0e0',
+  border: '1px solid var(--border-light)',
   margin: '0',
   width: 'min(6.5vh, 5vw)',
   height: 'min(6.5vh, 5vw)',
@@ -40,10 +42,12 @@ const CellStyle: React.CSSProperties = {
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
   overflow: 'hidden',
-  borderRadius: 'var(--border-radius)',
-  transition: 'var(--transition)',
+  borderRadius: 'var(--border-radius-sm)',
+  transition:
+    'background-color 0.05s ease, border-color 0.05s ease, box-shadow 0.05s ease, transform 0.05s ease',
   cursor: 'pointer',
   position: 'relative',
+  backdropFilter: 'blur(8px)',
 };
 
 const Square: React.FC<SquareProps> = props => {
@@ -56,7 +60,7 @@ const Square: React.FC<SquareProps> = props => {
   const [{ canDrag, isDragging }, dragRef] = useDrag(
     () => ({
       type: 'square',
-      item: { coord: props.coord, figure: props.figure },
+      item: () => ({ coord: props.coord, figure: props.figure }),
       canDrag: () => {
         let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', props.coord);
         return action && action.canFrom(props.G, parseInt(props.player), props.coord);
@@ -69,10 +73,13 @@ const Square: React.FC<SquareProps> = props => {
     [props.G, props.ctx, props.player, props.mode, props.coord, props.figure]
   );
 
-  const [{ canDrop }, dropRef] = useDrop(
+  const [{ canDrop, isOver }, dropRef] = useDrop(
     () => ({
       accept: 'square',
       drop: (item: DragItem) => {
+        if (props.onMoveStart) {
+          props.onMoveStart();
+        }
         takeMove(props.G, props.ctx, props.moves, props.mode || '', item.coord, props.coord);
       },
       canDrop: (item: DragItem) => {
@@ -84,36 +91,54 @@ const Square: React.FC<SquareProps> = props => {
       },
       collect: monitor => ({
         canDrop: monitor.canDrop(),
+        isOver: monitor.isOver(),
       }),
     }),
     [props.G, props.ctx, props.player, props.mode, props.moves, props.coord]
   );
 
   let backgroundColor = 'var(--cell-default)';
+  let borderColor = 'var(--border-light)';
   let elevation = 0;
+  let transform = 'scale(1)';
 
   if (isDragging) {
-    backgroundColor = 'var(--cell-defend)';
-    elevation = 2;
+    backgroundColor = 'var(--accent-primary)';
+    borderColor = 'var(--accent-primary)';
+    elevation = 3;
+    transform = 'scale(0.95)';
   }
-  if (canDrop) {
+  if (canDrop && isOver) {
     backgroundColor = 'var(--cell-active)';
+    borderColor = 'var(--cell-active)';
+    elevation = 2;
+    transform = 'scale(1.02)';
+  } else if (canDrop) {
+    backgroundColor = 'var(--cell-hover)';
+    borderColor = 'var(--cell-active)';
     elevation = 1;
   }
-  if (canDrag) {
+  if (canDrag && !isDragging && !props.pendingMove) {
     backgroundColor = 'var(--cell-hover)';
+    borderColor = 'var(--accent-primary)';
+    elevation = 1;
   }
   if (props.G.attackFrom && dist(props.G.attackFrom, props.coord) == 0) {
     backgroundColor = 'var(--cell-defend)';
+    borderColor = 'var(--cell-defend)';
+    elevation = 2;
   }
   if (props.G.attackTo && dist(props.G.attackTo, props.coord) == 0) {
     backgroundColor = 'var(--cell-attack)';
+    borderColor = 'var(--cell-attack)';
+    elevation = 2;
   }
   if (
     props.highlightedBlock &&
     props.highlightedBlock.coords.some((el: any) => dist(el, props.coord) == 0)
   ) {
     backgroundColor = 'var(--cell-active)';
+    borderColor = 'var(--cell-active)';
   }
   for (let pair of props.highlight || []) {
     if (dist(props.coord, pair[0]) == 0) {
@@ -123,10 +148,14 @@ const Square: React.FC<SquareProps> = props => {
 
   let cellStyle = deepcopy(CellStyle);
   cellStyle.backgroundColor = backgroundColor;
+  cellStyle.borderColor = borderColor;
+  cellStyle.transform = transform;
   if (elevation === 1) {
-    cellStyle.boxShadow = 'var(--shadow-light)';
+    cellStyle.boxShadow = 'var(--shadow-sm)';
   } else if (elevation === 2) {
-    cellStyle.boxShadow = 'var(--shadow-medium)';
+    cellStyle.boxShadow = 'var(--shadow-md)';
+  } else if (elevation === 3) {
+    cellStyle.boxShadow = 'var(--shadow-lg)';
   }
   let label = undefined;
   if (props.figure) {
@@ -183,12 +212,14 @@ interface BoardState {
   tooltip?: boolean;
   showRemaining?: boolean;
   highlightedBlock?: any;
+  pendingMove?: boolean;
+  lastMoveTimestamp?: number;
 }
 
 class Board extends React.Component<BoardPropsLocal, BoardState> {
   constructor(props: BoardPropsLocal) {
     super(props);
-    this.state = { mode: undefined };
+    this.state = { mode: undefined, pendingMove: false };
   }
 
   Ready = () => {
@@ -325,9 +356,35 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     this.setState({ highlight: highlight });
   };
 
+  onMoveStart = () => {
+    this.setState({
+      pendingMove: true,
+      lastMoveTimestamp: Date.now(),
+    });
+  };
+
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyDown);
     document.addEventListener('keyup', this.handleKeyUp);
+  }
+
+  componentDidUpdate(prevProps: BoardPropsLocal) {
+    // Clear pending move state when game state changes
+    if (
+      this.state.pendingMove &&
+      (prevProps.G !== this.props.G || prevProps.ctx.turn !== this.props.ctx.turn)
+    ) {
+      this.setState({ pendingMove: false });
+    }
+
+    // Failsafe: clear pending state after 2 seconds
+    if (
+      this.state.pendingMove &&
+      this.state.lastMoveTimestamp &&
+      Date.now() - this.state.lastMoveTimestamp > 2000
+    ) {
+      this.setState({ pendingMove: false });
+    }
   }
 
   componentWillUnmount() {
@@ -360,6 +417,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             hover={e => this.hoverSquare(e, [i, j])}
             leave={this.leaveSquare}
             highlight={this.state.highlight}
+            pendingMove={this.state.pendingMove}
+            onMoveStart={this.onMoveStart}
           ></Square>
         );
       }
@@ -405,29 +464,31 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
     let remainingStyle: React.CSSProperties = {
       position: 'absolute',
-      top: '20px',
-      left: '20px',
+      top: '24px',
+      left: '24px',
       tableLayout: 'fixed',
       color: 'var(--text-primary)',
-      background: '#ffffff',
-      borderRadius: 'var(--border-radius)',
-      padding: '16px',
-      boxShadow: 'var(--shadow-medium)',
-      border: '1px solid #e0e0e0',
+      background: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(20px)',
+      borderRadius: 'var(--border-radius-lg)',
+      padding: '20px',
+      boxShadow: 'var(--shadow-lg)',
+      border: '1px solid var(--border-light)',
     };
 
     let sidebarStyle: React.CSSProperties = {
-      padding: '24px',
-      background: '#ffffff',
-      width: 'min(320px, 25vw)',
+      padding: '32px 24px',
+      background: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(20px)',
+      width: 'min(360px, 28vw)',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'flex-start',
-      alignItems: 'flex-start',
+      alignItems: 'stretch',
       height: '100vh',
       margin: 0,
-      borderLeft: '1px solid #e0e0e0',
-      boxShadow: 'var(--shadow-light)',
+      borderLeft: '1px solid var(--border-light)',
+      boxShadow: 'var(--shadow-xl)',
     };
 
     let outStyle: React.CSSProperties = {
@@ -437,8 +498,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       alignItems: 'center',
       height: '100vh',
       margin: 0,
-      background: '#fafafa',
+      background: 'var(--bg-primary)',
       overflow: 'hidden',
+      position: 'relative',
     };
 
     let blocksStyle: React.CSSProperties = {
@@ -479,21 +541,39 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
           </table>
           <div
             style={{
-              padding: '16px',
-              background: '#ffffff',
-              borderRadius: 'var(--border-radius)',
-              boxShadow: 'var(--shadow-medium)',
-              border: '1px solid #e0e0e0',
+              padding: '24px',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: 'var(--border-radius-xl)',
+              boxShadow: 'var(--shadow-xl)',
+              border: '1px solid var(--border-light)',
+              position: 'relative',
             }}
           >
+            <div
+              style={{
+                position: 'absolute',
+                top: '12px',
+                left: '12px',
+                right: '12px',
+                bottom: '12px',
+                background:
+                  'linear-gradient(45deg, rgba(139, 92, 246, 0.03) 25%, transparent 25%), linear-gradient(-45deg, rgba(139, 92, 246, 0.03) 25%, transparent 25%)',
+                backgroundSize: '20px 20px',
+                borderRadius: 'var(--border-radius-lg)',
+                pointerEvents: 'none',
+              }}
+            />
             <table
               id="board"
               style={{
                 borderCollapse: 'separate',
-                borderSpacing: '1px',
-                background: 'var(--bg-board)',
-                borderRadius: 'var(--border-radius)',
-                padding: '8px',
+                borderSpacing: '2px',
+                background: 'transparent',
+                borderRadius: 'var(--border-radius-lg)',
+                padding: '12px',
+                position: 'relative',
+                zIndex: 1,
               }}
             >
               <tbody>{tbody}</tbody>
@@ -505,49 +585,84 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 style={{
                   background:
                     this.props.ctx.gameover.winner == parseInt(this.props.playerID)
-                      ? '#4caf50'
+                      ? 'var(--cell-active)'
                       : this.props.ctx.gameover.winner === undefined
-                        ? '#ff9800'
-                        : '#f44336',
-                  padding: '16px',
-                  borderRadius: 'var(--border-radius)',
-                  margin: '0 0 16px 0',
+                        ? 'var(--accent-secondary)'
+                        : 'var(--cell-attack)',
+                  padding: '20px',
+                  borderRadius: 'var(--border-radius-lg)',
+                  margin: '0 0 24px 0',
                   textAlign: 'center',
-                  boxShadow: 'var(--shadow-light)',
-                  color: '#ffffff',
+                  boxShadow: 'var(--shadow-lg)',
+                  color: 'var(--text-light)',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background:
+                      'linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%)',
+                    backgroundSize: '20px 20px',
+                  }}
+                />
                 <h1
                   style={{
                     margin: 0,
-                    fontSize: '1.5rem',
-                    fontWeight: '500',
+                    fontSize: '1.75rem',
+                    fontWeight: '700',
+                    position: 'relative',
+                    zIndex: 1,
+                    textShadow: '0 2px 8px rgba(0,0,0,0.3)',
                   }}
                 >
                   {this.props.ctx.gameover.winner === undefined
                     ? '🤝 Draw'
                     : this.props.ctx.gameover.winner == parseInt(this.props.playerID)
-                      ? '🎉 You Win!'
-                      : '💥 You Lose'}
+                      ? '🎉 Victory!'
+                      : '💥 Defeat'}
                 </h1>
               </div>
             )}
             <div
               style={{
-                background: 'var(--bg-primary)',
-                padding: '12px 16px',
-                borderRadius: 'var(--border-radius)',
-                margin: '0 0 16px 0',
+                background: 'var(--accent-primary)',
+                padding: '16px 20px',
+                borderRadius: 'var(--border-radius-lg)',
+                margin: '0 0 24px 0',
                 textAlign: 'center',
-                boxShadow: 'var(--shadow-light)',
-                color: '#ffffff',
+                boxShadow: 'var(--shadow-md)',
+                color: 'var(--text-light)',
+                position: 'relative',
+                overflow: 'hidden',
               }}
             >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background:
+                    'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
+                  transform: 'translateX(-100%)',
+                  animation: stage ? 'shimmer 2s infinite' : 'none',
+                }}
+              />
               <h2
                 style={{
                   margin: 0,
-                  fontSize: '1.1rem',
-                  fontWeight: '500',
+                  fontSize: '1.125rem',
+                  fontWeight: '600',
+                  position: 'relative',
+                  zIndex: 1,
+                  letterSpacing: '0.025em',
                 }}
               >
                 {!stage ? '⏳ Waiting...' : `${stageDescr[stage as keyof typeof stageDescr]}`}
@@ -559,27 +674,33 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 style={{
                   background: 'var(--cell-active)',
                   border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: 'var(--border-radius)',
-                  color: '#ffffff',
+                  padding: '16px 32px',
+                  borderRadius: 'var(--border-radius-lg)',
+                  color: 'var(--text-light)',
                   fontSize: '1rem',
-                  fontWeight: '500',
+                  fontWeight: '600',
                   cursor: 'pointer',
-                  boxShadow: 'var(--shadow-light)',
-                  transition: 'var(--transition)',
-                  marginBottom: '16px',
+                  boxShadow: 'var(--shadow-md)',
+                  transition: 'var(--transition-fast)',
+                  marginBottom: '24px',
                   width: '100%',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
+                  letterSpacing: '0.075em',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.boxShadow = 'var(--shadow-medium)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                  e.currentTarget.style.transition = 'var(--transition-fast)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.boxShadow = 'var(--shadow-light)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                  e.currentTarget.style.transition = 'var(--transition-fast)';
                 }}
               >
-                ✅ Finish Placement
+                <span style={{ position: 'relative', zIndex: 1 }}>✅ Ready to Battle</span>
               </button>
             )}
             <div style={blocksStyle}>
@@ -588,32 +709,44 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   <button
                     key={i}
                     style={{
-                      padding: '8px 16px',
-                      margin: '4px',
-                      background: '#ffffff',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: 'var(--border-radius)',
+                      padding: '12px 20px',
+                      margin: '6px',
+                      background: 'var(--surface-1)',
+                      border: '1px solid var(--border-light)',
+                      borderRadius: 'var(--border-radius-lg)',
                       color: 'var(--text-primary)',
                       fontSize: '0.875rem',
                       fontWeight: '500',
                       cursor: 'pointer',
-                      transition: 'var(--transition)',
-                      boxShadow: 'var(--shadow-light)',
-                      minWidth: '80px',
+                      transition: 'var(--transition-fast)',
+                      boxShadow: 'var(--shadow-sm)',
+                      minWidth: '100px',
+                      position: 'relative',
+                      overflow: 'hidden',
                     }}
                     onMouseEnter={e => {
                       this.hoverBlock(e, block);
-                      e.currentTarget.style.background = 'var(--cell-hover)';
-                      e.currentTarget.style.boxShadow = 'var(--shadow-medium)';
+                      e.currentTarget.style.background = 'var(--accent-primary)';
+                      e.currentTarget.style.color = 'var(--text-light)';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
+                      e.currentTarget.style.borderColor = 'var(--accent-primary)';
+                      e.currentTarget.style.transition = 'var(--transition-fast)';
                     }}
                     onMouseLeave={e => {
                       this.leaveBlock();
-                      e.currentTarget.style.background = '#ffffff';
-                      e.currentTarget.style.boxShadow = 'var(--shadow-light)';
+                      e.currentTarget.style.background = 'var(--surface-1)';
+                      e.currentTarget.style.color = 'var(--text-primary)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                      e.currentTarget.style.borderColor = 'var(--border-light)';
+                      e.currentTarget.style.transition = 'var(--transition-fast)';
                     }}
                     onClick={e => this.clickBlock(e, block)}
                   >
-                    {block.size} × {block.type}
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: '500' }}>
+                      {block.size} × {block.type}
+                    </span>
                   </button>
                 ))}
             </div>

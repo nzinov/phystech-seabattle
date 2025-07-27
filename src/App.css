@@ -24,10 +24,12 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #fafafa;
-  color: var(--text-primary);
-  font-size: 1.2rem;
-  font-weight: 500;
+  background: var(--bg-primary);
+  color: var(--text-light);
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.025em;
 }
 
 .loading::after {
@@ -67,6 +69,25 @@ input:focus {
   }
   100% {
     transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
   }
 }
 

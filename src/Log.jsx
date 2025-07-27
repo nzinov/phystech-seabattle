@@ -63,25 +63,36 @@ class LogEvent extends React.Component {
     return (
       <div
         style={{
-          padding: '8px 12px',
-          margin: '4px 0',
-          background: '#f5f5f5',
-          borderRadius: 'var(--border-radius)',
-          border: '1px solid #e0e0e0',
+          padding: '12px 16px',
+          margin: '6px 0',
+          background: 'var(--surface-2)',
+          borderRadius: 'var(--border-radius-sm)',
+          border: '1px solid var(--border-light)',
           cursor: 'pointer',
-          transition: 'var(--transition)',
+          transition: 'all 0.03s ease',
           fontSize: '0.875rem',
           color: 'var(--text-primary)',
+          lineHeight: '1.5',
+          position: 'relative',
+          overflow: 'hidden',
         }}
         onMouseEnter={e => {
           this.props.highlight(this.getHighlight());
-          e.currentTarget.style.background = 'var(--cell-hover)';
-          e.currentTarget.style.boxShadow = 'var(--shadow-light)';
+          e.currentTarget.style.background = 'var(--accent-primary)';
+          e.currentTarget.style.color = 'var(--text-light)';
+          e.currentTarget.style.transform = 'translateX(2px)';
+          e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+          e.currentTarget.style.borderColor = 'var(--accent-primary)';
+          e.currentTarget.style.transition = 'all 0.03s ease';
         }}
         onMouseLeave={e => {
           this.props.highlight([]);
-          e.currentTarget.style.background = '#f5f5f5';
+          e.currentTarget.style.background = 'var(--surface-2)';
+          e.currentTarget.style.color = 'var(--text-primary)';
+          e.currentTarget.style.transform = 'translateX(0)';
           e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.borderColor = 'var(--border-light)';
+          e.currentTarget.style.transition = 'all 0.03s ease';
         }}
       >
         {this.renderText()}
@@ -94,12 +105,12 @@ const style = {
   width: '100%',
   maxHeight: '400px',
   overflowY: 'auto',
-  background: '#ffffff',
-  borderRadius: 'var(--border-radius)',
-  padding: '12px',
-  margin: '16px 0',
-  border: '1px solid #e0e0e0',
-  boxShadow: 'var(--shadow-light)',
+  background: 'var(--surface-1)',
+  borderRadius: 'var(--border-radius-lg)',
+  padding: '16px',
+  margin: '20px 0',
+  border: '1px solid var(--border-light)',
+  boxShadow: 'var(--shadow-sm)',
 };
 
 export class Log extends React.Component {
@@ -108,15 +119,19 @@ export class Log extends React.Component {
       <div>
         <h3
           style={{
-            margin: '0 0 8px 0',
+            margin: '0 0 16px 0',
             color: 'var(--text-primary)',
-            fontSize: '1rem',
-            fontWeight: '500',
+            fontSize: '1.125rem',
+            fontWeight: '600',
             textTransform: 'uppercase',
-            letterSpacing: '0.5px',
+            letterSpacing: '0.075em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
           }}
         >
-          🕰️ Battle Log
+          <span style={{ fontSize: '1.25rem' }}>🕰️</span>
+          Battle Log
         </h3>
         <div style={style}>
           {this.props.events.length === 0 ? (
