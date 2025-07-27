@@ -885,16 +885,16 @@ export const GameRules: Game<GameState> = {
           responseBlock: { moves: { ResponseBlock: ResponseBlockMove, Label: LabelMove } },
           wait: { moves: { Label: LabelMove } },
         },
-        onBegin({ G }: any) {
+        onBegin({ G }: ActionContext) {
           for (let i = 0; i < 2; ++i) {
             G.usedBrander[i] = Math.max(0, G.usedBrander[i] - 1);
           }
         },
-        onMove({ G, ctx, events }: any) {
+        onMove({ G, ctx, events }: ActionContext) {
           if (G.attackBlock && G.responseBlock) {
-            let ship = getShip(G, G.attackFrom);
+            let ship = getShip(G, G.attackFrom!);
             if (ship?.compare) {
-              let res = ship.compare(getPos(G, G.attackTo)!);
+              let res = ship.compare(getPos(G, G.attackTo!)!);
               battle(
                 { G, ctx, events },
                 res,
@@ -926,7 +926,7 @@ export const GameRules: Game<GameState> = {
   },
   moves: {},
 
-  endIf: ({ G }: any) => {
+  endIf: ({ G }: ActionContext) => {
     let fortCount = [0, 0];
     for (let i = 0; i < 14; ++i) {
       for (let j = 0; j < 14; ++j) {
@@ -946,21 +946,21 @@ export const GameRules: Game<GameState> = {
     }
   },
 
-  playerView({ G, ctx, playerID }: any): GameState {
+  playerView({ G, ctx, playerID }: { G: GameState; ctx: Ctx; playerID: string | null }): GameState {
     G = deepcopy(G);
     for (let i = 0; i < SIZE; ++i) {
       for (let j = 0; j < SIZE; ++j) {
-        if (ctx.phase == 'place' && !checkSide(G, parseInt(playerID), [i, j])) {
+        if (ctx.phase == 'place' && !checkSide(G, parseInt(playerID!), [i, j])) {
           G.cells[i][j] = null;
           continue;
         }
         let cell = G.cells[i][j];
-        if (cell && cell.player != parseInt(playerID)) {
+        if (cell && cell.player != parseInt(playerID!)) {
           cell.type = cell.player == -1 ? 'Sinking' : 'Unknown';
           cell.state = {};
         }
         if (cell) {
-          cell.label = cell.label?.[playerID];
+          cell.label = cell.label?.[playerID!];
         }
         G.cells[i][j] = cell;
       }
