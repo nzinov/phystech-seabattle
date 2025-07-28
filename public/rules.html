@@ -1,867 +1,1172 @@
-<h2>Основные правила</h2>
-<p>В Морской бой по-физтеховски играют два игрока. Игра ведется на квадратном клетчатом поле 14 на 14 клеток. Оба игрока имеют одинаковые наборы специальных фишек, изображения на которых видны самому игроку, но не видны противнику. То есть каждый игрок видит свои фишки и положение - но не тип - фишек соперника. Перед началом игры игроки расставляют свои наборы фишек произвольным образом на первых 3-х линиях поля (друг напротив друга). После этого игроки по очереди совершают ходы.</p>
-<p>Цель игры уничтожить или захватить неподвижную фишку <strong>- Форт</strong> противника.</p>
-<h3>Возможные действия</h3>
-В разные моменты хода доступны все или некоторые из следующих действий. Чтобы выполнить действие, нужно зажать соответствующую ему клавишу клавиатуры и переместить нужную фишку с помощью мышки.
-<table>
-    <tr><th>Клавиша</th><th>Название действия</th><th>Описание действия</th></tr>
-    <tr><td>M</td><td>Перемещение</td><td>Передвижение фишки на соседнюю (не по диагонали) свободную клетку</td></tr>
-    <tr><td>A</td><td>Атака</td><td>Выбранная фишка атакует соседнюю (не по диагонали) фишку противника</td></tr>
-    <tr><td>S</td><td>Выстрел</td><td>Смотрите описание фишек</td></tr>
-    <tr><td>E</td><td>Взрыв</td><td>Смотрите описание фишек</td></tr>
-</table>
-<h3>Список фаз игры</h3>
-<p>Ход игрока состоит из основной (move, shoot or attack) и, возможно, дополнительной (attack or skip) фаз.</p>
-<p>В основную фазу можно выполнять любые действия. Если игрок в основную фазу выбрал перемещение фишки, то он получает возможность действовать в дополнительную фазу, в которой можно только атаковать или взрывать. Дополнительную фазу можно пропустить нажатием кнопки Пробел. В случае, если игрок удачно произвел атаку или выстрел, то он немедленно начинает дополнительный ход.</p>
-<p>Надпись справа вверху помогает понять, в какой фазе игры вы находитесь:</p>
-<dl class="dl-horizontal"><dt>Надпись на панели состояния</dt><dd>Описание</dd><dt>Place your ships</dt><dd>Фаза расстановки, передвиньте корабли внутри зеленой области, чтобы расставить их для начала игры. Когда будете готовы, нажмите кнопку Finish placement.</dd><dt>Wait</dt><dd>Сейчас действует ваш противник, вам остается ждать, ну или обдумывать следующие ходы</dd><dt>Move, shoot or attack</dt><dd>Доступны действия хода, выстрела, атаки и взрыва.</dd><dt>Attack or skip</dt><dd>В эту фазу можно только атаковать и взрывать, если хотите, можно ее пропустить, нажав Пробел</dd>
-<dt>Select you block</dt><dd>Вам нужно заявить блок, нажав на одну из кнопок с названиями блоков в правой панели</dd></dl>
-<h3>&nbsp;</h3>
-<h3>Подробнее об атакe: блоки</h3>
-<p>Два корабля (фишки) одного типа стоящие рядом (не по диагонали) образуют блок из двух кораблей. Если рядом с одним из них (опять же не по диагонали) стоит третий корабль, то получается блок из трёх кораблей (ясно, что тройной блок может стоять или &laquo;линией&raquo; или &laquo;уголком&raquo;). Блоков больше трёх кораблей не бывает. Не все типы кораблей могут образовывать блоки, а <strong>Рейдер</strong> может образовывать блоки не только с другими <strong>Рейдерами</strong>, но&nbsp; и с фишками других типов. (подробности будут дальше).</p>
-<p>Во время атаки игрок выбирает какой-нибудь корабль противника как цель атаки. Противник должен выбрать, в какой блок входит его атакованный корабль. Так, например, если вы атаковали один из трех стоящих в линию рядышком <strong>Эсминцев</strong>, он может заявить блок из одного, двух, или трех эсминцев (так как не обязательно включать в блок рядом стоящие корабли). Атаковавший видит, какой блок заявил его противник, но не наоборот. Если ваш блок сильнее - противник потеряет атакованную фишку. Если ваш блок слабее - вы теряете фишку, которой атаковали. А вот если ваш блок и блок противника равны по силе, то и ваш блок (все корабли, а не только один) и блок противника полностью уничтожаются.</p>
-<p>Когда вам нужно выделить блок, на панели состояния появляется надпись "Select your block", и атакующий и атакованный корабль выделяются синим и красным фоном соответсвенно. В правой панели появляются кнопки, позволяющие выбрать блок (обратите внимание, что при наведении на кнопку блок подсвечивается).</p>
-<p><strong>Пример:</strong> Крейсер стоящий по диагонали с другим Крейсером делает ход вставая рядом с ним (блок 2 Крейсера) и рядом с неизвестной фишкой противника, стоящей в ряд с ещё двумя другими. При этом Крейсер атакует фишку стоящую рядом с ним. атакованная фишка входит в блок 2 Эсминца&raquo;. Владелец крейсеров объявляет: &laquo;Был блок :-)&raquo; и, не объявляя своих фишек, снимает атакованного Эсминца. Далее владелец Крейсера по правилу &laquo;убил-ходишь&raquo; получает новый ход и, разрывая блок Крейсеров делает одним из них ход вперёд, атакую следующую фишку (он уверен, что там не более 1 Эсминца). Атакованный корабль отвечает: &laquo;Блок 2 Эсминца!&raquo;. &laquo;А я Крейсер&hellip;был :-(&raquo; - отвечает атаковавший и теряет Крейсер. Как такое могло получиться? Игрок с Эсминцами имел 3 Эсминца стоящие в ряд, когда одного из них (крайнего) атаковали 2 неизвестные фишки, то игрок имел право заявить его и как 1 Эсминец, и как блок 2 Эсминцев, и как блок 3 Эсминцев. Не предполагая, что это атака Крейсеров, игрок предпочёл заявить лишь 2 Эсминца и проиграл атакованную фишку. Когда же введённый в заблуждение атакующий разорвал свой блок и атаковал оставшихся 2-х Эсминцев одиночным Крейсером, то конечно же был &laquo;убит&raquo;. Стоит обратить внимание на нюанс: если бы атакованный заявил сразу блок 3 Эсминца, то у атакующего было бы 2 варианта: или заявить блок 2 Крейсера и произвести размен блоков, либо не &laquo;засвечивая&raquo; 2-го Крейсера пожертвовать первым, как одиночной фишкой. В зависимости от ситуации бывают выгодны оба варианта.</p>
-<img src="rules/example.png" class="img-responsive" alt="" />
-<h2>Фишки</h2>
-<p>Разных типов фишек довольно много, но многие из них не отличаются друг от друга ничем, кроме силы. Условно их можно разделить на несколько классов:</p>
-<p align="center">Фишки, образующие блоки</p>
-<p><strong><em>Авианосец (сокр. - Ав)</em></strong> - формально самая сильная фишка, один на один бьёт любую другую фишку кроме <strong>КрПл.</strong> Также бьётся блоками <strong>2-х Линкоров (Лк)</strong> или <strong>3-х Крейсеров (Кр).</strong> Способность &laquo;нести&raquo; рядом с собой <strong>Самолёт (См)</strong>, и производить &laquo;выстрел&raquo; им.</p>
-<p><strong><em>Линкор (сокр. Лк</em></strong> <em>) -</em> следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong>, <strong>КрПл и Пл</strong>(!!!). Также бьётся блоками <strong>2-х Крейсеров (Кр)</strong> или <strong>3-х Эсминцев (Эс)</strong>. <strong>2Лк = 3Кр</strong>. <strong>3Лк = 2Ав</strong>. В наборе их всего по 2 штуки у каждого игрока.</p>
-<p>&nbsp;</p>
-<p><strong><em>Крейсер (сокр. - Кр) </em></strong> - следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong> и <strong>Лк</strong>. Бьётся блоками <strong>2-х Рейдеров (Рд</strong>) (!), <strong>2-х Эсминцев (Эс)</strong> или <strong>3-х Сторожей (Ст)</strong>. <strong>2Кр = 3Эс</strong>, <strong>3Кр = 2Лк</strong>.</p>
-<p><strong><em>Эсминец (сокр. - Эс)</em></strong> - следующая по рангу фишка (если пропустить <strong>Рейдер (Рд)</strong>), один на один бьёт всех кроме <strong>Ав</strong> , <strong>Лк, Кр и Рд</strong> (!). Бьётся блоками<strong> 2Ст</strong> или <strong>3Тк</strong>. <strong>2Эс = 3Ст</strong>. <strong>3Эс = 2Кр</strong>.</p>
-<p><strong><em>Сторож (сокр. - Ст)</em></strong> - следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong> , <strong>Лк, Кр, Рд, Эс и КрПл</strong>. Бьётся блоками <strong>2Тк</strong> или <strong>3Тр (Тральщика)</strong>. <strong>2Ст = 3Тк = 1Рд. 3Ст = 2Э.</strong></p>
-<p><strong><em>Торпедный Катер (сокр. - Тк</em></strong> ) - следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong> , <strong>Лк, Кр, Рд, Эс, Ст и КрПл</strong>. Бьётся блоком <strong>2Тр.</strong> <strong>2Тк = 3Тр. 3Тк = 2Ст = 1Рд.</strong> Особые свойства: способен таскать рядом с собой <strong>Торпеды</strong> и запускать их; может двигаться, как по одной клетке в ход, так и по две (но не по диагонали!). Так, например, может сделать ход вперёд-вправо или вправо-вперёд по свободным клеткам, но, если справа и спереди стоят корабли, то занять клетку &laquo;проскользнув&raquo; между ними он не может!</p>
-<p><strong><em>Тральщик ( сокр. - Тр)</em></strong> - следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong> , <strong>Лк, Кр, Рд, Эс, Ст, Тк и КрПл</strong>. То есть бьёт только<strong> Пл.</strong> <strong>3Тр=2Тк</strong>. При всей своей слабости, обладает неоценимым свойством - способен разминировать (уничтожать не погибая сам)<strong> Мины</strong>, <strong>Торпеды</strong> и <strong>Брандеры</strong>.</p>
-<div align="center">
-<table border="0" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td width="29">&nbsp;</td>
-<td width="29">
-<p align="center"><strong>Ав</strong></p>
-</td>
-<td width="29">
-<p align="center"><strong>Лк</strong></p>
-</td>
-<td width="29">
-<p align="center"><strong>Кр</strong></p>
-</td>
-<td width="29">
-<p align="center"><strong>Эс</strong></p>
-</td>
-<td width="29">
-<p align="center"><strong>Ст</strong></p>
-</td>
-<td width="29">
-<p align="center"><strong>Тк</strong></p>
-</td>
-<td width="29">
-<p align="center"><strong>Тр</strong></p>
-</td>
-<td width="73">
-<p align="center">сила в "тральщиках"</p>
-</td>
-</tr>
-<tr>
-<td width="29">
-<p align="center"><strong>Ав</strong></p>
-</td>
-<td width="29">
-<p align="center">=</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="73">
-<p align="center">11,390625</p>
-</td>
-</tr>
-<tr>
-<td width="29">
-<p align="center"><strong>Лк</strong></p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">=</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="73">
-<p align="center">7,59375</p>
-</td>
-</tr>
-<tr>
-<td width="29">
-<p align="center"><strong>Кр</strong></p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">=</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="73">
-<p align="center">5,0625</p>
-</td>
-</tr>
-<tr>
-<td width="29">
-<p align="center"><strong>Эс</strong></p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">=</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="73">
-<p align="center">3,375</p>
-</td>
-</tr>
-<tr>
-<td width="29">
-<p align="center"><strong>Ст</strong></p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">=</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="73">
-<p align="center">2,25</p>
-</td>
-</tr>
-<tr>
-<td width="29">
-<p align="center"><strong>Тк</strong></p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">=</p>
-</td>
-<td width="29">
-<p align="center">+</p>
-</td>
-<td width="73">
-<p align="center">1,5</p>
-</td>
-</tr>
-<tr>
-<td width="29">
-<p align="center"><strong>Тр</strong></p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">-</p>
-</td>
-<td width="29">
-<p align="center">=</p>
-</td>
-<td width="73">
-<p align="center">1</p>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p align="center">Таб.1.1</p>
-<p>Все перечисленные фишки образуют строгую вертикаль, где каждый корабль следующего по старшинству ранга ровно в 1,5 раза слабее предыдущего. Т. е. <strong>Ав = 1,5Лк = 1,5*1,5Кр = 1,5*1,5*1,5Эс = 1,5*1,5*1,5*1,5Ст = &hellip;</strong> и т. д.</p>
-<p>Но есть фишка, находящаяся между рангов - это <strong>Рейдер</strong>. <strong>Рейдер</strong> - промежуточная между <strong>Кр</strong> и <strong>Эс</strong> фишка, способная образовывать блоки, как между собой, так и с младшими фишками.</p>
-<p><strong>Рейдер (сокр. - Рд)</strong> - следующая по рангу за Крейсером фишка, один на один бьёт всех кроме <strong>Ав</strong>, <strong>Лк и Кр</strong>. Бьётся блоками <strong>2Эс</strong> и<strong>3Ст</strong>. По силе в точности равен <strong>2Ст</strong>. <strong>Рд = 2Ст = 3Тк</strong>. <strong>Рд </strong>может создавать блоки с любыми фишками младших классов (естественно, только теми, которые могут образовывать блоки, то есть <strong>Эс, Ст, Тк и Тр</strong>). В таком блоке <strong>Рд </strong>притворяется стоящей рядом фишкой, например, если рядом стоит <strong>Тк</strong>, то такой блок может объявить себя как <strong>2Тк</strong> (а, если рядом ещё один <strong>Тк</strong>, то соответственно,<strong> 3Тк</strong>). Такие комбинации обычно используются, когда вашу фишку атакует более сильная, чтобы защитить её. Но, учтите, что будет очень обидно разменять, например, <strong>2Тк+Рд</strong> (объявленные <strong>3Тк</strong>) на <strong>2Ст</strong>! Особым свойством<strong> Рд</strong>, является также то, что<strong> Рд</strong> способен создавать блок со <strong>Ст</strong> обозначаемый <strong>2 Эс</strong>, также может образовывать в целях маскировки блок со <strong>Ст</strong> - <strong>2 Ст</strong> (но учтите: если<strong> Рд</strong> в таком блоке атакует <strong>Крейсер</strong>, то <strong>Рейдер</strong> будет уничтожен, хотя если бы объявил себя <strong>2 Эсминцами</strong> &laquo;съел&raquo; бы <strong>Крейсера</strong>). Так же <strong>Рд&nbsp;</strong>может образовать блок из 3-х кораблей <strong>Рд-Ст-Эс</strong> (<strong>Рд-Ст-Рд</strong>)&nbsp; - объявляется <strong>3 Эс</strong>.</p>
-<p align="center">Самостоятельно ходящие фишки, НЕ образующие блоки.</p>
-<p><strong><em>Подводная Лодка (сокр. - Пл</em></strong> ) - охотница на <strong>Линкоры</strong>. Бьётся всеми кроме <strong>Лк</strong> (одиночного, или входящего в блок, роли не играет) и <strong>Тп</strong>.</p>
-<p><strong>Крейсерская Подводная Лодка (сокр.- КрПл) </strong> - очень &laquo;крута&raquo;. Бьёт всех кроме <strong>Кр, Рд, Эс</strong>. Бьет фишки входящие в блоки, как отдельные. То есть, атаковав входящий в блок <strong>3 Эсминца</strong> <strong>Сторож</strong>, КрПл уничтожает его.</p>
-<p><strong><em>Брандер (сокр. - Бр)</em></strong> - Может выстрелить в стоящий рядом корабль противника и таким образом захватить его. Это значит, что этот корабль становится вашим кораблём. После захвата ход остается у вас. Не может стрелять несколько раз подряд. Корабли, атакующие <strong>Брандер</strong>, взрываются вместе с ним, как на <strong>Мине</strong> (кроме <strong>Тральщика</strong>, естественно).</p>
-<p><strong><em>Атомная Бомба (сокр. - АБ)</em></strong> - особая фишка, ходит как обычный корабль, не может атаковать, но может &laquo;взорваться&raquo;. При взрыве уничтожает все корабли и чужие, и свои в квадрате 5 на 5 клеток вокруг себя. Взрывается как при атаке чужим кораблём, так самостоятельно - &laquo;пошёл и взорвался&raquo; (для этого в фазу атаки нужно нажать на нее).</p>
-<p><strong><em>Нейтронная Бомба (сокр. - НБ)</em></strong> - особая фишка, все правила игры <strong>НБ</strong> совпадают с правилами по <strong>АБ<em>. </em></strong>Единственное отличие - результат от взрыва. Если при взрыве <strong>АБ</strong> все фишки в квадрате 5х5 &laquo;уничтожаются&raquo;, то при взрыве <strong>НБ</strong> фишки в квадрате 5х5 становятся &laquo;ничейными&raquo;. Чтобы &laquo;захватить&raquo; такую &laquo;ничейную&raquo; фишку достаточно подойти к ней своей и атаковать её.</p>
-<div align="center">
-<table border="0" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td width="43">&nbsp;</td>
-<td width="43">
-<p align="center"><strong>Ав</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>Лк</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>Кр</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>Рд</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>Эс</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>КрПл</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>Ст</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>Тк</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>Тр</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>Пл</strong></p>
-</td>
-<td width="77">
-<p align="center">сила в "тральщиках"</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>Ав</strong></p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center"><strong>-</strong></p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="77">
-<p align="center">11,390625</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>Лк</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center"><strong>-</strong></p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center"><strong>-</strong></p>
-</td>
-<td width="77">
-<p align="center">7,59375</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>Кр</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="77">
-<p align="center">5,0625</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>Рд</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="77">
-<p align="center">4,5</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>Эс</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="77">
-<p align="center">3,375</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>КрПл</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>+</strong></p>
-</td>
-<td width="43">
-<p align="center"><strong>+</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="77">
-<p align="center">-</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>Ст</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="77">
-<p align="center">2,25</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>Тк</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="77">
-<p align="center">1,5</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>Тр</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="43">
-<p align="center">+</p>
-</td>
-<td width="77">
-<p align="center">1</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center"><strong>Пл</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center"><strong>+</strong></p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">-</p>
-</td>
-<td width="43">
-<p align="center">=</p>
-</td>
-<td width="77">
-<p align="center">-</p>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p align="center">Таб. 1.2</p>
-<p align="center">НЕсамостоятельные фишки.</p>
-<img src="rules/dependent.png" class="img-responsive" alt="" />
-<p><strong><em>Мина (сокр. - Мн)</em></strong> - фишка ходящая рядом с <strong>Эсминцем</strong>. Может передвигаться только по 8 клеткам вокруг <strong>Эс</strong> (в том числе и диагональным). Может передаваться с &laquo;поля ответственности&raquo; одного <strong>Эс</strong> к другому <strong>Эс</strong>. При атаке <strong>Мн</strong> кораблём противника взрывается вместе с ним (за исключением <strong>Тральщика</strong>). Сама атаковать и стрелять не может (!).</p>
-<p><strong><em>Торпеда (сокр.- Т)</em></strong> - аналогично, ходит только рядом с <strong>Тк</strong>. Может ходить на 2 клетки, как <strong>Тк</strong>. При атаке кораблём, взрывается как <strong>Мина</strong>, также тралится <strong>Тральщиком</strong>. Может стрелять, если рядом находится <strong>Тк</strong>. При выстреле <strong>Т</strong> поражает любую фишку (кроме <strong>Форта</strong>) на расстоянии не более чем 4 клетки и сама уничтожается. Бьёт только по прямой в любом направлении. Через корабли не прыгает, поэтому может поразить только ближайший по прямой корабль.</p>
-<p><strong><em>Самолёт (сокр. - См</em></strong> ) - ходит только рядом с <strong>Ав</strong>. Стреляет, если рядом есть<strong> Ав</strong>, при этом уничтожает любую фишку (кроме <strong>Форта</strong>) на любом расстоянии по прямой (в любом направлении, даже по диагонали), при этом погибает сам. Летает над кораблями. При атаке противником взрывается уничтожая любой(!!!) корабль в том числе и <strong>Тр</strong>.</p>
-<p>&nbsp;</p>
-<p><strong><em>КрПл-ная Ракета (сокр. - Рк ) </em></strong> - ходит только вокруг <strong>КрПл</strong>, стреляет тоже, если рядом <strong>КрПл</strong>. Выстрелить<strong> Рк</strong> может одним из двух способов:</p>
-<ol>
-<li><strong>Ракета</strong> запускается на расстояние не более 2-х клеток по прямой (над кораблями, как и <strong>См</strong>), при попадании поражает квадрат 3х3 вокруг себя</li>
-<li><strong>Ракета</strong> запускается по прямой не более, чем на 3 клетки (над кораблями) и поражает только корабль, в который попала.</li>
-</ol>
-<p>чтобы выбрать способ, которым использовать <strong>Рк</strong> нажмите R при включенном режиме выстрела (подсказка показывается на панели состояния)</p>
-<p><strong><em>Транспорт (сокр. &ndash; Тп)</em></strong> &ndash; самый слабый из кораблей, бьётся даже Пл. Особое свойство &ndash; может перемещать ЛЮБЫЕ несамостоятельные фишки: мины, торпеды, самолеты, ракеты&hellip;(форты, конечно, не двигаются). Т.е. рядом с ней все эти фишки могут двигаться не имея &laquo;родных&raquo; носителей.</p>
-<p align="center">НЕподвижные фишки.</p>
-<p><strong><em>Форт (сокр.- Ф) </em></strong> <strong>- Форт</strong> единственная абсолютно неподвижная вфишка. В сущности, это просто флаг. Он не может ничего - просто стоит и ждёт, пока его возьмут. <strong>Форт</strong> можно взять любой спрашивающей фишкой, его можно уничтожить <strong>АБ</strong>, его можно захватить <strong>Брандером</strong> или <strong>Нейтронной Бомбой</strong>. Внимание: <strong>Торпеды</strong> и <strong>Самолёты</strong> вреда <strong>Форту</strong> не наносят. Форты в начале игры расставляются на произвольные позиции, где и находятся до конца игры или пока их не возьмут.</p>
-<p align="center">Таблица количества фишек &laquo;МБ&raquo;.</p>
-<div align="center">
-<table border="0" cellspacing="0" cellpadding="0">
-<tbody>
-<tr>
-<td width="43">
-<p align="center">Ав</p>
-</td>
-<td width="74">
-<p align="center">1</p>
-</td>
-<td width="74">
-<p align="center">См</p>
-</td>
-<td width="74">
-<p align="center">1</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center">Лк</p>
-</td>
-<td width="74">
-<p align="center">2</p>
-</td>
-<td width="74">
-<p align="center">Рк</p>
-</td>
-<td width="74">
-<p align="center">1</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center">Кр</p>
-</td>
-<td width="74">
-<p align="center">6</p>
-</td>
-<td width="74">
-<p align="center">Т</p>
-</td>
-<td width="74">
-<p align="center">4</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center">Рд</p>
-</td>
-<td width="74">
-<p align="center">2</p>
-</td>
-<td width="74">
-<p align="center">Мн</p>
-</td>
-<td width="74">
-<p align="center">7</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center">Эс</p>
-</td>
-<td width="74">
-<p align="center">6</p>
-</td>
-<td width="74">
-<p align="center">Бр</p>
-</td>
-<td width="74">
-<p align="center">2</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center">КрПл</p>
-</td>
-<td width="74">
-<p align="center">1</p>
-</td>
-<td width="74">
-<p align="center">АБ</p>
-</td>
-<td width="74">
-<p align="center">1</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center">Ст</p>
-</td>
-<td width="74">
-<p align="center">7</p>
-</td>
-<td width="74">
-<p align="center">НБ</p>
-</td>
-<td width="74">
-<p align="center">1</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center">Тк</p>
-</td>
-<td width="74">
-<p align="center">6</p>
-</td>
-<td width="74">
-<p align="center">Фт</p>
-</td>
-<td width="74">
-<p align="center">2</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center">Тр</p>
-</td>
-<td width="74">
-<p align="center">7</p>
-</td>
-<td width="43">
-<p align="center">Тп</p>
-</td>
-<td width="74">
-<p align="center">1</p>
-</td>
-</tr>
-<tr>
-<td width="43">
-<p align="center">Пл</p>
-</td>
-<td width="74">
-<p align="center">4</p>
-</td>
-<td width="74">
-<p align="center"><strong>Итого</strong></p>
-</td>
-<td width="74">
-<p align="center"><strong>62</strong></p>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Правила игры - Морской бой по-физтеховски</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #5d6d7e;
+            margin-top: 25px;
+        }
+        .ship-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #e74c3c;
+        }
+        .ship-item {
+            display: flex;
+            align-items: flex-start;
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .ship-image {
+            width: 48px;
+            height: 48px;
+            margin-right: 15px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            background: #f0f0f0;
+        }
+        .ship-description {
+            flex: 1;
+        }
+        .ship-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .action-table th {
+            background-color: #27ae60;
+        }
+        .combat-table th {
+            background-color: #e74c3c;
+        }
+        .quantity-table th {
+            background-color: #9b59b6;
+        }
+        .phase-list {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .dl-horizontal dt {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-top: 10px;
+        }
+        .dl-horizontal dd {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        .example-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .example-section h4 {
+            color: #856404;
+            margin-top: 0;
+        }
+        img.img-responsive {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+        .category-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            margin: 25px 0 15px 0;
+        }
+        .strength-indicator {
+            background: #3498db;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        strong {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Морской бой по-физтеховски - Правила игры</h1>
+
+        <h2>Основные правила</h2>
+        <p>В Морской бой по-физтеховски играют два игрока. Игра ведется на квадратном клетчатом поле 14 на 14 клеток. Оба игрока имеют одинаковые наборы специальных фишек, изображения на которых видны самому игроку, но не видны противнику. То есть каждый игрок видит свои фишки и положение - но не тип - фишек соперника. Перед началом игры игроки расставляют свои наборы фишек произвольным образом на первых 3-х линиях поля (друг напротив друга). После этого игроки по очереди совершают ходы.</p>
+        <div class="ship-item">
+            <img src="figures/F.png" alt="Форт" class="ship-image">
+            <div class="ship-description">
+                <div class="ship-name">Цель игры</div>
+                <p>Уничтожить или захватить неподвижную фишку <strong>Форт</strong> противника.</p>
+            </div>
+        </div>
+
+        <h3>Возможные действия</h3>
+        <p>В разные моменты хода доступны все или некоторые из следующих действий. Чтобы выполнить действие, нужно зажать соответствующую ему клавишу клавиатуры и переместить нужную фишку с помощью мышки.</p>
+        <table class="action-table">
+            <tr><th>Клавиша</th><th>Название действия</th><th>Описание действия</th></tr>
+            <tr><td><strong>M</strong></td><td>Перемещение</td><td>Передвижение фишки на соседнюю (не по диагонали) свободную клетку</td></tr>
+            <tr><td><strong>A</strong></td><td>Атака</td><td>Выбранная фишка атакует соседнюю (не по диагонали) фишку противника</td></tr>
+            <tr><td><strong>S</strong></td><td>Выстрел</td><td>Смотрите описание фишек</td></tr>
+            <tr><td><strong>E</strong></td><td>Взрыв</td><td>Смотрите описание фишек</td></tr>
+        </table>
+
+        <h3>Список фаз игры</h3>
+        <div class="phase-list">
+            <p>Ход игрока состоит из основной (move, shoot or attack) и, возможно, дополнительной (attack or skip) фаз.</p>
+            <p>В основную фазу можно выполнять любые действия. Если игрок в основную фазу выбрал перемещение фишки, то он получает возможность действовать в дополнительную фазу, в которой можно только атаковать или взрывать. Дополнительную фазу можно пропустить нажатием кнопки Пробел. В случае, если игрок удачно произвел атаку или выстрел, то он немедленно начинает дополнительный ход.</p>
+            <p><strong>Надпись справа вверху помогает понять, в какой фазе игры вы находитесь:</strong></p>
+            <dl class="dl-horizontal">
+                <dt>Place your ships</dt><dd>Фаза расстановки, передвиньте корабли внутри зеленой области, чтобы расставить их для начала игры. Когда будете готовы, нажмите кнопку Finish placement.</dd>
+                <dt>Wait</dt><dd>Сейчас действует ваш противник, вам остается ждать, ну или обдумывать следующие ходы</dd>
+                <dt>Move, shoot or attack</dt><dd>Доступны действия хода, выстрела, атаки и взрыва.</dd>
+                <dt>Attack or skip</dt><dd>В эту фазу можно только атаковать и взрывать, если хотите, можно ее пропустить, нажав Пробел</dd>
+                <dt>Select you block</dt><dd>Вам нужно заявить блок, нажав на одну из кнопок с названиями блоков в правой панели</dd>
+            </dl>
+        </div>
+
+        <h3>Подробнее об атаке: блоки</h3>
+        <p>Два корабля (фишки) одного типа стоящие рядом (не по диагонали) образуют блок из двух кораблей. Если рядом с одним из них (опять же не по диагонали) стоит третий корабль, то получается блок из трёх кораблей (ясно, что тройной блок может стоять или «линией» или «уголком»). Блоков больше трёх кораблей не бывает. Не все типы кораблей могут образовывать блоки, а <strong>Рейдер</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;"> может образовывать блоки не только с другими <strong>Рейдерами</strong>, но  и с фишками других типов. (подробности будут дальше).</p>
+        <p>Во время атаки игрок выбирает какой-нибудь корабль противника как цель атаки. Противник должен выбрать, в какой блок входит его атакованный корабль. Так, например, если вы атаковали один из трех стоящих в линию рядышком <strong>Эсминцев</strong>, он может заявить блок из одного, двух, или трех эсминцев (так как не обязательно включать в блок рядом стоящие корабли). Атаковавший видит, какой блок заявил его противник, но не наоборот. Если ваш блок сильнее - противник потеряет атакованную фишку. Если ваш блок слабее - вы теряете фишку, которой атаковали. А вот если ваш блок и блок противника равны по силе, то и ваш блок (все корабли, а не только один) и блок противника полностью уничтожаются.</p>
+        <p>Когда вам нужно выделить блок, на панели состояния появляется надпись "Select your block", и атакующий и атакованный корабль выделяются синим и красным фоном соответсвенно. В правой панели появляются кнопки, позволяющие выбрать блок (обратите внимание, что при наведении на кнопку блок подсвечивается).</p>
+
+        <h2>Фишки</h2>
+        <p>Разных типов фишек довольно много, но многие из них не отличаются друг от друга ничем, кроме силы. Условно их можно разделить на несколько классов:</p>
+        
+        <div class="category-header">Фишки, образующие блоки</div>
+        <div class="ship-section">
+            <div class="ship-item">
+                <img src="figures/Av.png" alt="Авианосец" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Авианосец (сокр. - Ав) <span class="strength-indicator">11.39 е.с.</span></div>
+                    <p>Формально самая сильная фишка, один на один бьёт любую другую фишку кроме <strong>КрПл.</strong> Также бьётся блоками <strong>2-х Линкоров (Лк)</strong> или <strong>3-х Крейсеров (Кр).</strong> Способность «нести» рядом с собой <strong>Самолёт (См)</strong> <img src="figures/Sm.png" alt="Самолёт" style="width: 20px; height: 20px; vertical-align: middle;"> и производить «выстрел» им.</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Lk.png" alt="Линкор" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Линкор (сокр. - Лк) <span class="strength-indicator">7.59 е.с.</span></div>
+                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong>, <strong>КрПл и Пл</strong>(!!!). Также бьётся блоками <strong>2-х Крейсеров (Кр)</strong> или <strong>3-х Эсминцев (Эс)</strong>. <strong>2Лк = 3Кр</strong>. <strong>3Лк = 2Ав</strong>. В наборе их всего по 2 штуки у каждого игрока.</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Kr.png" alt="Крейсер" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Крейсер (сокр. - Кр) <span class="strength-indicator">5.06 е.с.</span></div>
+                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong> и <strong>Лк</strong>. Бьётся блоками <strong>2-х Рейдеров (Рд</strong>) (!), <strong>2-х Эсминцев (Эс)</strong> или <strong>3-х Сторожей (Ст)</strong>. <strong>2Кр = 3Эс</strong>, <strong>3Кр = 2Лк</strong>.</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Rd.png" alt="Рейдер" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Рейдер (сокр. - Рд) <span class="strength-indicator">4.5 е.с.</span></div>
+                    <p>Следующая по рангу за Крейсером фишка, один на один бьёт всех кроме <strong>Ав</strong>, <strong>Лк и Кр</strong>. Бьётся блоками <strong>2Эс</strong> и<strong>3Ст</strong>. По силе в точности равен <strong>2Ст</strong>. <strong>Рд = 2Ст = 3Тк</strong>. <strong>Рд </strong>может создавать блоки с любыми фишками младших классов (естественно, только теми, которые могут образовывать блоки, то есть <strong>Эс, Ст, Тк и Тр</strong>). В таком блоке <strong>Рд </strong>притворяется стоящей рядом фишкой, например, если рядом стоит <strong>Тк</strong>, то такой блок может объявить себя как <strong>2Тк</strong> (а, если рядом ещё один <strong>Тк</strong>, то соответственно,<strong> 3Тк</strong>). Такие комбинации обычно используются, когда вашу фишку атакует более сильная, чтобы защитить её. Но, учтите, что будет очень обидно разменять, например, <strong>2Тк+Рд</strong> (объявленные <strong>3Тк</strong>) на <strong>2Ст</strong>!</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Es.png" alt="Эсминец" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Эсминец (сокр. - Эс) <span class="strength-indicator">3.38 е.с.</span></div>
+                    <p>Следующая по рангу фишка (если пропустить <strong>Рейдер (Рд)</strong>), один на один бьёт всех кроме <strong>Ав</strong> , <strong>Лк, Кр и Рд</strong> (!). Бьётся блоками<strong> 2Ст</strong> или <strong>3Тк</strong>. <strong>2Эс = 3Ст</strong>. <strong>3Эс = 2Кр</strong>. Может нести <strong>Мины</strong> <img src="figures/Mn.png" alt="Мина" style="width: 20px; height: 20px; vertical-align: middle;">.</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/St.png" alt="Сторож" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Сторож (сокр. - Ст) <span class="strength-indicator">2.25 е.с.</span></div>
+                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong> , <strong>Лк, Кр, Рд, Эс и КрПл</strong>. Бьётся блоками <strong>2Тк</strong> или <strong>3Тр (Тральщика)</strong>. <strong>2Ст = 3Тк = 1Рд. 3Ст = 2Эс.</strong></p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Tk.png" alt="Торпедный катер" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Торпедный Катер (сокр. - Тк) <span class="strength-indicator">1.5 е.с.</span></div>
+                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong> , <strong>Лк, Кр, Рд, Эс, Ст и КрПл</strong>. Бьётся блоком <strong>2Тр.</strong> <strong>2Тк = 3Тр. 3Тк = 2Ст = 1Рд.</strong> Особые свойства: способен таскать рядом с собой <strong>Торпеды</strong> <img src="figures/T.png" alt="Торпеда" style="width: 20px; height: 20px; vertical-align: middle;"> и запускать их; может двигаться, как по одной клетке в ход, так и по две (но не по диагонали!). Так, например, может сделать ход вперёд-вправо или вправо-вперёд по свободным клеткам, но, если справа и спереди стоят корабли, то занять клетку «проскользнув» между ними он не может!</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Tr.png" alt="Тральщик" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Тральщик (сокр. - Тр) <span class="strength-indicator">1.0 е.с.</span></div>
+                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Ав</strong> , <strong>Лк, Кр, Рд, Эс, Ст, Тк и КрПл</strong>. То есть бьёт только<strong> Пл</strong> <img src="figures/Pl.png" alt="Подводная лодка" style="width: 20px; height: 20px; vertical-align: middle;">. <strong>3Тр=2Тк</strong>. При всей своей слабости, обладает неоценимым свойством - способен разминировать (уничтожать не погибая сам)<strong> Мины</strong>, <strong>Торпеды</strong> и <strong>Брандеры</strong>.</p>
+                </div>
+            </div>
+        </div>
+
+        <div align="center">
+        <table border="0" cellspacing="0" cellpadding="0" class="combat-table">
+        <tbody>
+        <tr>
+        <td width="29">&nbsp;</td>
+        <td width="29">
+        <p align="center"><strong>Ав</strong></p>
+        </td>
+        <td width="29">
+        <p align="center"><strong>Лк</strong></p>
+        </td>
+        <td width="29">
+        <p align="center"><strong>Кр</strong></p>
+        </td>
+        <td width="29">
+        <p align="center"><strong>Эс</strong></p>
+        </td>
+        <td width="29">
+        <p align="center"><strong>Ст</strong></p>
+        </td>
+        <td width="29">
+        <p align="center"><strong>Тк</strong></p>
+        </td>
+        <td width="29">
+        <p align="center"><strong>Тр</strong></p>
+        </td>
+        <td width="73">
+        <p align="center">сила в "тральщиках"</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="29">
+        <p align="center"><strong>Ав</strong></p>
+        </td>
+        <td width="29">
+        <p align="center">=</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="73">
+        <p align="center">11,390625</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="29">
+        <p align="center"><strong>Лк</strong></p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">=</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="73">
+        <p align="center">7,59375</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="29">
+        <p align="center"><strong>Кр</strong></p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">=</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="73">
+        <p align="center">5,0625</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="29">
+        <p align="center"><strong>Эс</strong></p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">=</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="73">
+        <p align="center">3,375</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="29">
+        <p align="center"><strong>Ст</strong></p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">=</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="73">
+        <p align="center">2,25</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="29">
+        <p align="center"><strong>Тк</strong></p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">=</p>
+        </td>
+        <td width="29">
+        <p align="center">+</p>
+        </td>
+        <td width="73">
+        <p align="center">1,5</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="29">
+        <p align="center"><strong>Тр</strong></p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">-</p>
+        </td>
+        <td width="29">
+        <p align="center">=</p>
+        </td>
+        <td width="73">
+        <p align="center">1</p>
+        </td>
+        </tr>
+        </tbody>
+        </table>
+        </div>
+        <p align="center">Таб.1.1</p>
+        <p>Все перечисленные фишки образуют строгую вертикаль, где каждый корабль следующего по старшинству ранга ровно в 1,5 раза слабее предыдущего. Т. е. <strong>Ав = 1,5Лк = 1,5*1,5Кр = 1,5*1,5*1,5Эс = 1,5*1,5*1,5*1,5Ст = …</strong> и т. д.</p>
+        <p>Но есть фишка, находящаяся между рангов - это <strong>Рейдер</strong>. <strong>Рейдер</strong> - промежуточная между <strong>Кр</strong> и <strong>Эс</strong> фишка, способная образовывать блоки, как между собой, так и с младшими фишками.</p>
+
+        <div class="category-header">Самостоятельно ходящие фишки, НЕ образующие блоки</div>
+        <div class="ship-section">
+            <div class="ship-item">
+                <img src="figures/Pl.png" alt="Подводная лодка" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Подводная Лодка (сокр. - Пл)</div>
+                    <p>Охотница на <strong>Линкоры</strong>. Бьётся всеми кроме <strong>Лк</strong> (одиночного, или входящего в блок, роли не играет) и <strong>Тп</strong>.</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/KrPl.png" alt="Крейсерская подводная лодка" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Крейсерская Подводная Лодка (сокр.- КрПл)</div>
+                    <p>Очень «крута». Бьёт всех кроме <strong>Кр, Рд, Эс</strong>. Бьет фишки входящие в блоки, как отдельные. То есть, атаковав входящий в блок <strong>3 Эсминца</strong> <strong>Сторож</strong>, КрПл уничтожает его. Может нести <strong>Ракеты</strong> <img src="figures/Rk.png" alt="Ракета" style="width: 20px; height: 20px; vertical-align: middle;">.</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Br.png" alt="Брандер" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Брандер (сокр. - Бр)</div>
+                    <p>Может выстрелить в стоящий рядом корабль противника и таким образом захватить его. Это значит, что этот корабль становится вашим кораблём. После захвата ход остается у вас. Не может стрелять несколько раз подряд. Корабли, атакующие <strong>Брандер</strong>, взрываются вместе с ним, как на <strong>Мине</strong> (кроме <strong>Тральщика</strong>, естественно).</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/AB.png" alt="Атомная бомба" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Атомная Бомба (сокр. - АБ)</div>
+                    <p>Особая фишка, ходит как обычный корабль, не может атаковать, но может «взорваться». При взрыве уничтожает все корабли и чужие, и свои в квадрате 5 на 5 клеток вокруг себя. Взрывается как при атаке чужим кораблём, так самостоятельно - «пошёл и взорвался» (для этого в фазу атаки нужно нажать на нее).</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/NB.png" alt="Нейтронная бомба" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Нейтронная Бомба (сокр. - НБ)</div>
+                    <p>Особая фишка, все правила игры <strong>НБ</strong> совпадают с правилами по <strong>АБ</strong>. Единственное отличие - результат от взрыва. Если при взрыве <strong>АБ</strong> все фишки в квадрате 5х5 «уничтожаются», то при взрыве <strong>НБ</strong> фишки в квадрате 5х5 становятся «ничейными». Чтобы «захватить» такую «ничейную» фишку достаточно подойти к ней своей и атаковать её.</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Tp.png" alt="Транспорт" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Транспорт (сокр. – Тп)</div>
+                    <p>Самый слабый из кораблей, бьётся даже Пл. Особое свойство – может перемещать ЛЮБЫЕ несамостоятельные фишки: мины, торпеды, самолеты, ракеты…(форты, конечно, не двигаются). Т.е. рядом с ней все эти фишки могут двигаться не имея «родных» носителей.</p>
+                </div>
+            </div>
+        </div>
+
+        <div align="center">
+        <table border="0" cellspacing="0" cellpadding="0" class="combat-table">
+        <tbody>
+        <tr>
+        <td width="43">&nbsp;</td>
+        <td width="43">
+        <p align="center"><strong>Ав</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>Лк</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>Кр</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>Рд</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>Эс</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>КрПл</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>Ст</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>Тк</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>Тр</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>Пл</strong></p>
+        </td>
+        <td width="77">
+        <p align="center">сила в "тральщиках"</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>Ав</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>-</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="77">
+        <p align="center">11,390625</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>Лк</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>-</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>-</strong></p>
+        </td>
+        <td width="77">
+        <p align="center">7,59375</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>Кр</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="77">
+        <p align="center">5,0625</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>Рд</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="77">
+        <p align="center">4,5</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>Эс</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="77">
+        <p align="center">3,375</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>КрПл</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>+</strong></p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>+</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="77">
+        <p align="center">-</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>Ст</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="77">
+        <p align="center">2,25</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>Тк</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="77">
+        <p align="center">1,5</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>Тр</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="43">
+        <p align="center">+</p>
+        </td>
+        <td width="77">
+        <p align="center">1</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center"><strong>Пл</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center"><strong>+</strong></p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">-</p>
+        </td>
+        <td width="43">
+        <p align="center">=</p>
+        </td>
+        <td width="77">
+        <p align="center">-</p>
+        </td>
+        </tr>
+        </tbody>
+        </table>
+        </div>
+        <p align="center">Таб. 1.2</p>
+
+        <div class="category-header">НЕсамостоятельные фишки</div>
+        <img src="rules/dependent.png" class="img-responsive" alt="" />
+        <div class="ship-section">
+            <div class="ship-item">
+                <img src="figures/Mn.png" alt="Мина" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Мина (сокр. - Мн)</div>
+                    <p>Фишка ходящая рядом с <strong>Эсминцем</strong>. Может передвигаться только по 8 клеткам вокруг <strong>Эс</strong> (в том числе и диагональным). Может передаваться с «поля ответственности» одного <strong>Эс</strong> к другому <strong>Эс</strong>. При атаке <strong>Мн</strong> кораблём противника взрывается вместе с ним (за исключением <strong>Тральщика</strong>). Сама атаковать и стрелять не может (!).</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/T.png" alt="Торпеда" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Торпеда (сокр.- Т)</div>
+                    <p>Аналогично, ходит только рядом с <strong>Тк</strong>. Может ходить на 2 клетки, как <strong>Тк</strong>. При атаке кораблём, взрывается как <strong>Мина</strong>, также тралится <strong>Тральщиком</strong>. Может стрелять, если рядом находится <strong>Тк</strong>. При выстреле <strong>Т</strong> поражает любую фишку (кроме <strong>Форта</strong>) на расстоянии не более чем 4 клетки и сама уничтожается. Бьёт только по прямой в любом направлении. Через корабли не прыгает, поэтому может поразить только ближайший по прямой корабль.</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Sm.png" alt="Самолёт" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Самолёт (сокр. - См)</div>
+                    <p>Ходит только рядом с <strong>Ав</strong>. Стреляет, если рядом есть<strong> Ав</strong>, при этом уничтожает любую фишку (кроме <strong>Форта</strong>) на любом расстоянии по прямой (в любом направлении, даже по диагонали), при этом погибает сам. Летает над кораблями. При атаке противником взрывается уничтожая любой(!!!) корабль в том числе и <strong>Тр</strong>.</p>
+                </div>
+            </div>
+            <div class="ship-item">
+                <img src="figures/Rk.png" alt="Ракета" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">КрПл-ная Ракета (сокр. - Рк)</div>
+                    <p>Ходит только вокруг <strong>КрПл</strong>, стреляет тоже, если рядом <strong>КрПл</strong>. Выстрелить<strong> Рк</strong> может одним из двух способов:</p>
+                    <ol>
+                    <li><strong>Ракета</strong> запускается на расстояние не более 2-х клеток по прямой (над кораблями, как и <strong>См</strong>), при попадании поражает квадрат 3х3 вокруг себя</li>
+                    <li><strong>Ракета</strong> запускается по прямой не более, чем на 3 клетки (над кораблями) и поражает только корабль, в который попала.</li>
+                    </ol>
+                    <p>Чтобы выбрать способ, которым использовать <strong>Рк</strong> нажмите R при включенном режиме выстрела (подсказка показывается на панели состояния)</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="category-header">НЕподвижные фишки</div>
+        <div class="ship-section">
+            <div class="ship-item">
+                <img src="figures/F.png" alt="Форт" class="ship-image">
+                <div class="ship-description">
+                    <div class="ship-name">Форт (сокр.- Ф)</div>
+                    <p><strong>Форт</strong> единственная абсолютно неподвижная фишка. В сущности, это просто флаг. Он не может ничего - просто стоит и ждёт, пока его возьмут. <strong>Форт</strong> можно взять любой атакующей фишкой, его можно уничтожить <strong>АБ</strong>, его можно захватить <strong>Брандером</strong> или <strong>Нейтронной Бомбой</strong>. Внимание: <strong>Торпеды</strong> и <strong>Самолёты</strong> вреда <strong>Форту</strong> не наносят. Форты в начале игры расставляются на произвольные позиции, где и находятся до конца игры или пока их не возьмут.</p>
+                </div>
+            </div>
+        </div>
+
+        <p align="center">Таблица количества фишек «МБ».</p>
+        <div align="center">
+        <table border="0" cellspacing="0" cellpadding="0" class="quantity-table">
+        <tbody>
+        <tr>
+        <td width="43">
+        <p align="center">Ав</p>
+        </td>
+        <td width="74">
+        <p align="center">1</p>
+        </td>
+        <td width="74">
+        <p align="center">См</p>
+        </td>
+        <td width="74">
+        <p align="center">1</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center">Лк</p>
+        </td>
+        <td width="74">
+        <p align="center">2</p>
+        </td>
+        <td width="74">
+        <p align="center">Рк</p>
+        </td>
+        <td width="74">
+        <p align="center">1</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center">Кр</p>
+        </td>
+        <td width="74">
+        <p align="center">6</p>
+        </td>
+        <td width="74">
+        <p align="center">Т</p>
+        </td>
+        <td width="74">
+        <p align="center">4</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center">Рд</p>
+        </td>
+        <td width="74">
+        <p align="center">2</p>
+        </td>
+        <td width="74">
+        <p align="center">Мн</p>
+        </td>
+        <td width="74">
+        <p align="center">7</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center">Эс</p>
+        </td>
+        <td width="74">
+        <p align="center">6</p>
+        </td>
+        <td width="74">
+        <p align="center">Бр</p>
+        </td>
+        <td width="74">
+        <p align="center">2</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center">КрПл</p>
+        </td>
+        <td width="74">
+        <p align="center">1</p>
+        </td>
+        <td width="74">
+        <p align="center">АБ</p>
+        </td>
+        <td width="74">
+        <p align="center">1</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center">Ст</p>
+        </td>
+        <td width="74">
+        <p align="center">7</p>
+        </td>
+        <td width="74">
+        <p align="center">НБ</p>
+        </td>
+        <td width="74">
+        <p align="center">1</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center">Тк</p>
+        </td>
+        <td width="74">
+        <p align="center">6</p>
+        </td>
+        <td width="74">
+        <p align="center">Фт</p>
+        </td>
+        <td width="74">
+        <p align="center">2</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center">Тр</p>
+        </td>
+        <td width="74">
+        <p align="center">7</p>
+        </td>
+        <td width="43">
+        <p align="center">Тп</p>
+        </td>
+        <td width="74">
+        <p align="center">1</p>
+        </td>
+        </tr>
+        <tr>
+        <td width="43">
+        <p align="center">Пл</p>
+        </td>
+        <td width="74">
+        <p align="center">4</p>
+        </td>
+        <td width="74">
+        <p align="center"><strong>Итого</strong></p>
+        </td>
+        <td width="74">
+        <p align="center"><strong>62</strong></p>
+        </td>
+        </tr>
+        </tbody>
+        </table>
+        </div>
+    </div>
+</body>
+</html>

@@ -1270,6 +1270,15 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             </div>
           </div>
         </div>
+        <a
+          href="/rules.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="board-rules-link"
+          title="Game Rules"
+        >
+          ?
+        </a>
         {this.renderActionSelectionPopup()}
       </DndProvider>
     );
