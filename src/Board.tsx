@@ -90,7 +90,9 @@ const Square: React.FC<SquareProps> = props => {
         return (
           actions &&
           actions.length > 0 &&
-          actions.some(action => action.canFrom(props.G, parseInt(props.player), props.coord))
+          actions.some(
+            action => action && action.canFrom(props.G, parseInt(props.player), props.coord)
+          )
         );
       },
       collect: monitor => ({
@@ -129,8 +131,8 @@ const Square: React.FC<SquareProps> = props => {
           );
         }
         const actions = getActions(props.G, props.ctx, item.player, item.coord);
-        return actions.some(action =>
-          action.can(props.G, parseInt(item.player), item.coord, props.coord)
+        return actions.some(
+          action => action && action.can(props.G, parseInt(item.player), item.coord, props.coord)
         );
       },
       collect: monitor => ({
@@ -178,7 +180,8 @@ const Square: React.FC<SquareProps> = props => {
         action = getModeAction(props.G, props.ctx, props.player, props.mode, dragItem.coord);
       } else {
         const actions = getActions(props.G, props.ctx, dragItem.player, dragItem.coord).filter(
-          action => action.can(props.G, parseInt(dragItem.player), dragItem.coord, props.coord)
+          action =>
+            action && action.can(props.G, parseInt(dragItem.player), dragItem.coord, props.coord)
         );
         if (actions.length == 1) {
           action = actions[0];
@@ -453,17 +456,33 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
 
     // Get all available actions for the piece
-    const actions = getActions(this.props.G, this.props.ctx, this.props.playerID, from);
-    const validActions = actions.filter(action =>
-      action.can(this.props.G, parseInt(this.props.playerID), from, to)
-    );
+    let validActions: any[] = [];
+    if (this.state.mode) {
+      let action = getModeAction(
+        this.props.G,
+        this.props.ctx,
+        this.props.playerID,
+        this.state.mode,
+        from
+      );
+      if (action) {
+        validActions = [action];
+      }
+    } else {
+      validActions = getActions(this.props.G, this.props.ctx, this.props.playerID, from).filter(
+        action => action && action.can(this.props.G, parseInt(this.props.playerID), from, to)
+      );
+    }
 
     if (validActions.length === 0) {
       return; // No valid actions
     } else if (validActions.length === 1) {
       // Only one action - execute it directly
       const mode = validActions[0].key;
-      takeMove(this.props.G, this.props.ctx, this.props.moves, mode, from, to);
+      console.log(mode);
+      if (['r', 'e'].indexOf(mode) == -1 || confirm('Are you sure?')) {
+        takeMove(this.props.G, this.props.ctx, this.props.moves, mode, from, to);
+      }
     } else {
       // Multiple actions - show selection popup
       let position = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
