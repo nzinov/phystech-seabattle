@@ -111,6 +111,10 @@ const Square: React.FC<SquareProps> = props => {
     if (isPlayerSide) {
       cellClasses.push('board-cell-placement-zone');
     }
+    if (canDrop && isOver && dragItem) {
+      cellClasses.push('board-cell-drop-active');
+      borderColor = 'var(--cell-active)';
+    }
     // No drag/drop effects during placement phase
   } else {
     // Normal drag/drop behavior for non-placement phases
@@ -569,7 +573,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       return null;
     }
 
-    const boardSize = 14;
+    const boardSize = this.props.G.config?.fieldSize || 14;
 
     return (
       <svg className="board-arrows-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -748,8 +752,10 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       return <div className="loading">Loading game</div>;
     }
 
+    const fieldSize = this.props.G.config?.fieldSize || 14;
+    const cellSizeScaleFactor = 14 / fieldSize; // Scale relative to original 14x14
+
     let tbody = [];
-    const fieldSize = this.props.G.config.fieldSize;
     for (let i = 0; i < fieldSize; i++) {
       let cells = [];
       for (let j = 0; j < fieldSize; j++) {
@@ -876,7 +882,23 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             content ? <div dangerouslySetInnerHTML={{ __html: content }} /> : null
           }
         />
-        <div className="board-container">
+        <div
+          className="board-container"
+          style={
+            {
+              '--board-size': fieldSize,
+              '--cell-scale-factor': cellSizeScaleFactor,
+            } as React.CSSProperties
+          }
+        >
+          <div className="flip-screen-prompt">
+            <div className="flip-screen-icon">📱</div>
+            <h2 className="flip-screen-title">Please Rotate Your Device</h2>
+            <p className="flip-screen-text">
+              This game is designed for landscape orientation. Please rotate your device
+              horizontally for the best experience.
+            </p>
+          </div>
           {this.state.showRemaining && (
             <table id="remaining" className="board-remaining-overlay">
               <tbody>{remaining_tbody}</tbody>
