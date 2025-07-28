@@ -74,6 +74,7 @@ Object.assign(Ships, {
   },
   Lk: { ...AttackingShip, strength: 7.59375 },
   Rk: {
+    ...Missile,
     actions: {
       place: [Actions.Place],
       move: [Actions.Move, Actions.Shoot, Actions.RocketShootArea],

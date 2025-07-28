@@ -13,52 +13,26 @@ class LogEvent extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLongPressing: false,
-      longPressTimer: null,
+      mobileHighlightActive: false,
     };
   }
 
-  handleTouchStart = e => {
-    e.preventDefault();
-    const timer = setTimeout(() => {
-      this.setState({ isLongPressing: true });
+  handleMobileClick = () => {
+    const newState = !this.state.mobileHighlightActive;
+
+    if (newState) {
+      // Show highlight
       this.props.highlight(this.getHighlight());
-      // Auto-hide highlight after 3 seconds
-      setTimeout(() => {
-        this.setState({ isLongPressing: false });
-        if (!this.state.longPressTimer) {
-          this.props.highlight([]);
-        }
-      }, 3000);
-    }, 500); // 500ms for long press
-    this.setState({ longPressTimer: timer });
-  };
-
-  handleTouchEnd = e => {
-    e.preventDefault();
-    if (this.state.longPressTimer) {
-      clearTimeout(this.state.longPressTimer);
-      this.setState({ longPressTimer: null });
-    }
-    if (!this.state.isLongPressing) {
-      // This was a short tap, do nothing special
-    }
-    this.setState({ isLongPressing: false });
-  };
-
-  handleTouchMove = _e => {
-    // Cancel long press if user moves finger too much
-    if (this.state.longPressTimer) {
-      clearTimeout(this.state.longPressTimer);
-      this.setState({ longPressTimer: null });
+      this.setState({ mobileHighlightActive: true });
+    } else {
+      this.props.highlightLastMove();
+      this.setState({ mobileHighlightActive: false });
     }
   };
 
-  componentWillUnmount() {
-    if (this.state.longPressTimer) {
-      clearTimeout(this.state.longPressTimer);
-    }
-  }
+  isMobileDevice = () => {
+    return navigator.maxTouchPoints > 0;
+  };
 
   getHighlight = () => {
     let event = this.props.event;
@@ -77,7 +51,7 @@ class LogEvent extends React.Component {
       case 'die':
         return [[event.from, 'rgba(239, 68, 68, 0.5)']];
       case 'explode':
-        return [[event.from, 'rgba(239, 68, 68, 0.5)']];
+        return [[event.to, 'rgba(239, 68, 68, 0.5)']];
       case 'response':
         return [];
       default:
@@ -123,11 +97,22 @@ class LogEvent extends React.Component {
       <div
         className={`log-event-container ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}
         onMouseEnter={_e => {
-          this.props.highlight(this.getHighlight());
+          // Only highlight on hover for desktop
+          if (!this.isMobileDevice()) {
+            this.props.highlight(this.getHighlight());
+          }
         }}
-        onTouchStart={this.handleTouchStart}
-        onTouchEnd={this.handleTouchEnd}
-        onTouchMove={this.handleTouchMove}
+        onMouseLeave={_e => {
+          if (!this.isMobileDevice()) {
+            this.props.highlightLastMove();
+          }
+        }}
+        onClick={_e => {
+          // Only handle clicks on mobile
+          if (this.isMobileDevice()) {
+            this.handleMobileClick();
+          }
+        }}
       >
         <div
           className={`log-event-bubble ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}
@@ -147,7 +132,6 @@ export const Log = ({ events, player, highlight }) => {
   const prevEventsLength = useRef(events.length);
   const isAutoScrolling = useRef(false);
   const hasInitiallyScrolled = useRef(false);
-  const [isMouseOverLog, setIsMouseOverLog] = useState(false);
 
   const checkScrollPosition = () => {
     if (!scrollRef.current || isAutoScrolling.current) return;
@@ -235,20 +219,15 @@ export const Log = ({ events, player, highlight }) => {
   }, [events.length]);
 
   // Auto-highlight last move when mouse is not over log
-  useEffect(() => {
-    if (!isMouseOverLog && events.length > 0) {
-      const lastEvent = events[events.length - 1];
-      // Create LogEvent instance to get highlight for the last event
-      const logEventInstance = new LogEvent({ event: lastEvent });
-      const lastMoveHighlight = logEventInstance.getHighlight();
-      if (lastMoveHighlight.length > 0) {
-        highlight(lastMoveHighlight);
-      }
-    } else if (isMouseOverLog) {
-      // Clear auto-highlight when mouse enters log (individual hover events will take over)
-      highlight([]);
+  const highlightLastMove = () => {
+    const lastEvent = events[events.length - 1];
+    // Create LogEvent instance to get highlight for the last event
+    const logEventInstance = new LogEvent({ event: lastEvent });
+    const lastMoveHighlight = logEventInstance.getHighlight();
+    if (lastMoveHighlight.length > 0) {
+      highlight(lastMoveHighlight);
     }
-  }, [isMouseOverLog, events, highlight]);
+  };
 
   const scrollToTop = () => {
     if (scrollRef.current) {
@@ -263,11 +242,7 @@ export const Log = ({ events, player, highlight }) => {
   };
 
   return (
-    <div
-      className="log-container"
-      onMouseEnter={() => setIsMouseOverLog(true)}
-      onMouseLeave={() => setIsMouseOverLog(false)}
-    >
+    <div className="log-container">
       {showTopArrow && (
         <div onClick={scrollToTop} className="log-scroll-arrow top">
           ↑
@@ -279,7 +254,13 @@ export const Log = ({ events, player, highlight }) => {
           <div className="log-empty-state">No events yet...</div>
         ) : (
           events.map((event, index) => (
-            <LogEvent key={index} event={event} player={player} highlight={highlight} />
+            <LogEvent
+              key={index}
+              event={event}
+              player={player}
+              highlight={highlight}
+              highlightLastMove={highlightLastMove}
+            />
           ))
         )}
       </div>

@@ -1,8 +1,8 @@
 import type { Ctx } from 'boardgame.io';
+import { HTML5toTouch } from 'rdndmb-html5-to-touch';
 import React from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
+import { MultiBackend } from 'react-dnd-multi-backend';
 import { Tooltip } from 'react-tooltip';
 import './Board.css';
 import {
@@ -18,27 +18,18 @@ import {
 import { Log } from './Log.jsx';
 import { shipInfo, stageDescr } from './Texts';
 
-// Function to detect touch capability and choose appropriate backend
-const isTouchDevice = () => {
-  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
+// Multi-backend configuration for seamless touch and mouse support
+const backendOptions = HTML5toTouch;
 
-const getBackend = () => {
-  return isTouchDevice() ? TouchBackend : HTML5Backend;
-};
-
-const getBackendOptions = () => {
-  return isTouchDevice()
-    ? {
-        enableMouseEvents: true,
-        delayTouchStart: 100,
-        delayMouseStart: 0,
-      }
-    : {};
+// Utility to detect mobile devices
+const isMobileDevice = () => {
+  return navigator.maxTouchPoints > 0;
 };
 
 interface DragItem {
   coord: [number, number];
+  figure: string;
+  player: string;
 }
 
 interface SquareProps {
@@ -60,58 +51,41 @@ interface SquareProps {
   pendingMove?: boolean;
   onMoveStart?: () => void;
   onDrop: (from: [number, number], to: [number, number], event?: any) => void;
-  onLongPress?: (coord: [number, number]) => void;
   stage?: string;
 }
 
 const Square: React.FC<SquareProps> = props => {
-  const [longPressTimer, setLongPressTimer] = React.useState<NodeJS.Timeout | null>(null);
-  const [isLongPressing, setIsLongPressing] = React.useState(false);
-
   const click = () => {
-    if (['Unknown', 'Sinking'].includes(props.figure?.type) && !props.G.attackFrom) {
-      props.moves.Label(props.coord, prompt('Enter label'));
-    }
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
-    const timer = setTimeout(() => {
-      setIsLongPressing(true);
-      if (props.onLongPress) {
-        props.onLongPress(props.coord);
+    if (isMobileDevice()) {
+      // Mobile: Only handle tooltip/trace cycling for squares with figures
+      if (props.figure && props.hover) {
+        props.hover({ type: 'mobile-cycle-click', coord: props.coord });
       }
-    }, 500); // 500ms for long press
-    setLongPressTimer(timer);
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-    if (!isLongPressing) {
-      // This was a short tap, treat as click
-      click();
-    }
-    setIsLongPressing(false);
-  };
-
-  const handleTouchMove = (_e: React.TouchEvent) => {
-    // Cancel long press if user moves finger too much
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
+    } else {
+      // Desktop: Only handle label functionality for Unknown/Sinking
+      if (['Unknown', 'Sinking'].includes(props.figure?.type) && !props.G.attackFrom) {
+        props.moves.Label(props.coord, prompt('Enter label'));
+      }
     }
   };
 
   const [{ canDrag, isDragging }, dragRef] = useDrag(
     () => ({
       type: 'square',
-      item: () => ({ coord: props.coord, figure: props.figure }),
+      item: () => ({ coord: props.coord, figure: props.figure, player: props.player }),
       canDrag: () => {
         // Allow dragging if piece has any available actions (for mobile support)
+        if (props.mode) {
+          let action = getModeAction(props.G, props.ctx, props.player, props.mode, props.coord);
+          return (
+            action &&
+            getModeAction(props.G, props.ctx, props.player, props.mode, props.coord).canFrom(
+              props.G,
+              parseInt(props.player),
+              props.coord
+            )
+          );
+        }
         const actions = getActions(props.G, props.ctx, props.player, props.coord);
         return (
           actions &&
@@ -124,21 +98,39 @@ const Square: React.FC<SquareProps> = props => {
         isDragging: monitor.isDragging(),
       }),
     }),
-    [props.G, props.ctx, props.player, props.mode, props.coord, props.figure, props.pendingMove]
+    [
+      props.G,
+      props.ctx,
+      props.player,
+      props.mode,
+      props.coord,
+      props.figure,
+      props.pendingMove,
+      props.hover,
+    ]
   );
 
   const [{ canDrop, isOver, dragItem }, dropRef] = useDrop(
     () => ({
       accept: 'square',
       drop: (item: DragItem, monitor) => {
-        const dropTargetElement = monitor.getDropResult();
-        props.onDrop(item.coord, props.coord, dropTargetElement);
+        const clientOffset = monitor.getClientOffset();
+        const element = document.elementFromPoint(clientOffset?.x ?? 0, clientOffset?.y ?? 0);
+        props.onDrop(item.coord, props.coord, { target: element, clientOffset });
       },
       canDrop: (item: DragItem) => {
         // Check if any available actions can be performed at this target
-        const actions = getActions(props.G, props.ctx, props.player, item.coord);
+        if (props.mode) {
+          return getModeAction(props.G, props.ctx, item.player, props.mode, item.coord).can(
+            props.G,
+            item.player,
+            item.coord,
+            props.coord
+          );
+        }
+        const actions = getActions(props.G, props.ctx, item.player, item.coord);
         return actions.some(action =>
-          action.can(props.G, parseInt(props.player), item.coord, props.coord)
+          action.can(props.G, parseInt(item.player), item.coord, props.coord)
         );
       },
       collect: monitor => ({
@@ -179,17 +171,23 @@ const Square: React.FC<SquareProps> = props => {
       cellClasses.push('board-cell-dragging');
       elevation = 3;
     }
-    if (canDrop && isOver && dragItem) {
+    if (canDrop && dragItem) {
       // Get the drag item action type for active drop zone highlighting - action background color
-      let action = getModeAction(
-        props.G,
-        props.ctx,
-        props.player,
-        props.mode || '',
-        dragItem.coord
-      );
-      cellClasses.push('board-cell-drop-active');
-      if (action) {
+      let action;
+      if (props.mode && props.mode != '') {
+        action = getModeAction(props.G, props.ctx, props.player, props.mode, dragItem.coord);
+      } else {
+        const actions = getActions(props.G, props.ctx, dragItem.player, dragItem.coord).filter(
+          action => action.can(props.G, parseInt(dragItem.player), dragItem.coord, props.coord)
+        );
+        if (actions.length == 1) {
+          action = actions[0];
+        } else {
+          action = '';
+        }
+      }
+      if (isOver) {
+        cellClasses.push('board-cell-drop-active');
         switch (action.key) {
           case 'a': // Attack
             backgroundColor = 'var(--action-attack-bg)';
@@ -213,23 +211,10 @@ const Square: React.FC<SquareProps> = props => {
             borderColor = 'var(--action-move-border)';
             break;
         }
+        elevation = 2;
       } else {
-        backgroundColor = 'var(--cell-active)';
-        borderColor = 'var(--cell-active)';
-      }
-      elevation = 2;
-    } else if (canDrop && dragItem) {
-      // Get the drag item action type for subtle drop zone highlighting - always grey background with action border
-      let action = getModeAction(
-        props.G,
-        props.ctx,
-        props.player,
-        props.mode || '',
-        dragItem.coord
-      );
-      cellClasses.push('board-cell-drop-hover');
-      backgroundColor = 'var(--cell-hover)';
-      if (action) {
+        cellClasses.push('board-cell-drop-hover');
+        backgroundColor = 'var(--cell-hover)';
         switch (action.key) {
           case 'a': // Attack
             borderColor = 'var(--action-attack-border)';
@@ -248,10 +233,8 @@ const Square: React.FC<SquareProps> = props => {
             borderColor = 'var(--action-move-border)';
             break;
         }
-      } else {
-        borderColor = 'var(--cell-active)';
+        elevation = 1;
       }
-      elevation = 1;
     } else if (canDrop) {
       // Fallback for canDrop without dragItem
       backgroundColor = 'var(--cell-hover)';
@@ -260,34 +243,35 @@ const Square: React.FC<SquareProps> = props => {
     }
     if (canDrag && !isDragging && !props.pendingMove) {
       // Get action type and set color accordingly
-      let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', props.coord);
-      if (action) {
-        switch (action.key) {
-          case 'a': // Attack
-            backgroundColor = 'var(--action-attack-bg)';
-            borderColor = 'var(--action-attack-border)';
-            break;
-          case 's': // Shoot
-            backgroundColor = 'var(--action-shoot-bg)';
-            borderColor = 'var(--action-shoot-border)';
-            break;
-          case 'e': // Explode
-            backgroundColor = 'var(--action-explode-bg)';
-            borderColor = 'var(--action-explode-border)';
-            break;
-          case 'r': // Rocket/Area
-            backgroundColor = 'var(--action-rocket-bg)';
-            borderColor = 'var(--action-rocket-border)';
-            break;
-          case 'm': // Move
-          default:
-            backgroundColor = 'var(--action-move-bg)';
-            borderColor = 'var(--accent-primary)';
-            break;
-        }
-      } else {
-        backgroundColor = 'var(--action-move-bg)';
-        borderColor = 'var(--accent-primary)';
+      let action = getModeAction(
+        props.G,
+        props.ctx,
+        props.player,
+        props.mode || '',
+        props.coord
+      ) ?? { key: '' };
+      switch (action.key) {
+        case 'a': // Attack
+          backgroundColor = 'var(--action-attack-bg)';
+          borderColor = 'var(--action-attack-border)';
+          break;
+        case 's': // Shoot
+          backgroundColor = 'var(--action-shoot-bg)';
+          borderColor = 'var(--action-shoot-border)';
+          break;
+        case 'e': // Explode
+          backgroundColor = 'var(--action-explode-bg)';
+          borderColor = 'var(--action-explode-border)';
+          break;
+        case 'r': // Rocket/Area
+          backgroundColor = 'var(--action-rocket-bg)';
+          borderColor = 'var(--action-rocket-border)';
+          break;
+        case 'm': // Move
+        default:
+          backgroundColor = 'var(--action-move-bg)';
+          borderColor = 'var(--accent-primary)';
+          break;
       }
       elevation = 1;
     }
@@ -358,9 +342,6 @@ const Square: React.FC<SquareProps> = props => {
         data-tooltip-id="ship-tooltip"
         data-tooltip-content={shipInfo?.[props.figure?.type as keyof typeof shipInfo]}
         onClick={click}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}
         className={cellClasses.join(' ')}
         style={cellStyle}
         onMouseEnter={props.hover}
@@ -402,6 +383,8 @@ interface BoardState {
   lastMoveTimestamp?: number;
   linkCopied?: boolean;
   readyConfirmPending?: boolean;
+  longPressTraceActive?: boolean;
+  mobileClickStates?: Map<string, 'trace' | 'tooltip' | 'none'>;
   actionSelectionPopup?: {
     visible: boolean;
     actions: any[];
@@ -424,6 +407,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       blockArrows: [],
       linkCopied: false,
       readyConfirmPending: false,
+      longPressTraceActive: false,
+      mobileClickStates: new Map(),
       actionSelectionPopup: undefined,
     };
   }
@@ -469,11 +454,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
     // Get all available actions for the piece
     const actions = getActions(this.props.G, this.props.ctx, this.props.playerID, from);
-    console.log(actions);
     const validActions = actions.filter(action =>
       action.can(this.props.G, parseInt(this.props.playerID), from, to)
     );
-    console.log(validActions);
 
     if (validActions.length === 0) {
       return; // No valid actions
@@ -483,10 +466,15 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       takeMove(this.props.G, this.props.ctx, this.props.moves, mode, from, to);
     } else {
       // Multiple actions - show selection popup
-      const rect = event?.target?.getBoundingClientRect?.();
-      const position = rect
-        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
-        : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      let position = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+      // Try to get position from event data
+      if (event?.clientOffset) {
+        position = { x: event.clientOffset.x, y: event.clientOffset.y };
+      } else if (event?.target?.getBoundingClientRect) {
+        const rect = event.target.getBoundingClientRect();
+        position = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      }
 
       this.setState({
         actionSelectionPopup: {
@@ -510,30 +498,6 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
   cancelActionSelection = () => {
     this.setState({ actionSelectionPopup: undefined });
-  };
-
-  handleLongPress = (coord: [number, number]) => {
-    // Show tooltip and trace on long press
-    this.setState(
-      {
-        tooltip: true,
-        trace: true,
-        hoveredCoords: coord,
-      },
-      () => {
-        this.HighlightTrace();
-        // Auto-hide after 3 seconds
-        setTimeout(() => {
-          this.setState({
-            tooltip: false,
-            trace: false,
-            traceHighlight: [],
-            traceArrows: [],
-            hoveredCoords: undefined,
-          });
-        }, 3000);
-      }
-    );
   };
 
   HighlightTrace = () => {
@@ -646,14 +610,22 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   };
 
   handleKeyUp = (event: KeyboardEvent) => {
-    this.setState({
-      mode: undefined,
-      tooltip: false,
-      traceHighlight: [],
-      traceArrows: [],
-      trace: false,
-      showRemaining: false,
-    });
+    // Don't clear trace if long press trace is active
+    if (this.state.longPressTraceActive) {
+      this.setState({
+        mode: undefined,
+        showRemaining: false,
+      });
+    } else {
+      this.setState({
+        mode: undefined,
+        tooltip: false,
+        traceHighlight: [],
+        traceArrows: [],
+        trace: false,
+        showRemaining: false,
+      });
+    }
     // Don't clear blockArrows on key up - they should persist during block declaration
     event.preventDefault();
   };
@@ -666,14 +638,72 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     this.setState({ highlightedBlock: undefined });
   };
 
-  hoverSquare = (_event: any, coords: any) => {
-    this.setState({ hoveredCoords: coords }, () => {
-      this.HighlightTrace();
-    });
+  hoverSquare = (event: any, coords?: any) => {
+    // Handle mobile cycling clicks
+    if (event?.type === 'mobile-cycle-click') {
+      const coordKey = `${event.coord[0]}-${event.coord[1]}`;
+      const currentState = this.state.mobileClickStates?.get(coordKey) || 'none';
+
+      // Cycle through: none → trace → tooltip → none
+      let nextState: 'trace' | 'tooltip' | 'none';
+      switch (currentState) {
+        case 'none':
+          nextState = 'trace';
+          break;
+        case 'trace':
+          nextState = 'tooltip';
+          break;
+        case 'tooltip':
+          nextState = 'none';
+          break;
+        default:
+          nextState = 'trace';
+      }
+
+      // Update the click state
+      const newClickStates = new Map(this.state.mobileClickStates);
+      newClickStates.set(coordKey, nextState);
+
+      // Clear all other mobile states when starting a new one
+      if (nextState !== 'none') {
+        for (const [key, value] of newClickStates) {
+          if (key !== coordKey && value !== 'none') {
+            newClickStates.set(key, 'none');
+          }
+        }
+      }
+
+      this.setState(
+        {
+          mobileClickStates: newClickStates,
+          hoveredCoords: nextState !== 'none' ? event.coord : undefined,
+          longPressTraceActive: nextState !== 'none',
+          tooltip: nextState === 'tooltip',
+          trace: nextState === 'trace',
+          traceHighlight: nextState === 'none' ? [] : this.state.traceHighlight,
+          traceArrows: nextState === 'none' ? [] : this.state.traceArrows,
+        },
+        () => {
+          if (nextState === 'trace') {
+            this.HighlightTrace();
+          }
+        }
+      );
+    } else {
+      // Regular hover (desktop only)
+      if (!isMobileDevice()) {
+        this.setState({ hoveredCoords: coords }, () => {
+          this.HighlightTrace();
+        });
+      }
+    }
   };
 
   leaveSquare = (_event: any) => {
-    this.setState({ hoveredCoords: undefined });
+    // Only clear hover state on desktop
+    if (!isMobileDevice()) {
+      this.setState({ hoveredCoords: undefined });
+    }
     // Don't clear blockArrows on square leave - they should persist during block declaration
   };
 
@@ -689,6 +719,11 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   };
 
   highlight = (highlight: any) => {
+    // Don't update highlight if mobile trace/tooltip is active
+    if (this.state.longPressTraceActive && isMobileDevice()) {
+      return;
+    }
+
     // Check if this highlight represents a move event and add arrow
     let logArrows = [];
     if (highlight && highlight.length >= 2) {
@@ -912,33 +947,30 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     };
 
     return (
-      <div className="action-selection-overlay" onClick={this.cancelActionSelection}>
-        <div
-          className="action-selection-popup"
-          style={{
-            position: 'absolute',
-            left: popup.position.x,
-            top: popup.position.y,
-            transform: 'translate(-50%, -50%)',
-          }}
-          onClick={e => e.stopPropagation()}
-        >
-          <h3 className="action-selection-title">Choose Action</h3>
-          <div className="action-selection-buttons">
-            {popup.actions.map((action, index) => (
-              <button
-                key={index}
-                className="action-selection-button"
-                onClick={() => this.selectAction(action.key)}
-              >
-                {getActionName(action)}
-              </button>
-            ))}
-          </div>
-          <button className="action-selection-cancel" onClick={this.cancelActionSelection}>
-            Cancel
-          </button>
+      <div
+        className="action-selection-popup"
+        style={{
+          position: 'absolute',
+          left: popup.position.x,
+          top: popup.position.y,
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <h3 className="action-selection-title">Choose Action</h3>
+        <div className="action-selection-buttons">
+          {popup.actions.map((action, index) => (
+            <button
+              key={index}
+              className="action-selection-button"
+              onClick={() => this.selectAction(action.key)}
+            >
+              {getActionName(action)}
+            </button>
+          ))}
         </div>
+        <button className="action-selection-cancel" onClick={this.cancelActionSelection}>
+          Cancel
+        </button>
       </div>
     );
   }
@@ -975,7 +1007,6 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             pendingMove={this.state.pendingMove}
             onMoveStart={this.onMoveStart}
             onDrop={this.handleDrop}
-            onLongPress={this.handleLongPress}
             stage={this.props.ctx.activePlayers?.[this.props.playerID]}
           ></Square>
         );
@@ -1071,7 +1102,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
 
     return (
-      <DndProvider backend={getBackend()} options={getBackendOptions()}>
+      <DndProvider backend={MultiBackend} options={backendOptions}>
         <Tooltip
           id="ship-tooltip"
           isOpen={this.state.tooltip ?? false}
