@@ -33,7 +33,8 @@ interface SquareProps {
   hover?: (e: any) => void;
   leave?: (e: any) => void;
   highlightedBlock?: any;
-  highlight?: any[];
+  highlight: any[];
+  traceHighlight: any[];
   pendingMove?: boolean;
   onMoveStart?: () => void;
   stage?: string;
@@ -195,10 +196,6 @@ const Square: React.FC<SquareProps> = props => {
       borderColor = 'var(--cell-active)';
       elevation = 1;
     }
-  }
-
-  // Apply additional highlights only if NOT in placement phase
-  if (props.stage !== 'place') {
     if (canDrag && !isDragging && !props.pendingMove) {
       // Get action type and set color accordingly
       let action = getModeAction(props.G, props.ctx, props.player, props.mode || '', props.coord);
@@ -232,6 +229,11 @@ const Square: React.FC<SquareProps> = props => {
       }
       elevation = 1;
     }
+    for (let pair of [...props.highlight, ...props.traceHighlight]) {
+      if (dist(props.coord, pair[0]) == 0) {
+        backgroundColor = pair[1];
+      }
+    }
     if (props.G.attackFrom && dist(props.G.attackFrom, props.coord) == 0) {
       cellClasses.push('board-cell-attack-from');
       elevation = 2;
@@ -244,13 +246,9 @@ const Square: React.FC<SquareProps> = props => {
       props.highlightedBlock &&
       props.highlightedBlock.coords.some((el: any) => dist(el, props.coord) == 0)
     ) {
+      elevation = 3;
       backgroundColor = 'var(--cell-active)';
       borderColor = 'var(--cell-active)';
-    }
-    for (let pair of props.highlight || []) {
-      if (dist(props.coord, pair[0]) == 0) {
-        backgroundColor = pair[1];
-      }
     }
   }
 
@@ -325,7 +323,8 @@ interface BoardState {
   mode: string | undefined;
   trace?: boolean;
   hoveredCoords?: any;
-  highlight?: any[];
+  highlight: any[];
+  traceHighlight: any[];
   traceArrows?: any[];
   logArrows?: any[];
   blockArrows?: any[];
@@ -344,6 +343,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     this.state = {
       mode: undefined,
       pendingMove: false,
+      highlight: [],
+      traceHighlight: [],
       traceArrows: [],
       logArrows: [],
       blockArrows: [],
@@ -439,7 +440,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       }
     }
 
-    this.setState({ highlight: trace, traceArrows });
+    this.setState({ traceHighlight: trace, traceArrows });
   };
 
   CalcRemainingShips = () => {
@@ -499,9 +500,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     this.setState({
       mode: undefined,
       tooltip: false,
-      highlight: [],
+      traceHighlight: [],
       traceArrows: [],
-      logArrows: [],
       trace: false,
       showRemaining: false,
     });
@@ -524,7 +524,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   };
 
   leaveSquare = (_event: any) => {
-    this.setState({ hoveredCoords: undefined, highlight: [], traceArrows: [], logArrows: [] });
+    this.setState({ hoveredCoords: undefined });
     // Don't clear blockArrows on square leave - they should persist during block declaration
   };
 
@@ -759,6 +759,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             hover={e => this.hoverSquare(e, [i, j])}
             leave={this.leaveSquare}
             highlight={this.state.highlight}
+            traceHighlight={this.state.traceHighlight}
             pendingMove={this.state.pendingMove}
             onMoveStart={this.onMoveStart}
             stage={this.props.ctx.activePlayers?.[this.props.playerID]}

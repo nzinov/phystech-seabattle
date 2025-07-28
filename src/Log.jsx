@@ -75,9 +75,6 @@ class LogEvent extends React.Component {
         onMouseEnter={_e => {
           this.props.highlight(this.getHighlight());
         }}
-        onMouseLeave={_e => {
-          this.props.highlight([]);
-        }}
       >
         <div
           className={`log-event-bubble ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}
@@ -189,7 +186,7 @@ export const Log = ({ events, player, highlight }) => {
     if (!isMouseOverLog && events.length > 0) {
       const lastEvent = events[events.length - 1];
       // Create LogEvent instance to get highlight for the last event
-      const logEventInstance = new LogEvent({ event: lastEvent, player: player });
+      const logEventInstance = new LogEvent({ event: lastEvent });
       const lastMoveHighlight = logEventInstance.getHighlight();
       if (lastMoveHighlight.length > 0) {
         highlight(lastMoveHighlight);
@@ -198,7 +195,7 @@ export const Log = ({ events, player, highlight }) => {
       // Clear auto-highlight when mouse enters log (individual hover events will take over)
       highlight([]);
     }
-  }, [isMouseOverLog, events, player, highlight]);
+  }, [isMouseOverLog, events, highlight]);
 
   const scrollToTop = () => {
     if (scrollRef.current) {
