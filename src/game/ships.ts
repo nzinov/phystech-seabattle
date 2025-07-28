@@ -1,6 +1,6 @@
 import { Actions } from './actions';
 import { Effects } from './effects';
-import type { ActionContext, GameState, Position, Ship, ShipDefinition } from './types';
+import type { ActionContext, GameState, Position, Ship } from './types';
 import { checkPath, dist, getPos, isStraight, Ships, vector } from './utils';
 
 function repeatTurn({ ctx, events }: ActionContext) {
@@ -114,7 +114,7 @@ Object.assign(Ships, {
   },
   KrPl: {
     ...AttackingShip,
-    compare(ship: ShipDefinition) {
+    compare(ship: Ship) {
       if (ship.type == 'KrPl') return 0;
       if (['Kr', 'Rd', 'Es'].includes(ship.type)) return -1;
       return 1;

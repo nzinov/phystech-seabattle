@@ -97,6 +97,7 @@ export const Log = ({ events, player, highlight }) => {
   const prevEventsLength = useRef(events.length);
   const isAutoScrolling = useRef(false);
   const hasInitiallyScrolled = useRef(false);
+  const [isMouseOverLog, setIsMouseOverLog] = useState(false);
 
   const checkScrollPosition = () => {
     if (!scrollRef.current || isAutoScrolling.current) return;
@@ -183,6 +184,22 @@ export const Log = ({ events, player, highlight }) => {
     }
   }, [events.length]);
 
+  // Auto-highlight last move when mouse is not over log
+  useEffect(() => {
+    if (!isMouseOverLog && events.length > 0) {
+      const lastEvent = events[events.length - 1];
+      // Create LogEvent instance to get highlight for the last event
+      const logEventInstance = new LogEvent({ event: lastEvent, player: player });
+      const lastMoveHighlight = logEventInstance.getHighlight();
+      if (lastMoveHighlight.length > 0) {
+        highlight(lastMoveHighlight);
+      }
+    } else if (isMouseOverLog) {
+      // Clear auto-highlight when mouse enters log (individual hover events will take over)
+      highlight([]);
+    }
+  }, [isMouseOverLog, events, player, highlight]);
+
   const scrollToTop = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
@@ -196,7 +213,11 @@ export const Log = ({ events, player, highlight }) => {
   };
 
   return (
-    <div className="log-container">
+    <div
+      className="log-container"
+      onMouseEnter={() => setIsMouseOverLog(true)}
+      onMouseLeave={() => setIsMouseOverLog(false)}
+    >
       {showTopArrow && (
         <div onClick={scrollToTop} className="log-scroll-arrow top">
           ↑

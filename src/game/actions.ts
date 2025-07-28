@@ -1,16 +1,16 @@
-import type { ActionContext, MoveContext, Position, GameState } from './types';
+import { Effects } from './effects';
+import type { ActionContext, GameState, MoveContext, Position } from './types';
 import {
   addLog,
+  checkPath,
+  checkPatron,
   checkSide,
   dist,
   getPos,
-  setPos,
-  checkPath,
+  getShip,
   isStraight,
-  checkPatron,
+  setPos,
 } from './utils';
-import { getShip } from './utils';
-import { Effects } from './effects';
 
 function repeatTurn({ ctx, events }: ActionContext) {
   events.endTurn({ next: ctx.currentPlayer });
@@ -111,7 +111,7 @@ export const Actions = {
       G.attackTo = to;
       let isBlockableFrom = !!ship?.strength;
       if (!isBlockableFrom) {
-        G.attackBlock = 'not_required';
+        G.attackBlock = { type: fig!.type, size: 1, coords: [from] };
       }
       events.setActivePlayers({
         currentPlayer: isBlockableFrom ? 'attackBlock' : undefined,

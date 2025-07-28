@@ -14,7 +14,7 @@ export interface Ship {
   type: string;
   player: number;
   state?: any;
-  label?: string;
+  label?: any;
 }
 
 export interface GameState {
