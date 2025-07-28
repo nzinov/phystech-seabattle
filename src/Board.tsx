@@ -246,13 +246,19 @@ const Square: React.FC<SquareProps> = props => {
     }
     if (canDrag && !isDragging && !props.pendingMove) {
       // Get action type and set color accordingly
-      let action = getModeAction(
-        props.G,
-        props.ctx,
-        props.player,
-        props.mode || '',
-        props.coord
-      ) ?? { key: '' };
+      let action;
+      if (props.mode && props.mode != '') {
+        action = getModeAction(props.G, props.ctx, props.player, props.mode, props.coord);
+      } else {
+        const actions = getActions(props.G, props.ctx, props.player, props.coord).filter(
+          action => action && action.canFrom(props.G, parseInt(props.player), props.coord)
+        );
+        if (actions.length == 1) {
+          action = actions[0];
+        } else {
+          action = '';
+        }
+      }
       switch (action.key) {
         case 'a': // Attack
           backgroundColor = 'var(--action-attack-bg)';
