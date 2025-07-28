@@ -221,6 +221,9 @@ export const Log = ({ events, player, highlight }) => {
   // Auto-highlight last move when mouse is not over log
   const highlightLastMove = () => {
     const lastEvent = events[events.length - 1];
+    if (!lastEvent) {
+      return;
+    }
     // Create LogEvent instance to get highlight for the last event
     const logEventInstance = new LogEvent({ event: lastEvent });
     const lastMoveHighlight = logEventInstance.getHighlight();
