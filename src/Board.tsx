@@ -3,6 +3,7 @@ import React from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Tooltip } from 'react-tooltip';
+import './Board.css';
 import {
   DefaultGameConfig,
   dist,
@@ -10,10 +11,9 @@ import {
   getModeAction,
   getPlacementZone,
   takeMove,
-} from './Game';
+} from './game';
 import { Log } from './Log.jsx';
 import { shipInfo, stageDescr } from './Texts';
-import './Board.css';
 
 interface DragItem {
   coord: [number, number];

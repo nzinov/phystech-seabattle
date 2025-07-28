@@ -4,7 +4,7 @@ import React from 'react';
 import Cookies from 'universal-cookie';
 import { v4 as uuid } from 'uuid';
 import Board from './Board';
-import { DefaultGame, MiniGame } from './Game';
+import { DefaultGame, MiniGame } from './game';
 
 // Store invite link globally for BoardWrapper access
 let globalInviteLink: string | null = null;
