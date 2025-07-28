@@ -1,0 +1,112 @@
+/* Log component styles */
+.log-container {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.log-scroll-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  flex: 1;
+  scroll-behavior: smooth;
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
+}
+
+.log-event-container {
+  padding: 4px 12px;
+  margin: 2px 0;
+  cursor: pointer;
+  transition: all 0.03s ease;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  display: flex;
+}
+
+.log-event-container.current-player {
+  justify-content: flex-start;
+}
+
+.log-event-container.opponent-player {
+  justify-content: flex-end;
+}
+
+.log-event-container:hover {
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.log-event-bubble {
+  padding: 6px 10px;
+  max-width: 80%;
+  word-wrap: break-word;
+  border-radius: 12px 12px 12px 4px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.1);
+  transition: all 0.03s ease;
+}
+
+.log-event-bubble.current-player {
+  border-radius: 12px 12px 12px 4px;
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.log-event-bubble.opponent-player {
+  border-radius: 12px 12px 4px 12px;
+  background: rgba(107, 114, 128, 0.1);
+  border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.log-event-bubble:hover.current-player {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.log-event-bubble:hover.opponent-player {
+  background: rgba(107, 114, 128, 0.15);
+  border-color: rgba(107, 114, 128, 0.3);
+}
+
+.log-empty-state {
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: left;
+  padding: 8px 0;
+  font-size: 0.875rem;
+}
+
+.log-scroll-arrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  cursor: pointer;
+  background: var(--accent-primary);
+  color: white;
+  padding: 4px 12px;
+  font-size: 12px;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-fast);
+}
+
+.log-scroll-arrow.top {
+  top: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+.log-scroll-arrow.bottom {
+  bottom: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+.log-scroll-arrow:hover {
+  background: var(--accent-secondary);
+}

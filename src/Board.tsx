@@ -1,5 +1,4 @@
 import type { Ctx } from 'boardgame.io';
-import deepcopy from 'deepcopy';
 import React from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -14,6 +13,7 @@ import {
 } from './Game';
 import { Log } from './Log.jsx';
 import { shipInfo, stageDescr } from './Texts';
+import './Board.css';
 
 interface DragItem {
   coord: [number, number];
@@ -38,25 +38,6 @@ interface SquareProps {
   onMoveStart?: () => void;
   stage?: string;
 }
-
-const CellStyle: React.CSSProperties = {
-  border: '1px solid var(--border-light)',
-  margin: '0',
-  width: 'min(6.5vh, 5vw)',
-  height: 'min(6.5vh, 5vw)',
-  lineHeight: '50px',
-  textAlign: 'center',
-  backgroundSize: 'contain',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center',
-  overflow: 'hidden',
-  borderRadius: 'var(--border-radius-sm)',
-  transition:
-    'background-color 0.05s ease, border-color 0.05s ease, box-shadow 0.05s ease, transform 0.05s ease',
-  cursor: 'pointer',
-  position: 'relative',
-  backdropFilter: 'blur(8px)',
-};
 
 const Square: React.FC<SquareProps> = props => {
   const click = () => {
@@ -115,6 +96,8 @@ const Square: React.FC<SquareProps> = props => {
   let elevation = 0;
   let transform = 'scale(1)';
 
+  let cellClasses = ['board-cell'];
+
   // During placement phase, set light green background for player's side and disable all drag/drop effects
   if (props.stage === 'place') {
     const playerNum = parseInt(props.playerID);
@@ -124,16 +107,14 @@ const Square: React.FC<SquareProps> = props => {
     const isPlayerSide = row >= low && row < high;
 
     if (isPlayerSide) {
-      backgroundColor = 'rgba(34, 197, 94, 0.15)'; // Light green background
+      cellClasses.push('board-cell-placement-zone');
     }
     // No drag/drop effects during placement phase
   } else {
     // Normal drag/drop behavior for non-placement phases
     if (isDragging) {
-      backgroundColor = 'var(--accent-primary)';
-      borderColor = 'var(--accent-primary)';
+      cellClasses.push('board-cell-dragging');
       elevation = 3;
-      transform = 'scale(0.95)';
     }
     if (canDrop && isOver && dragItem) {
       // Get the drag item action type for active drop zone highlighting - action background color
@@ -144,6 +125,7 @@ const Square: React.FC<SquareProps> = props => {
         props.mode || '',
         dragItem.coord
       );
+      cellClasses.push('board-cell-drop-active');
       if (action) {
         switch (action.key) {
           case 'a': // Attack
@@ -173,7 +155,6 @@ const Square: React.FC<SquareProps> = props => {
         borderColor = 'var(--cell-active)';
       }
       elevation = 2;
-      transform = 'scale(1.02)';
     } else if (canDrop && dragItem) {
       // Get the drag item action type for subtle drop zone highlighting - always grey background with action border
       let action = getModeAction(
@@ -183,6 +164,7 @@ const Square: React.FC<SquareProps> = props => {
         props.mode || '',
         dragItem.coord
       );
+      cellClasses.push('board-cell-drop-hover');
       backgroundColor = 'var(--cell-hover)';
       if (action) {
         switch (action.key) {
@@ -251,13 +233,11 @@ const Square: React.FC<SquareProps> = props => {
       elevation = 1;
     }
     if (props.G.attackFrom && dist(props.G.attackFrom, props.coord) == 0) {
-      backgroundColor = 'rgba(59, 130, 246, 0.15)';
-      borderColor = 'rgba(59, 130, 246, 0.6)';
+      cellClasses.push('board-cell-attack-from');
       elevation = 2;
     }
     if (props.G.attackTo && dist(props.G.attackTo, props.coord) == 0) {
-      backgroundColor = 'rgba(168, 85, 247, 0.15)';
-      borderColor = 'rgba(168, 85, 247, 0.6)';
+      cellClasses.push('board-cell-attack-to');
       elevation = 2;
     }
     if (
@@ -274,10 +254,16 @@ const Square: React.FC<SquareProps> = props => {
     }
   }
 
-  let cellStyle = deepcopy(CellStyle);
-  cellStyle.backgroundColor = backgroundColor;
-  cellStyle.borderColor = borderColor;
-  cellStyle.transform = transform;
+  let cellStyle: React.CSSProperties = {};
+  if (backgroundColor !== 'var(--cell-default)') {
+    cellStyle.backgroundColor = backgroundColor;
+  }
+  if (borderColor !== 'var(--border-light)') {
+    cellStyle.borderColor = borderColor;
+  }
+  if (transform !== 'scale(1)') {
+    cellStyle.transform = transform;
+  }
   if (elevation === 1) {
     cellStyle.boxShadow = 'var(--shadow-sm)';
   } else if (elevation === 2) {
@@ -289,12 +275,13 @@ const Square: React.FC<SquareProps> = props => {
   if (props.figure) {
     cellStyle.backgroundImage = 'url(/figures/' + props.figure.type + '.png)';
     if (props.figure.label) {
-      let labelStyle = {
-        width: '70%',
-        height: '70%',
-        backgroundColor: '#F0F0FF',
-      };
-      label = <img style={labelStyle} src={'/figures/' + props.figure.label + '.png'} alt="" />;
+      label = (
+        <img
+          className="board-cell-ship-label"
+          src={'/figures/' + props.figure.label + '.png'}
+          alt=""
+        />
+      );
     }
   }
 
@@ -309,6 +296,7 @@ const Square: React.FC<SquareProps> = props => {
         data-tooltip-id="ship-tooltip"
         data-tooltip-content={shipInfo?.[props.figure?.type as keyof typeof shipInfo]}
         onClick={click}
+        className={cellClasses.join(' ')}
         style={cellStyle}
         onMouseEnter={props.hover}
         onMouseLeave={props.leave}
@@ -581,19 +569,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     const boardSize = 14;
 
     return (
-      <svg
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          zIndex: 10,
-        }}
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-      >
+      <svg className="board-arrows-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
         <defs>
           <linearGradient
             id="blockArrowGradient"
@@ -796,65 +772,10 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     if (this.state.showRemaining) {
       let [my_remaining, other_remaining] = this.CalcRemainingShips();
 
-      let headerStyle: React.CSSProperties = {
-        textAlign: 'center',
-        fontSize: 'min(3vh, 2vw)',
-        fontWeight: '700',
-        color: '#1e293b',
-        paddingBottom: '12px',
-        borderBottom: '2px solid rgba(99, 102, 241, 0.3)',
-        letterSpacing: '0.025em',
-        textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)',
-        background:
-          'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%)',
-        padding: '18px 24px 12px 24px',
-        borderRadius: 'var(--border-radius-lg) var(--border-radius-lg) 0 0',
-      };
-
-      let shipIconStyle: React.CSSProperties = {
-        width: 'min(5vh, 4vw)',
-        height: 'min(5vh, 4vw)',
-        backgroundSize: 'contain',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        border: '1px solid rgba(139, 92, 246, 0.4)',
-        borderRadius: 'var(--border-radius-sm)',
-        backgroundColor: 'rgba(248, 250, 252, 0.9)',
-        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
-        margin: '4px',
-      };
-
-      let labelStyle: React.CSSProperties = {
-        padding: '10px 12px',
-        fontWeight: '600',
-        fontSize: 'min(2.2vh, 1.6vw)',
-        color: '#1e293b',
-        textAlign: 'center',
-        verticalAlign: 'middle',
-        borderRadius: 'var(--border-radius-sm)',
-        minWidth: '70px',
-        textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)',
-        letterSpacing: '0.025em',
-        margin: '4px',
-      };
-
-      let numberCellStyle: React.CSSProperties = {
-        textAlign: 'center',
-        verticalAlign: 'middle',
-        padding: '8px 4px',
-        fontWeight: '700',
-        fontSize: 'min(2.4vh, 1.8vw)',
-        fontFamily: '"Inter", "SF Pro Display", system-ui, sans-serif',
-        borderRadius: 'var(--border-radius-sm)',
-        minWidth: 'min(5vh, 4vw)',
-        letterSpacing: '-0.02em',
-        margin: '4px',
-      };
-
       // Header row
       remaining_tbody.push(
         <tr key="header">
-          <td colSpan={Object.keys(my_remaining).length + 1} style={headerStyle}>
+          <td colSpan={Object.keys(my_remaining).length + 1} className="board-remaining-header">
             🚢 Fleet Status
           </td>
         </tr>
@@ -862,16 +783,16 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
       // Ship icons row
       let shipIconRow = [
-        <td key="ship-label" style={{ ...labelStyle, padding: '12px' }}>
+        <td key="ship-label" className="board-remaining-label board-remaining-label-cell">
           Ships
         </td>,
       ];
       for (const [ship] of Object.entries(my_remaining) as [string, number][]) {
         shipIconRow.push(
-          <td key={`icon-${ship}`} style={{ padding: '6px' }}>
+          <td key={`icon-${ship}`} className="board-remaining-ship-cell">
             <div
+              className="board-remaining-ship-icon"
               style={{
-                ...shipIconStyle,
                 backgroundImage: `url(/figures/${ship}.png)`,
               }}
             />
@@ -882,40 +803,14 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
       // Your numbers row
       let yourRow = [
-        <td
-          key="you-label"
-          style={{
-            ...labelStyle,
-            background:
-              'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.12) 100%)',
-            border: '2px solid rgba(16, 185, 129, 0.25)',
-            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
-          }}
-        >
+        <td key="you-label" className="board-remaining-label your">
           You
         </td>,
       ];
       for (const [ship, count] of Object.entries(my_remaining) as [string, number][]) {
         yourRow.push(
-          <td key={`you-${ship}`} style={{ padding: '6px' }}>
-            <div
-              style={{
-                ...numberCellStyle,
-                color: count > 0 ? '#065f46' : '#9ca3af',
-                background:
-                  count > 0
-                    ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)'
-                    : 'rgba(248, 250, 252, 0.6)',
-                border:
-                  count > 0
-                    ? '1px solid rgba(16, 185, 129, 0.4)'
-                    : '1px solid rgba(148, 163, 184, 0.4)',
-                textShadow:
-                  count > 0
-                    ? '0 1px 2px rgba(255, 255, 255, 0.9)'
-                    : '0 1px 2px rgba(255, 255, 255, 0.5)',
-              }}
-            >
+          <td key={`you-${ship}`} className="board-remaining-ship-cell">
+            <div className={`board-remaining-number your ${count > 0 ? 'active' : 'inactive'}`}>
               {count}
             </div>
           </td>
@@ -925,40 +820,14 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
       // Enemy numbers row
       let enemyRow = [
-        <td
-          key="enemy-label"
-          style={{
-            ...labelStyle,
-            background:
-              'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 127, 0.12) 100%)',
-            border: '2px solid rgba(239, 68, 68, 0.25)',
-            boxShadow: '0 2px 8px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
-          }}
-        >
+        <td key="enemy-label" className="board-remaining-label enemy">
           Enemy
         </td>,
       ];
       for (const [ship, count] of Object.entries(other_remaining) as [string, number][]) {
         enemyRow.push(
-          <td key={`enemy-${ship}`} style={{ padding: '6px' }}>
-            <div
-              style={{
-                ...numberCellStyle,
-                color: count > 0 ? '#7f1d1d' : '#9ca3af',
-                background:
-                  count > 0
-                    ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 127, 0.1) 100%)'
-                    : 'rgba(248, 250, 252, 0.6)',
-                border:
-                  count > 0
-                    ? '1px solid rgba(239, 68, 68, 0.4)'
-                    : '1px solid rgba(148, 163, 184, 0.4)',
-                textShadow:
-                  count > 0
-                    ? '0 1px 2px rgba(255, 255, 255, 0.9)'
-                    : '0 1px 2px rgba(255, 255, 255, 0.5)',
-              }}
-            >
+          <td key={`enemy-${ship}`} className="board-remaining-ship-cell">
+            <div className={`board-remaining-number enemy ${count > 0 ? 'active' : 'inactive'}`}>
               {count}
             </div>
           </td>
@@ -969,66 +838,13 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       // Add bottom padding row
       remaining_tbody.push(
         <tr key="bottom-padding">
-          <td colSpan={Object.keys(my_remaining).length + 1} style={{ padding: '12px 0' }}></td>
+          <td
+            colSpan={Object.keys(my_remaining).length + 1}
+            className="board-remaining-padding-cell"
+          ></td>
         </tr>
       );
     }
-
-    let remainingStyle: React.CSSProperties = {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      tableLayout: 'fixed',
-      color: 'var(--text-primary)',
-      background: 'rgba(255, 255, 255, 0.98)',
-      backdropFilter: 'blur(24px)',
-      borderRadius: 'var(--border-radius-lg)',
-      padding: '0',
-      boxShadow: '0 12px 32px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08)',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      zIndex: 1000,
-      maxWidth: '90vw',
-      maxHeight: '85vh',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      animation: 'fadeInSlide 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-      borderCollapse: 'separate',
-      borderSpacing: '0',
-      fontSize: '16px',
-    };
-
-    let sidebarStyle: React.CSSProperties = {
-      padding: '32px 24px',
-      background: 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(20px)',
-      width: 'min(360px, 28vw)',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'stretch',
-      height: '100vh',
-      margin: 0,
-      borderLeft: '1px solid var(--border-light)',
-      boxShadow: 'var(--shadow-xl)',
-    };
-
-    let outStyle: React.CSSProperties = {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      margin: 0,
-      background: 'var(--bg-primary)',
-      overflow: 'hidden',
-      position: 'relative',
-    };
-
-    let blocksStyle: React.CSSProperties = {
-      display: 'flex',
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-    };
 
     let stage = this.props.ctx.activePlayers?.[this.props.playerID];
     let blocks: any[] = [];
@@ -1041,159 +857,43 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
     return (
       <DndProvider backend={HTML5Backend}>
-        <style>
-          {`
-            
-            @keyframes fadeInSlide {
-              0% {
-                opacity: 0;
-                transform: translate(-50%, -45%) scale(0.95);
-              }
-              100% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-              }
-            }
-            
-            @keyframes shimmer {
-              0% {
-                transform: translateX(-100%);
-              }
-              100% {
-                transform: translateX(100%);
-              }
-            }
-            
-            @keyframes blockArrowGlow {
-              0% {
-                filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.3)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
-                opacity: 0.8;
-              }
-              50% {
-                filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.6)) drop-shadow(0 4px 16px rgba(0, 0, 0, 0.3));
-                opacity: 1;
-              }
-              100% {
-                filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.3)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
-                opacity: 0.8;
-              }
-            }
-          `}
-        </style>
         <Tooltip
           id="ship-tooltip"
           isOpen={this.state.tooltip ?? false}
           place="right"
-          style={{
-            maxWidth: '300px',
-            width: 'max-content',
-            whiteSpace: 'normal',
-            wordWrap: 'break-word',
-            lineHeight: '1.4',
-            zIndex: 9999,
-          }}
+          className="board-tooltip"
           render={({ content }) =>
             content ? <div dangerouslySetInnerHTML={{ __html: content }} /> : null
           }
         />
-        <div style={outStyle}>
+        <div className="board-container">
           {this.state.showRemaining && (
-            <table
-              id="remaining"
-              style={{
-                ...remainingStyle,
-                borderSpacing: '6px 4px',
-              }}
-            >
+            <table id="remaining" className="board-remaining-overlay">
               <tbody>{remaining_tbody}</tbody>
             </table>
           )}
-          <div
-            style={{
-              padding: '24px',
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: 'var(--border-radius-xl)',
-              boxShadow: 'var(--shadow-xl)',
-              border: '1px solid var(--border-light)',
-              position: 'relative',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                top: '12px',
-                left: '12px',
-                right: '12px',
-                bottom: '12px',
-                background:
-                  'linear-gradient(45deg, rgba(139, 92, 246, 0.03) 25%, transparent 25%), linear-gradient(-45deg, rgba(139, 92, 246, 0.03) 25%, transparent 25%)',
-                backgroundSize: '20px 20px',
-                borderRadius: 'var(--border-radius-lg)',
-                pointerEvents: 'none',
-              }}
-            />
-            <div style={{ position: 'relative' }}>
-              <table
-                id="board"
-                style={{
-                  borderCollapse: 'separate',
-                  borderSpacing: '2px',
-                  background: 'transparent',
-                  borderRadius: 'var(--border-radius-lg)',
-                  padding: '12px',
-                  position: 'relative',
-                  zIndex: 1,
-                }}
-              >
+          <div className="board-main-container">
+            <div className="board-pattern-overlay" />
+            <div className="board-inner-container">
+              <table id="board" className="board-table">
                 <tbody>{tbody}</tbody>
               </table>
               {this.renderArrows()}
             </div>
           </div>
-          <div style={sidebarStyle}>
+          <div className="board-sidebar">
             {this.props.ctx?.gameover && (
               <div
-                style={{
-                  background:
-                    this.props.ctx.gameover.winner == parseInt(this.props.playerID)
-                      ? 'var(--cell-active)'
-                      : this.props.ctx.gameover.winner === undefined
-                        ? 'var(--accent-secondary)'
-                        : 'var(--cell-attack)',
-                  padding: '20px',
-                  borderRadius: 'var(--border-radius-lg)',
-                  margin: '0 0 24px 0',
-                  textAlign: 'center',
-                  boxShadow: 'var(--shadow-lg)',
-                  color: 'var(--text-light)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                }}
+                className={`board-game-over ${
+                  this.props.ctx.gameover.winner === undefined
+                    ? 'draw'
+                    : this.props.ctx.gameover.winner == parseInt(this.props.playerID)
+                      ? 'victory'
+                      : 'defeat'
+                }`}
               >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background:
-                      'linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.1) 75%)',
-                    backgroundSize: '20px 20px',
-                  }}
-                />
-                <h1
-                  style={{
-                    margin: 0,
-                    fontSize: '1.75rem',
-                    fontWeight: '700',
-                    position: 'relative',
-                    zIndex: 1,
-                    textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                  }}
-                >
+                <div className="board-game-over-pattern" />
+                <h1 className="board-game-over-title">
                   {this.props.ctx.gameover.winner === undefined
                     ? '🤝 Draw'
                     : this.props.ctx.gameover.winner == parseInt(this.props.playerID)
@@ -1202,82 +902,18 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 </h1>
               </div>
             )}
-            <div
-              style={{
-                background: 'var(--accent-primary)',
-                padding: '16px 20px',
-                borderRadius: 'var(--border-radius-lg)',
-                margin: '0 0 24px 0',
-                textAlign: 'center',
-                boxShadow: 'var(--shadow-md)',
-                color: 'var(--text-light)',
-                position: 'relative',
-                overflow: 'hidden',
-                flexShrink: 0,
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background:
-                    'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)',
-                  transform: 'translateX(-100%)',
-                  animation: stage ? 'shimmer 2s infinite' : 'none',
-                }}
-              />
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: '1.125rem',
-                  fontWeight: '600',
-                  position: 'relative',
-                  zIndex: 1,
-                  letterSpacing: '0.025em',
-                }}
-              >
+            <div className="board-status-container">
+              <div className={`board-status-shimmer ${stage ? 'active' : ''}`} />
+              <h2 className="board-status-title">
                 {!stage ? '⏳ Waiting...' : `${stageDescr[stage as keyof typeof stageDescr]}`}
               </h2>
             </div>
             {stage == 'place' && (
               <button
                 onClick={this.Ready}
-                style={{
-                  background: this.state.readyConfirmPending
-                    ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
-                    : 'var(--cell-active)',
-                  border: 'none',
-                  padding: '16px 32px',
-                  borderRadius: 'var(--border-radius-lg)',
-                  color: 'var(--text-light)',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  boxShadow: 'var(--shadow-md)',
-                  transition: 'var(--transition-fast)',
-                  marginBottom: '24px',
-                  width: '100%',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.075em',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-                  e.currentTarget.style.transition = 'var(--transition-fast)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                  e.currentTarget.style.transition = 'var(--transition-fast)';
-                }}
+                className={`board-ready-button ${this.state.readyConfirmPending ? 'confirm' : 'normal'}`}
               >
-                <span style={{ position: 'relative', zIndex: 1 }}>
+                <span className="board-ready-button-text">
                   {this.state.readyConfirmPending ? '🎯 Confirm Ready?' : '✅ Ready to Battle'}
                 </span>
               </button>
@@ -1285,83 +921,24 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             {this.props.inviteLink && stage === 'place' && this.props.playerID === '0' && (
               <button
                 onClick={this.copyInviteLink}
-                style={{
-                  background: this.state.linkCopied
-                    ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
-                    : 'linear-gradient(135deg, var(--accent-secondary, #4338ca) 0%, var(--accent-primary) 100%)',
-                  border: 'none',
-                  padding: '16px 32px',
-                  borderRadius: 'var(--border-radius-lg)',
-                  color: 'var(--text-light)',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  boxShadow: 'var(--shadow-md)',
-                  transition: 'var(--transition-fast)',
-                  marginBottom: '24px',
-                  width: '100%',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.075em',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  flexShrink: 0,
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-                  e.currentTarget.style.transition = 'var(--transition-fast)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                  e.currentTarget.style.transition = 'var(--transition-fast)';
-                }}
+                className={`board-invite-button ${this.state.linkCopied ? 'copied' : 'normal'}`}
               >
-                <span style={{ position: 'relative', zIndex: 1 }}>
+                <span className="board-invite-button-text">
                   {this.state.linkCopied ? '✅ Link Copied!' : '🔗 Copy Invite Link'}
                 </span>
               </button>
             )}
-            <div style={{ ...blocksStyle, flexShrink: 0 }}>
+            <div className="board-blocks-container">
               {blocks &&
                 blocks.map((block, i) => (
                   <button
                     key={i}
-                    style={{
-                      width: '80px',
-                      height: '80px',
-                      margin: '6px',
-                      background:
-                        'linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%)',
-                      border: '2px solid var(--border-light)',
-                      borderRadius: '16px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                      position: 'relative',
-                      overflow: 'visible',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '8px',
-                    }}
+                    className="board-block-button"
                     onMouseEnter={e => {
                       this.hoverBlock(e, block);
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary, #4338ca) 100%)';
-                      e.currentTarget.style.color = 'white';
-                      e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
-                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.25)';
-                      e.currentTarget.style.borderColor = 'var(--accent-primary)';
                     }}
                     onMouseLeave={e => {
                       this.leaveBlock(e);
-                      e.currentTarget.style.background =
-                        'linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%)';
-                      e.currentTarget.style.color = 'var(--text-primary)';
-                      e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-                      e.currentTarget.style.borderColor = 'var(--border-light)';
                     }}
                     onClick={e => this.clickBlock(e, block)}
                   >
@@ -1369,42 +946,15 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                     <img
                       src={`/figures/${block.type}.png`}
                       alt={block.type}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                        filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))',
-                      }}
+                      className="board-block-ship-icon"
                     />
 
                     {/* Size Badge */}
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '-10px',
-                        right: '-10px',
-                        backgroundColor: 'var(--accent-primary, #6366f1)',
-                        color: 'white',
-                        borderRadius: '50%',
-                        width: '28px',
-                        height: '28px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '0.8rem',
-                        fontWeight: '700',
-                        border: '3px solid white',
-                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-                        fontFamily: 'JetBrains Mono, monospace',
-                        zIndex: 10,
-                      }}
-                    >
-                      {block.size}
-                    </span>
+                    <span className="board-block-size-badge">{block.size}</span>
                   </button>
                 ))}
             </div>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <div className="board-log-section">
               <Log
                 events={this.props.G.log}
                 player={parseInt(this.props.playerID)}

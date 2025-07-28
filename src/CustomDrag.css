@@ -1,0 +1,22 @@
+/* Custom drag layer styles */
+.custom-drag-layer {
+  position: fixed;
+  pointer-events: none;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.custom-drag-item {
+  display: none;
+}
+
+.custom-drag-item.visible {
+  display: block;
+}
+
+.drag-preview-text {
+  /* Placeholder for drag preview text styling if needed */
+}

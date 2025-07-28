@@ -1,15 +1,6 @@
 import React from 'react';
 import { useDragLayer } from 'react-dnd';
-
-const layerStyles = {
-  position: 'fixed',
-  pointerEvents: 'none',
-  zIndex: 100,
-  left: 0,
-  top: 0,
-  width: '100%',
-  height: '100%',
-};
+import './CustomDrag.css';
 
 function getItemStyles(initialOffset, currentOffset) {
   if (!initialOffset || !currentOffset) {
@@ -44,8 +35,13 @@ export const CustomDragLayer = _props => {
     return null;
   }
   return (
-    <div style={layerStyles}>
-      <div style={getItemStyles(initialOffset, currentOffset)}>{renderItem()}</div>
+    <div className="custom-drag-layer">
+      <div
+        className={`custom-drag-item ${!initialOffset || !currentOffset ? '' : 'visible'}`}
+        style={getItemStyles(initialOffset, currentOffset)}
+      >
+        {renderItem()}
+      </div>
     </div>
   );
 };

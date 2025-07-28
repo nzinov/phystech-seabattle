@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import './Log.css';
 
 function getSide(player, currentPlayer) {
   return player == currentPlayer ? 'your' : "opponent's";
@@ -70,54 +71,16 @@ class LogEvent extends React.Component {
 
     return (
       <div
-        style={{
-          padding: '4px 12px',
-          margin: '2px 0',
-          cursor: 'pointer',
-          transition: 'all 0.03s ease',
-          fontSize: '0.875rem',
-          color: 'var(--text-primary)',
-          lineHeight: '1.4',
-          display: 'flex',
-          justifyContent: isCurrentPlayer ? 'flex-start' : 'flex-end',
-        }}
-        onMouseEnter={e => {
+        className={`log-event-container ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}
+        onMouseEnter={_e => {
           this.props.highlight(this.getHighlight());
-          e.currentTarget.style.background = 'rgba(139, 92, 246, 0.05)';
         }}
-        onMouseLeave={e => {
+        onMouseLeave={_e => {
           this.props.highlight([]);
-          e.currentTarget.style.background = 'transparent';
         }}
       >
         <div
-          style={{
-            background: isCurrentPlayer ? 'rgba(139, 92, 246, 0.1)' : 'rgba(107, 114, 128, 0.1)',
-            borderRadius: isCurrentPlayer ? '12px 12px 12px 4px' : '12px 12px 4px 12px',
-            padding: '6px 10px',
-            maxWidth: '80%',
-            wordWrap: 'break-word',
-            border: isCurrentPlayer
-              ? '1px solid rgba(139, 92, 246, 0.2)'
-              : '1px solid rgba(107, 114, 128, 0.2)',
-            transition: 'all 0.03s ease',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = isCurrentPlayer
-              ? 'rgba(139, 92, 246, 0.15)'
-              : 'rgba(107, 114, 128, 0.15)';
-            e.currentTarget.style.borderColor = isCurrentPlayer
-              ? 'rgba(139, 92, 246, 0.3)'
-              : 'rgba(107, 114, 128, 0.3)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = isCurrentPlayer
-              ? 'rgba(139, 92, 246, 0.1)'
-              : 'rgba(107, 114, 128, 0.1)';
-            e.currentTarget.style.borderColor = isCurrentPlayer
-              ? 'rgba(139, 92, 246, 0.2)'
-              : 'rgba(107, 114, 128, 0.2)';
-          }}
+          className={`log-event-bubble ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}
         >
           {this.renderText()}
         </div>
@@ -125,19 +88,6 @@ class LogEvent extends React.Component {
     );
   }
 }
-
-const style = {
-  width: '100%',
-  height: '100%',
-  overflowY: 'auto',
-  padding: '0',
-  margin: '0',
-  minHeight: 0,
-  flex: 1,
-  scrollBehavior: 'smooth',
-  borderTop: '1px solid var(--border-light)',
-  borderBottom: '1px solid var(--border-light)',
-};
 
 export const Log = ({ events, player, highlight }) => {
   const scrollRef = useRef(null);
@@ -246,56 +196,16 @@ export const Log = ({ events, player, highlight }) => {
   };
 
   return (
-    <div style={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="log-container">
       {showTopArrow && (
-        <div
-          onClick={scrollToTop}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-            cursor: 'pointer',
-            background: 'var(--accent-primary)',
-            color: 'white',
-            borderRadius: '0 0 8px 8px',
-            padding: '4px 12px',
-            fontSize: '12px',
-            boxShadow: 'var(--shadow-md)',
-            transition: 'var(--transition-fast)',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'var(--accent-secondary)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'var(--accent-primary)';
-          }}
-        >
+        <div onClick={scrollToTop} className="log-scroll-arrow top">
           ↑
         </div>
       )}
 
-      <div
-        ref={scrollRef}
-        style={{
-          ...style,
-          position: 'relative',
-        }}
-        onScroll={checkScrollPosition}
-      >
+      <div ref={scrollRef} className="log-scroll-container" onScroll={checkScrollPosition}>
         {events.length === 0 ? (
-          <div
-            style={{
-              color: 'var(--text-secondary)',
-              fontStyle: 'italic',
-              textAlign: 'left',
-              padding: '8px 0',
-              fontSize: '0.875rem',
-            }}
-          >
-            No events yet...
-          </div>
+          <div className="log-empty-state">No events yet...</div>
         ) : (
           events.map((event, index) => (
             <LogEvent key={index} event={event} player={player} highlight={highlight} />
@@ -304,30 +214,7 @@ export const Log = ({ events, player, highlight }) => {
       </div>
 
       {showBottomArrow && (
-        <div
-          onClick={scrollToBottom}
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-            cursor: 'pointer',
-            background: 'var(--accent-primary)',
-            color: 'white',
-            borderRadius: '8px 8px 0 0',
-            padding: '4px 12px',
-            fontSize: '12px',
-            boxShadow: 'var(--shadow-md)',
-            transition: 'var(--transition-fast)',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'var(--accent-secondary)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'var(--accent-primary)';
-          }}
-        >
+        <div onClick={scrollToBottom} className="log-scroll-arrow bottom">
           ↓
         </div>
       )}

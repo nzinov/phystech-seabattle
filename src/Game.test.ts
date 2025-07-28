@@ -1,5 +1,5 @@
 import { Client } from 'boardgame.io/client';
-import GameRules from './Game';
+import { DefaultGame as GameRules } from './Game';
 
 describe('Random Game Moves Test', () => {
   test('should launch game and take random moves for 50 turns', () => {
