@@ -16,7 +16,7 @@ import {
   takeMove,
 } from './game';
 import { Log } from './Log.jsx';
-import { shipInfo, stageDescr } from './Texts';
+import { shipInfo, shipNames, stageDescr } from './Texts';
 
 // Multi-backend configuration for seamless touch and mouse support
 const backendOptions = HTML5toTouch;
@@ -345,6 +345,12 @@ const Square: React.FC<SquareProps> = props => {
     dropRef(el);
   };
 
+  // Get ship name for accessibility
+  const shipName = props.figure?.type
+    ? shipNames[props.figure.type as keyof typeof shipNames]
+    : null;
+  const altText = shipName || 'Empty square';
+
   return (
     <td ref={combinedRef}>
       <div
@@ -355,6 +361,10 @@ const Square: React.FC<SquareProps> = props => {
         style={cellStyle}
         onMouseEnter={props.hover}
         onMouseLeave={props.leave}
+        aria-label={altText}
+        title={altText}
+        role="gridcell"
+        tabIndex={0}
       >
         {label}
       </div>
@@ -1066,6 +1076,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
               style={{
                 backgroundImage: `url(/figures/${ship}.png)`,
               }}
+              aria-label={shipNames[ship as keyof typeof shipNames] || ship}
+              title={shipNames[ship as keyof typeof shipNames] || ship}
             />
           </td>
         );
@@ -1162,7 +1174,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
           <div className="board-main-container">
             <div className="board-pattern-overlay" />
             <div className="board-inner-container">
-              <table id="board" className="board-table">
+              <table id="board" className="board-table" role="grid" aria-label="Game board">
                 <tbody>{tbody}</tbody>
               </table>
               {this.renderArrows()}
@@ -1235,11 +1247,12 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                       this.leaveBlock(e);
                     }}
                     onClick={e => this.clickBlock(e, block)}
+                    aria-label={`${shipNames[block.type as keyof typeof shipNames] || block.type} block (size ${block.size})`}
                   >
                     {/* Ship Icon */}
                     <img
                       src={`/figures/${block.type}.png`}
-                      alt={block.type}
+                      alt={shipNames[block.type as keyof typeof shipNames] || block.type}
                       className="board-block-ship-icon"
                     />
 
