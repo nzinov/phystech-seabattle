@@ -10,6 +10,7 @@ import {
   getBlocks,
   getModeAction,
   getPlacementZone,
+  playerAdjacent,
   takeMove,
 } from './game';
 import { Log } from './Log.jsx';
@@ -253,21 +254,23 @@ const Square: React.FC<SquareProps> = props => {
   }
 
   let cellStyle: React.CSSProperties = {};
-  if (backgroundColor !== 'var(--cell-default)') {
-    cellStyle.backgroundColor = backgroundColor;
-  }
-  if (borderColor !== 'var(--border-light)') {
-    cellStyle.borderColor = borderColor;
-  }
-  if (transform !== 'scale(1)') {
-    cellStyle.transform = transform;
-  }
-  if (elevation === 1) {
-    cellStyle.boxShadow = 'var(--shadow-sm)';
-  } else if (elevation === 2) {
-    cellStyle.boxShadow = 'var(--shadow-md)';
-  } else if (elevation === 3) {
-    cellStyle.boxShadow = 'var(--shadow-lg)';
+  if (!props.ctx.gameover) {
+    if (backgroundColor !== 'var(--cell-default)') {
+      cellStyle.backgroundColor = backgroundColor;
+    }
+    if (borderColor !== 'var(--border-light)') {
+      cellStyle.borderColor = borderColor;
+    }
+    if (transform !== 'scale(1)') {
+      cellStyle.transform = transform;
+    }
+    if (elevation === 1) {
+      cellStyle.boxShadow = 'var(--shadow-sm)';
+    } else if (elevation === 2) {
+      cellStyle.boxShadow = 'var(--shadow-md)';
+    } else if (elevation === 3) {
+      cellStyle.boxShadow = 'var(--shadow-lg)';
+    }
   }
   let label = undefined;
   if (props.figure) {
@@ -710,19 +713,25 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       currentStage !== prevStage &&
       (currentStage === 'attackBlock' || currentStage === 'responseBlock')
     ) {
-      let blocks: any[] = [];
-
       if (currentStage === 'attackBlock') {
-        blocks = getBlocks(this.props.G, parseInt(this.props.playerID), this.props.G.attackFrom);
-        // Auto-declare if only one possible block
-        if (blocks.length === 1) {
-          setTimeout(() => this.props.moves.AttackBlock(blocks[0]), 100);
+        if (!playerAdjacent(this.props.G, parseInt(this.props.playerID), this.props.G.attackFrom)) {
+          setTimeout(
+            () =>
+              this.props.moves.AttackBlock(
+                getBlocks(this.props.G, parseInt(this.props.playerID), this.props.G.attackFrom)[0]
+              ),
+            100
+          );
         }
       } else if (currentStage === 'responseBlock') {
-        blocks = getBlocks(this.props.G, parseInt(this.props.playerID), this.props.G.attackTo);
-        // Auto-declare if only one possible block
-        if (blocks.length === 1) {
-          setTimeout(() => this.props.moves.ResponseBlock(blocks[0]), 100);
+        if (!playerAdjacent(this.props.G, parseInt(this.props.playerID), this.props.G.attackTo)) {
+          setTimeout(
+            () =>
+              this.props.moves.ResponseBlock(
+                getBlocks(this.props.G, parseInt(this.props.playerID), this.props.G.attackTo)[0]
+              ),
+            100
+          );
         }
       }
     }
@@ -903,12 +912,14 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 </h1>
               </div>
             )}
-            <div className="board-status-container">
-              <div className={`board-status-shimmer ${stage ? 'active' : ''}`} />
-              <h2 className="board-status-title">
-                {!stage ? '⏳ Waiting...' : `${stageDescr[stage as keyof typeof stageDescr]}`}
-              </h2>
-            </div>
+            {!this.props.ctx?.gameover && (
+              <div className="board-status-container">
+                <div className={`board-status-shimmer ${stage ? 'active' : ''}`} />
+                <h2 className="board-status-title">
+                  {!stage ? '⏳ Waiting...' : `${stageDescr[stage as keyof typeof stageDescr]}`}
+                </h2>
+              </div>
+            )}
             {stage == 'place' && (
               <button
                 onClick={this.Ready}

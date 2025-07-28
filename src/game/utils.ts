@@ -53,6 +53,21 @@ export function checkSide(G: GameState, player: number, pos: Position): boolean 
   return low <= pos[0] && pos[0] < high;
 }
 
+export function playerAdjacent(G: GameState, player: number, pos: Position): boolean {
+  for (let dx = -1; dx < 2; ++dx) {
+    for (let dy = -1; dy < 2; ++dy) {
+      let newPos: Position = [pos[0] + dx, pos[1] + dy];
+      if (dist(pos, newPos) == 1 && valid(G, newPos)) {
+        let ship = getPos(G, newPos);
+        if (ship && ship.player == player) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 export function patronNear(G: GameState, type: string, player: number, pos: Position): boolean {
   for (let dx = -1; dx < 2; ++dx) {
     for (let dy = -1; dy < 2; ++dy) {
