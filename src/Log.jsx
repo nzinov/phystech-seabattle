@@ -229,6 +229,8 @@ export const Log = ({ events, player, highlight }) => {
     }
   };
 
+  useEffect(highlightLastMove, [events, highlight]);
+
   const scrollToTop = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
