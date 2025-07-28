@@ -4,154 +4,265 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Правила игры - Морской бой по-физтеховски</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --surface-1: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #f1f5f9;
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #06b6d4;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --text-light: #ffffff;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --border-radius-sm: 6px;
+            --border-radius: 8px;
+            --border-radius-lg: 12px;
+            --border-radius-xl: 16px;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-size: 14px;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.01em;
+        }
+        
+        .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            background: var(--surface-1);
+            padding: 40px;
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border-light);
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+        
         h1 {
-            color: #2c3e50;
+            color: var(--text-primary);
             text-align: center;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-            margin-bottom: 30px;
+            border-bottom: 3px solid var(--accent-primary);
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
         }
+        
         h2 {
-            color: #34495e;
-            border-left: 4px solid #3498db;
-            padding-left: 15px;
-            margin-top: 30px;
+            color: var(--text-primary);
+            border-left: 4px solid var(--accent-primary);
+            padding-left: 20px;
+            margin-top: 40px;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
+        
         h3 {
-            color: #5d6d7e;
-            margin-top: 25px;
+            color: var(--text-secondary);
+            margin-top: 30px;
+            font-size: 1.25rem;
+            font-weight: 600;
         }
+        
         .ship-section {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-            border-left: 4px solid #e74c3c;
+            background: var(--surface-2);
+            border-radius: var(--border-radius-lg);
+            padding: 24px;
+            margin: 24px 0;
+            border-left: 4px solid var(--accent-secondary);
+            box-shadow: var(--shadow-sm);
         }
+        
         .ship-item {
             display: flex;
             align-items: flex-start;
-            margin: 15px 0;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin: 16px 0;
+            padding: 16px;
+            background: var(--surface-1);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: all 0.2s ease;
         }
+        
+        .ship-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        
         .ship-image {
             width: 48px;
             height: 48px;
-            margin-right: 15px;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            background: #f0f0f0;
+            margin-right: 16px;
+            border: 2px solid var(--border-light);
+            border-radius: var(--border-radius);
+            background: var(--surface-2);
         }
+        
         .ship-description {
             flex: 1;
         }
+        
         .ship-name {
-            font-weight: bold;
-            color: #2c3e50;
+            font-weight: 600;
+            color: var(--text-primary);
             font-size: 1.1em;
+            margin-bottom: 8px;
         }
+        
         table {
             border-collapse: collapse;
             width: 100%;
-            margin: 20px 0;
-            background: white;
-            border-radius: 8px;
+            margin: 24px 0;
+            background: var(--surface-1);
+            border-radius: var(--border-radius-lg);
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
         }
+        
         th, td {
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-light);
             padding: 12px;
             text-align: center;
         }
+        
         th {
-            background-color: #3498db;
-            color: white;
-            font-weight: bold;
+            background: var(--accent-primary);
+            color: var(--text-light);
+            font-weight: 600;
         }
+        
         tr:nth-child(even) {
-            background-color: #f8f9fa;
+            background-color: var(--surface-2);
         }
+        
         .action-table th {
-            background-color: #27ae60;
+            background: var(--accent-primary);
         }
+        
         .combat-table th {
-            background-color: #e74c3c;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         }
+        
         .quantity-table th {
-            background-color: #9b59b6;
+            background: var(--accent-primary);
         }
+        
         .phase-list {
-            background: #e8f5e8;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+            background: var(--surface-2);
+            padding: 24px;
+            border-radius: var(--border-radius-lg);
+            margin: 24px 0;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
         }
+        
         .dl-horizontal dt {
-            font-weight: bold;
-            color: #2c3e50;
-            margin-top: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-top: 12px;
         }
+        
         .dl-horizontal dd {
-            margin-left: 20px;
-            margin-bottom: 10px;
+            margin-left: 24px;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
         }
+        
         .example-section {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+            border-radius: var(--border-radius-lg);
+            padding: 24px;
+            margin: 24px 0;
+            box-shadow: var(--shadow-sm);
         }
+        
         .example-section h4 {
-            color: #856404;
+            color: #92400e;
             margin-top: 0;
+            font-weight: 600;
         }
+        
         img.img-responsive {
             max-width: 100%;
             height: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            margin: 15px 0;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+            margin: 16px 0;
         }
+        
         .category-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-light);
+            padding: 20px;
+            border-radius: var(--border-radius-lg);
             text-align: center;
-            font-weight: bold;
-            margin: 25px 0 15px 0;
+            font-weight: 600;
+            margin: 32px 0 20px 0;
+            box-shadow: var(--shadow-md);
+            font-size: 1.1rem;
         }
+        
         .strength-indicator {
-            background: #3498db;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
+            background: var(--accent-secondary);
+            color: var(--text-light);
+            padding: 4px 12px;
+            border-radius: 16px;
             font-size: 0.8em;
-            margin-left: 10px;
+            margin-left: 12px;
+            font-weight: 500;
         }
+        
         strong {
-            color: #2c3e50;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px;
+                margin: 16px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .ship-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .ship-image {
+                margin-right: 0;
+                margin-bottom: 12px;
+                align-self: center;
+            }
         }
     </style>
 </head>
