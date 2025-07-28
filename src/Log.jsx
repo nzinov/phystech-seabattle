@@ -10,6 +10,56 @@ function getShipDescr(ship, currentPlayer) {
 }
 
 class LogEvent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      isLongPressing: false,
+      longPressTimer: null,
+    };
+  }
+
+  handleTouchStart = e => {
+    e.preventDefault();
+    const timer = setTimeout(() => {
+      this.setState({ isLongPressing: true });
+      this.props.highlight(this.getHighlight());
+      // Auto-hide highlight after 3 seconds
+      setTimeout(() => {
+        this.setState({ isLongPressing: false });
+        if (!this.state.longPressTimer) {
+          this.props.highlight([]);
+        }
+      }, 3000);
+    }, 500); // 500ms for long press
+    this.setState({ longPressTimer: timer });
+  };
+
+  handleTouchEnd = e => {
+    e.preventDefault();
+    if (this.state.longPressTimer) {
+      clearTimeout(this.state.longPressTimer);
+      this.setState({ longPressTimer: null });
+    }
+    if (!this.state.isLongPressing) {
+      // This was a short tap, do nothing special
+    }
+    this.setState({ isLongPressing: false });
+  };
+
+  handleTouchMove = _e => {
+    // Cancel long press if user moves finger too much
+    if (this.state.longPressTimer) {
+      clearTimeout(this.state.longPressTimer);
+      this.setState({ longPressTimer: null });
+    }
+  };
+
+  componentWillUnmount() {
+    if (this.state.longPressTimer) {
+      clearTimeout(this.state.longPressTimer);
+    }
+  }
+
   getHighlight = () => {
     let event = this.props.event;
     // Use purple shades to match arrow colors
@@ -75,6 +125,9 @@ class LogEvent extends React.Component {
         onMouseEnter={_e => {
           this.props.highlight(this.getHighlight());
         }}
+        onTouchStart={this.handleTouchStart}
+        onTouchEnd={this.handleTouchEnd}
+        onTouchMove={this.handleTouchMove}
       >
         <div
           className={`log-event-bubble ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}

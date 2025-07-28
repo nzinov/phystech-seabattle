@@ -2,11 +2,13 @@ import type { Ctx } from 'boardgame.io';
 import React from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { Tooltip } from 'react-tooltip';
 import './Board.css';
 import {
   DefaultGameConfig,
   dist,
+  getActions,
   getBlocks,
   getModeAction,
   getPlacementZone,
@@ -15,6 +17,25 @@ import {
 } from './game';
 import { Log } from './Log.jsx';
 import { shipInfo, stageDescr } from './Texts';
+
+// Function to detect touch capability and choose appropriate backend
+const isTouchDevice = () => {
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
+const getBackend = () => {
+  return isTouchDevice() ? TouchBackend : HTML5Backend;
+};
+
+const getBackendOptions = () => {
+  return isTouchDevice()
+    ? {
+        enableMouseEvents: true,
+        delayTouchStart: 100,
+        delayMouseStart: 0,
+      }
+    : {};
+};
 
 interface DragItem {
   coord: [number, number];
@@ -38,13 +59,50 @@ interface SquareProps {
   traceHighlight: any[];
   pendingMove?: boolean;
   onMoveStart?: () => void;
+  onDrop: (from: [number, number], to: [number, number], event?: any) => void;
+  onLongPress?: (coord: [number, number]) => void;
   stage?: string;
 }
 
 const Square: React.FC<SquareProps> = props => {
+  const [longPressTimer, setLongPressTimer] = React.useState<NodeJS.Timeout | null>(null);
+  const [isLongPressing, setIsLongPressing] = React.useState(false);
+
   const click = () => {
     if (['Unknown', 'Sinking'].includes(props.figure?.type) && !props.G.attackFrom) {
       props.moves.Label(props.coord, prompt('Enter label'));
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    const timer = setTimeout(() => {
+      setIsLongPressing(true);
+      if (props.onLongPress) {
+        props.onLongPress(props.coord);
+      }
+    }, 500); // 500ms for long press
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    if (!isLongPressing) {
+      // This was a short tap, treat as click
+      click();
+    }
+    setIsLongPressing(false);
+  };
+
+  const handleTouchMove = (_e: React.TouchEvent) => {
+    // Cancel long press if user moves finger too much
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
     }
   };
 
@@ -53,10 +111,13 @@ const Square: React.FC<SquareProps> = props => {
       type: 'square',
       item: () => ({ coord: props.coord, figure: props.figure }),
       canDrag: () => {
-        // Explicitly depend on mode for immediate updates
-        const currentMode = props.mode || '';
-        let action = getModeAction(props.G, props.ctx, props.player, currentMode, props.coord);
-        return action && action.canFrom(props.G, parseInt(props.player), props.coord);
+        // Allow dragging if piece has any available actions (for mobile support)
+        const actions = getActions(props.G, props.ctx, props.player, props.coord);
+        return (
+          actions &&
+          actions.length > 0 &&
+          actions.some(action => action.canFrom(props.G, parseInt(props.player), props.coord))
+        );
       },
       collect: monitor => ({
         canDrag: monitor.canDrag(),
@@ -69,20 +130,16 @@ const Square: React.FC<SquareProps> = props => {
   const [{ canDrop, isOver, dragItem }, dropRef] = useDrop(
     () => ({
       accept: 'square',
-      drop: (item: DragItem) => {
-        if (props.onMoveStart) {
-          props.onMoveStart();
-        }
-        takeMove(props.G, props.ctx, props.moves, props.mode || '', item.coord, props.coord);
+      drop: (item: DragItem, monitor) => {
+        const dropTargetElement = monitor.getDropResult();
+        props.onDrop(item.coord, props.coord, dropTargetElement);
       },
       canDrop: (item: DragItem) => {
-        // Explicitly depend on mode for immediate updates
-        const currentMode = props.mode || '';
-        let action = getModeAction(props.G, props.ctx, props.player, currentMode, item.coord);
-        if (!action) {
-          return false;
-        }
-        return action.can(props.G, parseInt(props.player), item.coord, props.coord);
+        // Check if any available actions can be performed at this target
+        const actions = getActions(props.G, props.ctx, props.player, item.coord);
+        return actions.some(action =>
+          action.can(props.G, parseInt(props.player), item.coord, props.coord)
+        );
       },
       collect: monitor => ({
         canDrop: monitor.canDrop(),
@@ -301,6 +358,9 @@ const Square: React.FC<SquareProps> = props => {
         data-tooltip-id="ship-tooltip"
         data-tooltip-content={shipInfo?.[props.figure?.type as keyof typeof shipInfo]}
         onClick={click}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
         className={cellClasses.join(' ')}
         style={cellStyle}
         onMouseEnter={props.hover}
@@ -342,6 +402,13 @@ interface BoardState {
   lastMoveTimestamp?: number;
   linkCopied?: boolean;
   readyConfirmPending?: boolean;
+  actionSelectionPopup?: {
+    visible: boolean;
+    actions: any[];
+    from: [number, number];
+    to: [number, number];
+    position: { x: number; y: number };
+  };
 }
 
 class Board extends React.Component<BoardPropsLocal, BoardState> {
@@ -357,6 +424,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       blockArrows: [],
       linkCopied: false,
       readyConfirmPending: false,
+      actionSelectionPopup: undefined,
     };
   }
 
@@ -392,6 +460,80 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
         console.error('Failed to copy link:', err);
       }
     }
+  };
+
+  handleDrop = (from: [number, number], to: [number, number], event?: any) => {
+    if (this.onMoveStart) {
+      this.onMoveStart();
+    }
+
+    // Get all available actions for the piece
+    const actions = getActions(this.props.G, this.props.ctx, this.props.playerID, from);
+    console.log(actions);
+    const validActions = actions.filter(action =>
+      action.can(this.props.G, parseInt(this.props.playerID), from, to)
+    );
+    console.log(validActions);
+
+    if (validActions.length === 0) {
+      return; // No valid actions
+    } else if (validActions.length === 1) {
+      // Only one action - execute it directly
+      const mode = validActions[0].key;
+      takeMove(this.props.G, this.props.ctx, this.props.moves, mode, from, to);
+    } else {
+      // Multiple actions - show selection popup
+      const rect = event?.target?.getBoundingClientRect?.();
+      const position = rect
+        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+      this.setState({
+        actionSelectionPopup: {
+          visible: true,
+          actions: validActions,
+          from,
+          to,
+          position,
+        },
+      });
+    }
+  };
+
+  selectAction = (actionKey: string) => {
+    const popup = this.state.actionSelectionPopup;
+    if (popup) {
+      takeMove(this.props.G, this.props.ctx, this.props.moves, actionKey, popup.from, popup.to);
+      this.setState({ actionSelectionPopup: undefined });
+    }
+  };
+
+  cancelActionSelection = () => {
+    this.setState({ actionSelectionPopup: undefined });
+  };
+
+  handleLongPress = (coord: [number, number]) => {
+    // Show tooltip and trace on long press
+    this.setState(
+      {
+        tooltip: true,
+        trace: true,
+        hoveredCoords: coord,
+      },
+      () => {
+        this.HighlightTrace();
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+          this.setState({
+            tooltip: false,
+            trace: false,
+            traceHighlight: [],
+            traceArrows: [],
+            hoveredCoords: undefined,
+          });
+        }, 3000);
+      }
+    );
   };
 
   HighlightTrace = () => {
@@ -746,6 +888,61 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     document.removeEventListener('keyup', this.handleKeyUp);
   }
 
+  renderActionSelectionPopup() {
+    const popup = this.state.actionSelectionPopup;
+    if (!popup?.visible) {
+      return null;
+    }
+
+    const getActionName = (action: any) => {
+      switch (action.key) {
+        case 'm':
+          return '🚢 Move';
+        case 'a':
+          return '⚔️ Attack';
+        case 's':
+          return '🎯 Shoot';
+        case 'e':
+          return '💥 Explode';
+        case 'r':
+          return '🚀 Rocket';
+        default:
+          return action.key.toUpperCase();
+      }
+    };
+
+    return (
+      <div className="action-selection-overlay" onClick={this.cancelActionSelection}>
+        <div
+          className="action-selection-popup"
+          style={{
+            position: 'absolute',
+            left: popup.position.x,
+            top: popup.position.y,
+            transform: 'translate(-50%, -50%)',
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          <h3 className="action-selection-title">Choose Action</h3>
+          <div className="action-selection-buttons">
+            {popup.actions.map((action, index) => (
+              <button
+                key={index}
+                className="action-selection-button"
+                onClick={() => this.selectAction(action.key)}
+              >
+                {getActionName(action)}
+              </button>
+            ))}
+          </div>
+          <button className="action-selection-cancel" onClick={this.cancelActionSelection}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     // Wait for game state to initialize
     if (!this.props.G || !this.props.G.cells) {
@@ -777,6 +974,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             traceHighlight={this.state.traceHighlight}
             pendingMove={this.state.pendingMove}
             onMoveStart={this.onMoveStart}
+            onDrop={this.handleDrop}
+            onLongPress={this.handleLongPress}
             stage={this.props.ctx.activePlayers?.[this.props.playerID]}
           ></Square>
         );
@@ -872,7 +1071,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
 
     return (
-      <DndProvider backend={HTML5Backend}>
+      <DndProvider backend={getBackend()} options={getBackendOptions()}>
         <Tooltip
           id="ship-tooltip"
           isOpen={this.state.tooltip ?? false}
@@ -952,6 +1151,11 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 </span>
               </button>
             )}
+            {stage == 'attack' && (
+              <button onClick={this.Skip} className="board-skip-button">
+                <span className="board-skip-button-text">⏭ Skip Turn</span>
+              </button>
+            )}
             {this.props.inviteLink && stage === 'place' && this.props.playerID === '0' && (
               <button
                 onClick={this.copyInviteLink}
@@ -997,6 +1201,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             </div>
           </div>
         </div>
+        {this.renderActionSelectionPopup()}
       </DndProvider>
     );
   }
