@@ -1130,6 +1130,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
 
     let stage = this.props.ctx.activePlayers?.[this.props.playerID];
+    let placementPhase = this.props.ctx.phase == 'place';
     let blocks: any[] = [];
     if (stage == 'attackBlock') {
       blocks = getBlocks(this.props.G, parseInt(this.props.playerID), this.props.G.attackFrom);
@@ -1221,10 +1222,12 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             )}
             {stage == 'attack' && (
               <button onClick={this.Skip} className="board-skip-button">
-                <span className="board-skip-button-text">⏭ Skip Turn</span>
+                <span className="board-skip-button-text">
+                  ⏭ Skip Turn (<i>space</i>)
+                </span>
               </button>
             )}
-            {this.props.inviteLink && stage === 'place' && this.props.playerID === '0' && (
+            {this.props.inviteLink && placementPhase && this.props.playerID === '0' && (
               <button
                 onClick={this.copyInviteLink}
                 className={`board-invite-button ${this.state.linkCopied ? 'copied' : 'normal'}`}
