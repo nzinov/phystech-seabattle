@@ -567,8 +567,8 @@
 }
 
 .board-remaining-ship-icon {
-  width: min(5vh, 4vw);
-  height: min(5vh, 4vw);
+  min-width: min(10vh, 4vw);
+  min-height: min(10vh, 4vw);
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -578,21 +578,18 @@
   box-shadow:
     0 1px 4px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  margin: 4px;
 }
 
 .board-remaining-label {
-  padding: 10px 12px;
+  padding: 0.5vw;
   font-weight: 600;
   font-size: min(2.2vh, 1.6vw);
   color: #1e293b;
   text-align: center;
   vertical-align: middle;
   border-radius: var(--border-radius-sm);
-  min-width: 70px;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
   letter-spacing: 0.025em;
-  margin: 4px;
 }
 
 .board-remaining-label.your {
@@ -620,8 +617,8 @@
   font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
   border-radius: var(--border-radius-sm);
   min-width: min(5vh, 4vw);
+  min-height: min(5vh, 4vw);
   letter-spacing: -0.02em;
-  margin: 4px;
 }
 
 .board-remaining-number.your.active {
@@ -766,15 +763,15 @@
   z-index: 10;
 }
 .board-remaining-ship-cell {
-  padding: 6px;
+  padding: 1px;
 }
 
 .board-remaining-label-cell {
-  padding: 12px;
+  padding: 1px;
 }
 
 .board-remaining-padding-cell {
-  padding: 12px 0;
+  padding: 1px 0;
 }
 
 /* Portrait orientation - show flip prompt */
