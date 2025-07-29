@@ -52,6 +52,13 @@ interface SquareProps {
   onMoveStart?: () => void;
   onDrop: (from: [number, number], to: [number, number], event?: any) => void;
   stage?: string;
+  actionSelectionPopup?: {
+    visible: boolean;
+    actions: any[];
+    from: [number, number];
+    to: [number, number];
+    position: { x: number; y: number };
+  };
 }
 
 const Square: React.FC<SquareProps> = props => {
@@ -150,6 +157,13 @@ const Square: React.FC<SquareProps> = props => {
   let transform = 'scale(1)';
 
   let cellClasses = ['board-cell'];
+
+  // Check if this cell should be highlighted due to action selection popup
+  const actionPopup = (props as any).actionSelectionPopup;
+  const isActionSource =
+    actionPopup?.visible && actionPopup.from && dist(props.coord, actionPopup.from) === 0;
+  const isActionTarget =
+    actionPopup?.visible && actionPopup.to && dist(props.coord, actionPopup.to) === 0;
 
   // During placement phase, set light green background for player's side and disable all drag/drop effects
   if (props.stage === 'place') {
@@ -296,6 +310,20 @@ const Square: React.FC<SquareProps> = props => {
     if (props.G.attackTo && dist(props.G.attackTo, props.coord) == 0) {
       cellClasses.push('board-cell-attack-to');
       elevation = 2;
+    }
+
+    // Highlight source and target squares when action selection popup is visible
+    if (isActionSource) {
+      cellClasses.push('board-cell-action-source');
+      backgroundColor = 'rgba(59, 130, 246, 0.3)';
+      borderColor = 'rgba(59, 130, 246, 0.8)';
+      elevation = Math.max(elevation, 3);
+    }
+    if (isActionTarget) {
+      cellClasses.push('board-cell-action-target');
+      backgroundColor = 'rgba(139, 92, 246, 0.3)';
+      borderColor = 'rgba(139, 92, 246, 0.8)';
+      elevation = Math.max(elevation, 3);
     }
     if (
       props.highlightedBlock &&
@@ -621,6 +649,13 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   };
 
   handleKeyDown = (event: KeyboardEvent) => {
+    // Handle ESC key to cancel action selection popup
+    if (event.key === 'Escape' && this.state.actionSelectionPopup?.visible) {
+      this.cancelActionSelection();
+      event.preventDefault();
+      return;
+    }
+
     if (event.key == ' ') {
       this.Skip();
       return;
@@ -917,9 +952,20 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     });
   };
 
+  handleDocumentClick = (event: MouseEvent) => {
+    // Cancel action selection popup if clicking outside of it
+    if (this.state.actionSelectionPopup?.visible) {
+      const popup = document.querySelector('.action-selection-popup');
+      if (popup && !popup.contains(event.target as Node)) {
+        this.cancelActionSelection();
+      }
+    }
+  };
+
   componentDidMount() {
     document.addEventListener('keydown', this.handleKeyDown);
     document.addEventListener('keyup', this.handleKeyUp);
+    document.addEventListener('click', this.handleDocumentClick);
     this.updateBlockArrows();
   }
 
@@ -983,6 +1029,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   componentWillUnmount() {
     document.removeEventListener('keydown', this.handleKeyDown);
     document.removeEventListener('keyup', this.handleKeyUp);
+    document.removeEventListener('click', this.handleDocumentClick);
   }
 
   renderActionSelectionPopup() {
@@ -994,45 +1041,64 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     const getActionName = (action: any) => {
       switch (action.key) {
         case 'm':
-          return '🚢 Move';
+          return { icon: '🚢', name: 'Move', color: 'var(--action-move-bg)' };
         case 'a':
-          return '⚔️ Attack';
+          return { icon: '⚔️', name: 'Attack', color: 'var(--action-attack-bg)' };
         case 's':
-          return '🎯 Shoot';
+          return { icon: '🎯', name: 'Shoot', color: 'var(--action-shoot-bg)' };
         case 'e':
-          return '💥 Explode';
+          return { icon: '💥', name: 'Explode', color: 'var(--action-explode-bg)' };
         case 'r':
-          return '🚀 Rocket';
+          return { icon: '🚀', name: 'Rocket', color: 'var(--action-rocket-bg)' };
         default:
-          return action.key.toUpperCase();
+          return { icon: '❓', name: action.key.toUpperCase(), color: 'var(--accent-primary)' };
       }
     };
+
+    // Calculate popup dimensions for boundary detection
+    const popupWidth = 200; // Approximate popup width
+    const popupHeight = 100 + popup.actions.length * 44; // Approximate popup height
+
+    // Get viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate bounded position to keep popup on screen
+    let left = popup.position.x - popupWidth / 2; // Center horizontally on click point
+    let top = popup.position.y - popupHeight / 2; // Center vertically on click point
+
+    // Boundary checks with padding
+    const padding = 16;
+    if (left < padding) left = padding;
+    if (left + popupWidth > viewportWidth - padding) left = viewportWidth - popupWidth - padding;
+    if (top < padding) top = padding;
+    if (top + popupHeight > viewportHeight - padding) top = viewportHeight - popupHeight - padding;
 
     return (
       <div
         className="action-selection-popup"
         style={{
-          position: 'absolute',
-          left: popup.position.x,
-          top: popup.position.y,
+          position: 'fixed',
+          left: left,
+          top: top,
+          zIndex: 10000,
         }}
         onClick={e => e.stopPropagation()}
       >
-        <h3 className="action-selection-title">Choose Action</h3>
-        <div className="action-selection-buttons">
-          {popup.actions.map((action, index) => (
+        {popup.actions.map((action, index) => {
+          const actionInfo = getActionName(action);
+          return (
             <button
               key={index}
               className="action-selection-button"
+              style={{ backgroundColor: actionInfo.color }}
               onClick={() => this.selectAction(action.key)}
             >
-              {getActionName(action)}
+              <span className="action-icon">{actionInfo.icon}</span>
+              <span className="action-name">{actionInfo.name}</span>
             </button>
-          ))}
-        </div>
-        <button className="action-selection-cancel" onClick={this.cancelActionSelection}>
-          Cancel
-        </button>
+          );
+        })}
       </div>
     );
   }
@@ -1070,6 +1136,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             onMoveStart={this.onMoveStart}
             onDrop={this.handleDrop}
             stage={this.props.ctx.activePlayers?.[this.props.playerID]}
+            actionSelectionPopup={this.state.actionSelectionPopup}
           ></Square>
         );
       }
