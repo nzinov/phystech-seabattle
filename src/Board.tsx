@@ -356,6 +356,7 @@ const Square: React.FC<SquareProps> = props => {
       <div
         data-tooltip-id="ship-tooltip"
         data-tooltip-content={shipInfo?.[props.figure?.type as keyof typeof shipInfo]}
+        data-cell={`${props.coord[0]}-${props.coord[1]}`}
         onClick={click}
         className={cellClasses.join(' ')}
         style={cellStyle}
@@ -785,10 +786,27 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       return null;
     }
 
-    const boardSize = this.props.G.config?.fieldSize || 14;
+    // Get the board inner container to calculate relative positions
+    const boardContainer = document.querySelector('.board-inner-container');
+    if (!boardContainer) {
+      return null;
+    }
+
+    const containerRect = boardContainer.getBoundingClientRect();
 
     return (
-      <svg className="board-arrows-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <svg
+        className="board-arrows-svg"
+        style={{
+          width: containerRect.width,
+          height: containerRect.height,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          pointerEvents: 'none',
+          zIndex: 10,
+        }}
+      >
         <defs>
           <linearGradient
             id="blockArrowGradient"
@@ -801,47 +819,56 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.9" />
             <stop offset="100%" stopColor="rgb(168, 85, 247)" stopOpacity="0.9" />
           </linearGradient>
-          <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="5.5" refY="2" orient="auto">
+          <marker id="arrowhead" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto">
             <polygon
-              points="0 0, 6 2, 0 4"
+              points="0 0, 12 4, 0 8"
               fill="rgba(147, 51, 234, 0.9)"
               stroke="rgba(147, 51, 234, 1)"
-              strokeWidth="0.3"
+              strokeWidth="0.5"
             />
           </marker>
           <marker
             id="bigarrowhead"
-            markerWidth="6.5"
-            markerHeight="4.5"
-            refX="6"
-            refY="2.25"
+            markerWidth="15"
+            markerHeight="10"
+            refX="14"
+            refY="5"
             orient="auto"
           >
-            <defs>
-              <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="rgba(59, 130, 246, 0.9)" />
-                <stop offset="100%" stopColor="rgba(168, 85, 247, 0.9)" />
-              </linearGradient>
-            </defs>
             <polygon
-              points="0 0, 6.5 2.25, 0 4.5"
+              points="0 0, 15 5, 0 10"
               fill="rgb(99, 102, 241)"
               stroke="rgb(79, 70, 229)"
-              strokeWidth="0.2"
+              strokeWidth="0.5"
             />
           </marker>
         </defs>
         {allArrows.map((arrow, index) => {
-          const fromX = (arrow.from[1] + 0.5) * (100 / boardSize);
-          const fromY = (arrow.from[0] + 0.5) * (100 / boardSize);
-          const toX = (arrow.to[1] + 0.5) * (100 / boardSize);
-          const toY = (arrow.to[0] + 0.5) * (100 / boardSize);
+          // Find the actual cell elements and get their centers
+          const fromCell = document.querySelector(
+            `[data-cell="${arrow.from[0]}-${arrow.from[1]}"]`
+          );
+          const toCell = document.querySelector(`[data-cell="${arrow.to[0]}-${arrow.to[1]}"]`);
+
+          if (!fromCell || !toCell) {
+            return null;
+          }
+
+          const fromRect = fromCell.getBoundingClientRect();
+          const toRect = toCell.getBoundingClientRect();
+
+          // Calculate centers relative to the inner container
+          const fromX = fromRect.left - containerRect.left + fromRect.width / 2;
+          const fromY = fromRect.top - containerRect.top + fromRect.height / 2;
+          const toX = toRect.left - containerRect.left + toRect.width / 2;
+          const toY = toRect.top - containerRect.top + toRect.height / 2;
 
           const isBigArrow = arrow.type === 'block';
           const strokeColor = isBigArrow
             ? 'rgb(99, 102, 241)'
             : `rgba(147, 51, 234, ${Math.max(0.7, arrow.opacity)})`;
-          const strokeWidth = isBigArrow ? '0.8' : '0.5';
+          // Scale stroke width for pixel coordinates (much thicker than before)
+          const strokeWidth = isBigArrow ? '3' : '2';
           const markerEnd = isBigArrow ? 'url(#bigarrowhead)' : 'url(#arrowhead)';
 
           return (
