@@ -52,13 +52,6 @@
   }
 }
 
-/* Focus and accessibility improvements */
-button:focus,
-input:focus {
-  outline: 2px solid var(--cell-defend);
-  outline-offset: 2px;
-}
-
 /* Animation for game state changes */
 @keyframes pulse {
   0% {
