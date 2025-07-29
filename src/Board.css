@@ -90,6 +90,7 @@
   user-select: none;
   /* Improve touch responsiveness */
   touch-action: none;
+  outline: none !important;
 }
 
 .board-cell-placement-zone {
