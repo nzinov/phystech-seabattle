@@ -159,6 +159,13 @@ export function createGameRules(config: GameConfig = DefaultGameConfig): Game<Ga
               G.responseBlock = undefined;
             }
           },
+          onEnd({ G }: ActionContext) {
+            // Clear attack state when turn ends to prevent blue border highlight
+            G.attackFrom = undefined;
+            G.attackTo = undefined;
+            G.attackBlock = undefined;
+            G.responseBlock = undefined;
+          },
           activePlayers: { currentPlayer: 'move', others: 'wait' },
         },
       },
