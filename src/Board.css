@@ -190,8 +190,7 @@
   padding: clamp(4px, 1.5vw, 16px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  width: clamp(180px, 20vw, 320px);
-  min-width: clamp(160px, 18vw, 280px);
+  width: clamp(180px, 25vw, 320px);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;

@@ -574,7 +574,6 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
     let trace = [];
     let traceArrows = [];
-    let count = 0;
     let moveSequence = []; // Store the full sequence of positions
 
     // First, collect all positions in the movement sequence
@@ -583,16 +582,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
     for (let i = this.props.G.log.length - 1; i >= 0; i--) {
       let event = this.props.G.log[i];
-      if (event.type == 'move' && dist(currentCoords, event.from) == 0) {
-        return;
-      }
       if (event.type == 'move' && dist(currentCoords, event.to) == 0) {
         currentCoords = event.from;
         moveSequence.push(currentCoords);
-        count++;
-        if (count == 10) {
-          break;
-        }
       }
     }
 
@@ -789,12 +781,42 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
   };
 
-  highlight = (highlight: any) => {
-    // Don't update highlight if mobile trace/tooltip is active
-    if (this.state.longPressTraceActive && isMobileDevice()) {
+  highlightLastMove = () => {
+    const events = this.props.G.log;
+    const lastEvent = events[events.length - 1];
+    if (!lastEvent) {
       return;
     }
 
+    // Create highlight for the last event (similar to LogEvent.getHighlight)
+    let hl = [];
+    switch (lastEvent.type) {
+      case 'move':
+      case 'shoot':
+      case 'attack':
+        hl = [
+          [lastEvent.from, 'rgba(147, 51, 234, 0.4)'], // Light purple for origin
+          [lastEvent.to, 'rgba(147, 51, 234, 0.6)'], // Darker purple for destination
+        ];
+        break;
+      case 'die':
+        hl = [[lastEvent.from, 'rgba(239, 68, 68, 0.5)']];
+        break;
+      case 'explode':
+        hl = [[lastEvent.to, 'rgba(239, 68, 68, 0.5)']];
+        break;
+      case 'response':
+      default:
+        hl = [];
+        break;
+    }
+
+    if (hl.length > 0) {
+      this.highlight(hl);
+    }
+  };
+
+  highlight = (highlight: any) => {
     // Check if this highlight represents a move event and add arrow
     let logArrows = [];
     if (highlight && highlight.length >= 2) {
@@ -958,6 +980,14 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       const popup = document.querySelector('.action-selection-popup');
       if (popup && !popup.contains(event.target as Node)) {
         this.cancelActionSelection();
+      }
+    }
+
+    // On mobile, highlight last move when clicking outside of log
+    if (isMobileDevice()) {
+      const logContainer = document.querySelector('.log-container');
+      if (logContainer && !logContainer.contains(event.target as Node)) {
+        this.highlightLastMove();
       }
     }
   };

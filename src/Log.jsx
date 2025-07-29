@@ -18,16 +18,9 @@ class LogEvent extends React.Component {
   }
 
   handleMobileClick = () => {
-    const newState = !this.state.mobileHighlightActive;
-
-    if (newState) {
-      // Show highlight
-      this.props.highlight(this.getHighlight());
-      this.setState({ mobileHighlightActive: true });
-    } else {
-      this.props.highlightLastMove();
-      this.setState({ mobileHighlightActive: false });
-    }
+    // Always highlight this entry when clicked on mobile
+    this.props.highlight(this.getHighlight());
+    this.setState({ mobileHighlightActive: true });
   };
 
   isMobileDevice = () => {
