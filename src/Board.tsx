@@ -1144,7 +1144,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
         <Tooltip
           id="ship-tooltip"
           isOpen={this.state.tooltip ?? false}
-          place="right"
+          place="left"
           className="board-tooltip"
           render={({ content }) =>
             content ? <div dangerouslySetInnerHTML={{ __html: content }} /> : null

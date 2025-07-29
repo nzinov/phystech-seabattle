@@ -62,7 +62,7 @@ body {
     sans-serif;
   background: var(--bg-primary);
   min-height: 100vh;
-  font-size: 14px;
+  font-size: clamp(12px, 2.5vw, 16px);
   line-height: 1.6;
   font-weight: 400;
   color: var(--text-primary);

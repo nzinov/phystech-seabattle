@@ -1,21 +1,22 @@
 /* Board component styles */
 .board-container {
+  --board-gap: clamp(4px, 2vh, 16px);
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
   margin: 0;
-  padding: 16px;
+  padding: var(--board-gap);
   background: var(--bg-primary);
   overflow: auto;
   position: relative;
   box-sizing: border-box;
-  gap: 16px;
+  gap: var(--board-gap);
 }
 
 .board-main-container {
-  padding: 16px;
+  padding: clamp(4px, 1.5vw, 16px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: var(--border-radius-xl);
@@ -23,10 +24,8 @@
   border: 1px solid var(--border-light);
   position: relative;
   flex-shrink: 0;
-  width: calc(100vh - 32px);
-  height: calc(100vh - 32px);
-  max-width: calc(100vw - 360px);
-  max-height: calc(100vh - 32px);
+  width: calc(100vh - 2 * var(--board-gap));
+  height: calc(100vh - 2 * var(--board-gap));
   aspect-ratio: 1;
 }
 
@@ -39,17 +38,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 4px;
+  padding: clamp(2px, 0.5vw, 4px);
   width: 100%;
   height: 100%;
 }
 
 .board-table {
   border-collapse: separate;
-  border-spacing: 1px;
+  border-spacing: clamp(0.5px, 0.15vw, 1px);
   background: transparent;
   border-radius: var(--border-radius-lg);
-  padding: 8px;
+  padding: clamp(4px, 1vw, 8px);
   position: relative;
   z-index: 1;
   margin: 0;
@@ -58,10 +57,14 @@
 }
 
 .board-cell {
-  border: 2px solid var(--border-light);
+  --cell-border: clamp(1px, 0.3vh, 2px);
+  border: var(--cell-border) solid var(--border-light);
   margin: 0;
-  width: calc(min(6vh, 5.5vw) * var(--cell-scale-factor, 1));
-  height: calc(min(6vh, 5.5vw) * var(--cell-scale-factor, 1));
+  --cell-size: calc(
+    (100vh - 2 * var(--board-gap)) / var(--board-size) - 2px - 2 * var(--cell-border)
+  );
+  width: var(--cell-size);
+  height: var(--cell-size);
   line-height: 1;
   text-align: center;
   background-size: contain;
@@ -135,22 +138,22 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  padding: 12px;
+  padding: clamp(6px, 1.5vw, 12px);
   z-index: 10;
 }
 
 .board-sidebar {
-  padding: 16px;
+  padding: clamp(4px, 1.5vw, 16px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  width: min(320px, 25vw);
-  min-width: 280px;
+  width: clamp(180px, 20vw, 320px);
+  min-width: clamp(160px, 18vw, 280px);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-  min-height: calc(100vh - 32px);
-  max-height: calc(100vh - 32px);
+  min-height: calc(100vh - 2 * var(--board-gap));
+  max-height: calc(100vh - 2 * var(--board-gap));
   margin: 0;
   border-radius: var(--border-radius-xl);
   border: 1px solid var(--border-light);
@@ -159,9 +162,9 @@
 }
 
 .board-game-over {
-  padding: 20px;
+  padding: clamp(12px, 3vw, 20px);
   border-radius: var(--border-radius-lg);
-  margin: 0 0 24px 0;
+  margin: 0 0 clamp(12px, 3vw, 24px) 0;
   text-align: center;
   box-shadow: var(--shadow-lg);
   color: var(--text-light);
@@ -200,7 +203,7 @@
 
 .board-game-over-title {
   margin: 0;
-  font-size: 1.75rem;
+  font-size: clamp(1.2rem, 4vw, 1.75rem);
   font-weight: 700;
   position: relative;
   z-index: 1;
@@ -209,9 +212,9 @@
 
 .board-status-container {
   background: var(--accent-primary);
-  padding: 16px 20px;
+  padding: clamp(1px, 1vw, 16px) clamp(1px, 1vh, 20px);
   border-radius: var(--border-radius-lg);
-  margin: 0 0 24px 0;
+  margin-bottom: clamp(4px, 2vh, 24px);
   text-align: center;
   box-shadow: var(--shadow-md);
   color: var(--text-light);
@@ -242,7 +245,7 @@
 
 .board-status-title {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: clamp(0.3rem, 1.3vw, 1.125rem);
   font-weight: 600;
   position: relative;
   z-index: 1;
@@ -251,18 +254,18 @@
 
 .board-ready-button {
   border: none;
-  padding: 16px 32px;
+  padding: clamp(1px, 1vw, 16px) clamp(1px, 1vh, 20px);
   border-radius: var(--border-radius-lg);
   color: var(--text-light);
-  font-size: 1rem;
+  font-size: clamp(0.3rem, 1.3vw, 1.125rem);
   font-weight: 600;
   cursor: pointer;
   box-shadow: var(--shadow-md);
   transition: var(--transition-fast);
-  margin-bottom: 24px;
+  margin-bottom: clamp(4px, 2vh, 24px);
   width: 100%;
   text-transform: uppercase;
-  letter-spacing: 0.075em;
+  letter-spacing: clamp(0.05em, 0.1vw, 0.075em);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -288,16 +291,17 @@
 
 .board-skip-button {
   border: none;
-  padding: 16px 32px;
+  padding: clamp(1px, 1vw, 16px) clamp(1px, 1vh, 20px);
   border-radius: var(--border-radius-lg);
   color: var(--text-light);
-  font-size: 1rem;
+  font-size: clamp(0.3rem, 1.3vw, 1.125rem);
   font-weight: 600;
   cursor: pointer;
   box-shadow: var(--shadow-md);
   transition: var(--transition-fast);
-  margin-bottom: 24px;
+  margin-bottom: clamp(4px, 2vh, 24px);
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  width: 100%;
 }
 
 .board-skip-button:hover {
@@ -312,10 +316,10 @@
 
 .board-rules-link {
   position: fixed;
-  bottom: 16px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
+  bottom: clamp(8px, 2vw, 16px);
+  right: clamp(8px, 2vw, 16px);
+  width: clamp(24px, 4vw, 32px);
+  height: clamp(24px, 4vw, 32px);
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   display: flex;
@@ -323,7 +327,7 @@
   justify-content: center;
   text-decoration: none;
   color: #666;
-  font-size: 16px;
+  font-size: clamp(12px, 2vw, 16px);
   font-weight: bold;
   transition: all 0.2s ease;
   z-index: 1000;
@@ -343,16 +347,16 @@
 .action-selection-popup {
   background: var(--bg-secondary);
   border-radius: var(--border-radius-lg);
-  padding: 24px;
+  padding: clamp(16px, 3vw, 24px);
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--border-light);
-  min-width: 200px;
-  max-width: 300px;
+  min-width: clamp(160px, 25vw, 200px);
+  max-width: clamp(240px, 35vw, 300px);
 }
 
 .action-selection-title {
-  margin: 0 0 16px 0;
-  font-size: 1.1rem;
+  margin: 0 0 clamp(12px, 2vw, 16px) 0;
+  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
   font-weight: 600;
   color: var(--text-primary);
   text-align: center;
@@ -361,17 +365,17 @@
 .action-selection-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: clamp(6px, 1vw, 8px);
+  margin-bottom: clamp(12px, 2vw, 16px);
 }
 
 .action-selection-button {
   border: none;
-  padding: 12px 16px;
+  padding: clamp(8px, 2vw, 12px) clamp(12px, 2.5vw, 16px);
   border-radius: var(--border-radius-md);
   background: var(--accent-primary);
   color: var(--text-light);
-  font-size: 0.9rem;
+  font-size: clamp(0.75rem, 1.8vw, 0.9rem);
   font-weight: 500;
   cursor: pointer;
   transition: var(--transition-fast);
@@ -385,11 +389,11 @@
 
 .action-selection-cancel {
   border: 1px solid var(--border-light);
-  padding: 8px 16px;
+  padding: clamp(6px, 1.5vw, 8px) clamp(12px, 2.5vw, 16px);
   border-radius: var(--border-radius-md);
   background: transparent;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: clamp(0.75rem, 1.8vw, 0.9rem);
   cursor: pointer;
   transition: var(--transition-fast);
   width: 100%;
@@ -403,12 +407,6 @@
 /* Mobile-specific enhancements */
 @media (hover: none) and (pointer: coarse) {
   /* Mobile devices */
-  .board-cell {
-    /* Slightly larger touch targets on mobile */
-    min-width: 44px;
-    min-height: 44px;
-  }
-
   /* Make draggable items more obvious on mobile */
   .board-cell[style*='border-color: var(--accent-primary)'] {
     animation: pulse-mobile 2s infinite;
@@ -445,18 +443,18 @@
 
 .board-invite-button {
   border: none;
-  padding: 16px 32px;
+  padding: clamp(1px, 1vw, 16px) clamp(1px, 1vh, 20px);
   border-radius: var(--border-radius-lg);
   color: var(--text-light);
-  font-size: 1rem;
+  font-size: clamp(0.3rem, 1.3vw, 1.125rem);
   font-weight: 600;
   cursor: pointer;
   box-shadow: var(--shadow-md);
   transition: var(--transition-fast);
-  margin-bottom: 24px;
+  margin-bottom: clamp(4px, 2vh, 24px);
   width: 100%;
   text-transform: uppercase;
-  letter-spacing: 0.075em;
+  letter-spacing: clamp(0.05em, 0.1vw, 0.075em);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -492,12 +490,12 @@
 }
 
 .board-block-button {
-  width: 80px;
-  height: 80px;
-  margin: 6px;
+  width: clamp(40px, 8vw, 80px);
+  height: clamp(40px, 8vw, 80px);
+  margin: clamp(2px, 0.5vw, 6px);
   background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
-  border: 2px solid var(--border-light);
-  border-radius: 16px;
+  border: clamp(1px, 0.2vw, 2px) solid var(--border-light);
+  border-radius: clamp(8px, 2vw, 16px);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -506,7 +504,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: clamp(3px, 1vw, 8px);
 }
 
 .board-block-button:hover {
@@ -530,19 +528,19 @@
 
 .board-block-size-badge {
   position: absolute;
-  top: -10px;
-  right: -10px;
+  top: clamp(-6px, -1.2vw, -10px);
+  right: clamp(-6px, -1.2vw, -10px);
   background-color: var(--accent-primary, #6366f1);
   color: white;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: clamp(16px, 3.5vw, 28px);
+  height: clamp(16px, 3.5vw, 28px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  font-size: clamp(0.5rem, 1.2vw, 0.8rem);
   font-weight: 700;
-  border: 3px solid white;
+  border: clamp(1.5px, 0.4vw, 3px) solid white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   font-family: 'JetBrains Mono', monospace;
   z-index: 10;
@@ -577,18 +575,18 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: fadeInSlide 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border-collapse: separate;
-  border-spacing: 6px 4px;
-  font-size: 16px;
+  border-spacing: clamp(3px, 0.8vw, 6px) clamp(2px, 0.5vw, 4px);
+  font-size: clamp(12px, 2vw, 16px);
 }
 
 .board-remaining-header {
   text-align: center;
-  font-size: min(3vh, 2vw);
+  font-size: clamp(0.9rem, 2.5vw, 1.3rem);
   font-weight: 700;
   color: #1e293b;
-  padding: 18px 24px 12px 24px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid rgba(99, 102, 241, 0.3);
+  padding: clamp(12px, 3vw, 18px) clamp(16px, 4vw, 24px) clamp(8px, 2vw, 12px)
+    clamp(16px, 4vw, 24px);
+  border-bottom: clamp(1px, 0.3vw, 2px) solid rgba(99, 102, 241, 0.3);
   letter-spacing: 0.025em;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%);
@@ -596,8 +594,8 @@
 }
 
 .board-remaining-ship-icon {
-  min-width: min(10vh, 4vw);
-  min-height: min(10vh, 4vw);
+  min-width: clamp(30px, 6vw, 60px);
+  min-height: clamp(30px, 6vw, 60px);
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -610,9 +608,9 @@
 }
 
 .board-remaining-label {
-  padding: 0.5vw;
+  padding: clamp(4px, 1vw, 8px);
   font-weight: 600;
-  font-size: min(2.2vh, 1.6vw);
+  font-size: clamp(0.7rem, 1.8vw, 1rem);
   color: #1e293b;
   text-align: center;
   vertical-align: middle;
@@ -640,13 +638,13 @@
 .board-remaining-number {
   text-align: center;
   vertical-align: middle;
-  padding: 8px 4px;
+  padding: clamp(4px, 1.2vw, 8px) clamp(2px, 0.6vw, 4px);
   font-weight: 700;
-  font-size: min(2.4vh, 1.8vw);
+  font-size: clamp(0.8rem, 2vw, 1.1rem);
   font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
   border-radius: var(--border-radius-sm);
-  min-width: min(5vh, 4vw);
-  min-height: min(5vh, 4vw);
+  min-width: clamp(24px, 5vw, 40px);
+  min-height: clamp(24px, 5vw, 40px);
   letter-spacing: -0.02em;
 }
 
@@ -736,12 +734,12 @@
 }
 
 .board-block-button {
-  width: 80px;
-  height: 80px;
-  margin: 6px;
+  width: clamp(40px, 8vw, 80px);
+  height: clamp(40px, 8vw, 80px);
+  margin: clamp(2px, 0.5vw, 6px);
   background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
-  border: 2px solid var(--border-light);
-  border-radius: 16px;
+  border: clamp(1px, 0.2vw, 2px) solid var(--border-light);
+  border-radius: clamp(8px, 2vw, 16px);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -750,7 +748,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  padding: clamp(3px, 1vw, 8px);
 }
 
 .board-block-button:hover {
@@ -774,33 +772,33 @@
 
 .board-block-size-badge {
   position: absolute;
-  top: -10px;
-  right: -10px;
+  top: clamp(-6px, -1.2vw, -10px);
+  right: clamp(-6px, -1.2vw, -10px);
   background-color: var(--accent-primary, #6366f1);
   color: white;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: clamp(16px, 3.5vw, 28px);
+  height: clamp(16px, 3.5vw, 28px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.8rem;
+  font-size: clamp(0.5rem, 1.2vw, 0.8rem);
   font-weight: 700;
-  border: 3px solid white;
+  border: clamp(1.5px, 0.4vw, 3px) solid white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   font-family: 'JetBrains Mono', monospace;
   z-index: 10;
 }
 .board-remaining-ship-cell {
-  padding: 1px;
+  padding: clamp(0.5px, 0.1vw, 1px);
 }
 
 .board-remaining-label-cell {
-  padding: 1px;
+  padding: clamp(0.5px, 0.1vw, 1px);
 }
 
 .board-remaining-padding-cell {
-  padding: 1px 0;
+  padding: clamp(0.5px, 0.1vw, 1px) 0;
 }
 
 /* Portrait orientation - show flip prompt */
@@ -831,28 +829,28 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: var(--border-radius-xl);
-  padding: 40px;
+  padding: clamp(24px, 6vw, 40px);
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--border-light);
-  max-width: 400px;
+  max-width: clamp(300px, 60vw, 400px);
   text-align: center;
 }
 
 .flip-screen-icon {
-  font-size: 4rem;
-  margin-bottom: 24px;
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  margin-bottom: clamp(16px, 4vw, 24px);
   animation: rotate 2s ease-in-out infinite alternate;
 }
 
 .flip-screen-title {
-  font-size: 1.5rem;
+  font-size: clamp(1.1rem, 3.5vw, 1.5rem);
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 16px;
+  margin-bottom: clamp(12px, 3vw, 16px);
 }
 
 .flip-screen-text {
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 2.2vw, 1rem);
   color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 0;
