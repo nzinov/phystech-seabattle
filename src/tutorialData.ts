@@ -26,8 +26,18 @@ function emptyCells(size: number) {
 }
 
 function baseState(): GameState {
+  const cells = emptyCells(tutorialConfig.fieldSize);
+  // Place forts for both players so the game doesn't end immediately
+  cells[0][0] = { type: 'F', player: 0, state: {}, label: {} } as any;
+  cells[tutorialConfig.fieldSize - 1][tutorialConfig.fieldSize - 1] = {
+    type: 'F',
+    player: 1,
+    state: {},
+    label: {},
+  } as any;
+
   return {
-    cells: emptyCells(tutorialConfig.fieldSize),
+    cells,
     log: [],
     phase: 'play',
     ready: 2,
