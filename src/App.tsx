@@ -67,7 +67,7 @@ const SeabattleClient = Client({
   game: params.get('mini') == '1' ? MiniGame : DefaultGame,
   board: BoardWrapper,
   multiplayer: SocketIO({ server: getServerUrl() }),
-  debug: import.meta.env.DEV || window.location.hostname === 'localhost',
+  debug: { collapseOnLoad: true },
 });
 
 const App: React.FC = () => {

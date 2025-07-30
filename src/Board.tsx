@@ -165,7 +165,7 @@ const Square: React.FC<SquareProps> = props => {
   const isActionTarget =
     actionPopup?.visible && actionPopup.to && dist(props.coord, actionPopup.to) === 0;
 
-  // During placement phase, set light green background for player's side and disable all drag/drop effects
+  // During placement phase, set light green background for player's side and enable drag source highlighting
   if (props.stage === 'place') {
     const playerNum = parseInt(props.playerID);
     const [row] = props.coord;
@@ -180,7 +180,11 @@ const Square: React.FC<SquareProps> = props => {
       cellClasses.push('board-cell-drop-active');
       borderColor = 'var(--cell-active)';
     }
-    // No drag/drop effects during placement phase
+    // Highlight drag source during placement phase with green styling
+    if (isDragging) {
+      cellClasses.push('board-cell-placement-dragging');
+      elevation = 3;
+    }
   } else {
     // Normal drag/drop behavior for non-placement phases
     if (isDragging) {
@@ -426,6 +430,7 @@ interface BoardState {
   blockArrows?: any[];
   tooltip?: boolean;
   showRemaining?: boolean;
+  mobileFleetStatus?: boolean;
   highlightedBlock?: any;
   pendingMove?: boolean;
   lastMoveTimestamp?: number;
@@ -458,6 +463,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       longPressTraceActive: false,
       mobileClickStates: new Map(),
       actionSelectionPopup: undefined,
+      mobileFleetStatus: false,
     };
   }
 
@@ -493,6 +499,10 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
         console.error('Failed to copy link:', err);
       }
     }
+  };
+
+  toggleMobileFleetStatus = () => {
+    this.setState({ mobileFleetStatus: !this.state.mobileFleetStatus });
   };
 
   handleDrop = (from: [number, number], to: [number, number], event?: any) => {
@@ -983,6 +993,20 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       }
     }
 
+    // Close mobile fleet status if clicking outside of it or the fleet status button
+    if (this.state.mobileFleetStatus) {
+      const fleetOverlay = document.querySelector('.board-remaining-overlay');
+      const fleetButton = document.querySelector('.board-fleet-button');
+      if (
+        fleetOverlay &&
+        fleetButton &&
+        !fleetOverlay.contains(event.target as Node) &&
+        !fleetButton.contains(event.target as Node)
+      ) {
+        this.setState({ mobileFleetStatus: false });
+      }
+    }
+
     // On mobile, highlight last move when clicking outside of log
     if (isMobileDevice()) {
       const logContainer = document.querySelector('.log-container');
@@ -1174,7 +1198,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
 
     let remaining_tbody = [];
-    if (this.state.showRemaining) {
+    if (this.state.showRemaining || this.state.mobileFleetStatus) {
       let [my_remaining, other_remaining] = this.CalcRemainingShips();
 
       // Header row
@@ -1291,7 +1315,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
               horizontally for the best experience.
             </p>
           </div>
-          {this.state.showRemaining && (
+          {(this.state.showRemaining || this.state.mobileFleetStatus) && (
             <table id="remaining" className="board-remaining-overlay">
               <tbody>{remaining_tbody}</tbody>
             </table>
@@ -1397,6 +1421,15 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             </div>
           </div>
         </div>
+        {isMobileDevice() && (
+          <button
+            className="board-fleet-button"
+            onClick={this.toggleMobileFleetStatus}
+            title="Fleet Status"
+          >
+            🚢
+          </button>
+        )}
         <a
           href="/rules.html"
           target="_blank"
