@@ -4,9 +4,10 @@ import { shipInfo, shipNames } from './Texts';
 
 interface MainPageProps {
   onStartGame: (mini: boolean) => void;
+  onStartTutorial: () => void;
 }
 
-const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
+const MainPage: React.FC<MainPageProps> = ({ onStartGame, onStartTutorial }) => {
   const gameDescription = `
     Морской бой по-физтеховски - стратегическая морская битва с уникальными правилами. Игра проходит на поле 14×14 клеток с 19 типами кораблей, 
     каждый из которых обладает особыми способностями, а противник не знает какой из ваших кораблей какого типа.
@@ -36,6 +37,10 @@ const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
 
   const handleStartMini = () => {
     onStartGame(true);
+  };
+
+  const handleStartTutorial = () => {
+    onStartTutorial();
   };
 
   const currentShip = shipTypes[currentShipIndex];
@@ -75,6 +80,11 @@ const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
             <button className="game-button mini-game" onClick={handleStartMini}>
               <h3>Мини-игра</h3>
               <p>Упрощенная версия для быстрой игры на поле 10х10</p>
+            </button>
+
+            <button className="game-button tutorial-game" onClick={handleStartTutorial}>
+              <h3>Обучение</h3>
+              <p>Пошаговое руководство</p>
             </button>
           </div>
 

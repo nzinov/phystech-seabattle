@@ -6,6 +6,7 @@ import { v4 as uuid } from 'uuid';
 import Board from './Board';
 import { DefaultGame, MiniGame } from './game';
 import MainPage from './MainPage';
+import Tutorial from './Tutorial';
 
 // Store invite link globally for BoardWrapper access
 let globalInviteLink: string | null = null;
@@ -30,6 +31,7 @@ const getServerUrl = (): string => {
 const App: React.FC = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [tutorialStarted, setTutorialStarted] = useState(false);
 
   const startGame = (mini: boolean) => {
     setIsLoading(true);
@@ -89,6 +91,14 @@ const App: React.FC = () => {
     setIsLoading(false);
   };
 
+  const startTutorial = () => {
+    setTutorialStarted(true);
+  };
+
+  const exitTutorial = () => {
+    setTutorialStarted(false);
+  };
+
   // Check if game should start immediately (when URL has match parameter)
   React.useEffect(() => {
     const search = window.location.search;
@@ -116,8 +126,12 @@ const App: React.FC = () => {
     );
   }
 
-  if (!gameStarted) {
-    return <MainPage onStartGame={startGame} />;
+  if (!gameStarted && !tutorialStarted) {
+    return <MainPage onStartGame={startGame} onStartTutorial={startTutorial} />;
+  }
+
+  if (tutorialStarted) {
+    return <Tutorial onExit={exitTutorial} />;
   }
 
   try {
