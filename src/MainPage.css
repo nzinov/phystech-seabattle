@@ -16,14 +16,31 @@
 }
 
 .main-content {
-  max-width: 800px;
+  max-width: 1200px;
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+
+.main-left {
+  flex: 1;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .main-content h1 {
   font-size: 3rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
   text-shadow: var(--shadow-lg);
   font-weight: 700;
 }
@@ -33,6 +50,85 @@
   margin-bottom: 2rem;
   opacity: 0.9;
   font-weight: 400;
+}
+
+.ship-preview {
+  display: flex;
+  justify-content: center;
+}
+
+.ship-showcase {
+  padding: 2rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2rem;
+  min-width: 400px;
+  max-width: 600px;
+  transition: var(--transition-slow);
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ship-showcase.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.6s ease-in-out,
+    transform 0.6s ease-in-out;
+}
+
+.ship-showcase.hidden {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition:
+    opacity 0.4s ease-in-out,
+    transform 0.4s ease-in-out;
+}
+
+.ship-image {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  transition: var(--transition-slow);
+  flex-shrink: 0;
+}
+
+.ship-info-display {
+  text-align: left;
+  color: var(--text-light);
+  flex: 1;
+}
+
+.ship-info-display h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ship-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1rem;
+  text-align: left;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-weight: 400;
+}
+
+.ship-counter {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.4rem 1rem;
+  border-radius: var(--border-radius);
+  display: inline-block;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
 }
 
 .game-description {
@@ -122,6 +218,7 @@
 
 .rules-section {
   margin-bottom: 2rem;
+  align-self: center;
 }
 
 .rules-button {
@@ -236,6 +333,19 @@
   background: #d32f2f;
 }
 
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+    gap: 3rem;
+    text-align: center;
+  }
+
+  .main-left {
+    text-align: center;
+    align-items: center;
+  }
+}
+
 @media (max-width: 768px) {
   .main-content h1 {
     font-size: 2rem;
@@ -243,6 +353,32 @@
 
   .main-content h2 {
     font-size: 1.2rem;
+  }
+
+  .ship-showcase {
+    padding: 1.5rem;
+    min-width: 300px;
+    max-width: 350px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .ship-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .ship-info-display {
+    text-align: center;
+  }
+
+  .ship-info-display h3 {
+    font-size: 1.2rem;
+  }
+
+  .ship-description {
+    font-size: 0.95rem;
+    text-align: center;
   }
 
   .game-modes {
