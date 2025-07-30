@@ -17,7 +17,7 @@ export interface TutorialStep {
 const tutorialConfig: GameConfig = {
   name: 'Tutorial',
   fieldSize: 5,
-  placementZoneSize: 0,
+  placementZoneSize: 2,
   initialShips: [],
 };
 
@@ -46,22 +46,111 @@ function baseState(): GameState {
   };
 }
 
-const step1State = baseState();
-step1State.cells[1][1] = { type: 'Kr', player: 0, state: {}, label: {} } as any;
+// Step 1: place a cruiser
+const stepPlacement = (() => {
+  const s = baseState();
+  s.phase = 'place';
+  s.ready = 1; // opponent already ready
+  s.cells[0][1] = { type: 'Kr', player: 0, state: {}, label: {} } as any;
+  return s;
+})();
 
-const step2State = baseState();
-step2State.cells[2][1] = { type: 'Kr', player: 0, state: {}, label: {} } as any;
-step2State.cells[3][1] = { type: 'St', player: 1, state: {}, label: {} } as any;
+// Step 2: move a cruiser
+const stepMove = (() => {
+  const s = baseState();
+  s.cells[1][1] = { type: 'Kr', player: 0, state: {}, label: {} } as any;
+  return s;
+})();
+
+// Step 3: move a dependent ship (torpedo with boat)
+const stepDependent = (() => {
+  const s = baseState();
+  s.cells[1][1] = { type: 'Tk', player: 0, state: {}, label: {} } as any;
+  s.cells[1][2] = { type: 'T', player: 0, state: {}, label: {} } as any;
+  return s;
+})();
+
+// Step 4: basic attack
+const stepAttack = (() => {
+  const s = baseState();
+  s.cells[2][1] = { type: 'Kr', player: 0, state: {}, label: {} } as any;
+  s.cells[3][1] = { type: 'St', player: 1, state: {}, label: {} } as any;
+  return s;
+})();
+
+// Step 5: attack using a block
+const stepAttackBlock = (() => {
+  const s = baseState();
+  s.cells[2][1] = { type: 'Kr', player: 0, state: {}, label: {} } as any;
+  s.cells[2][2] = { type: 'Kr', player: 0, state: {}, label: {} } as any;
+  s.cells[3][1] = { type: 'Lk', player: 1, state: {}, label: {} } as any;
+  return s;
+})();
+
+// Step 6: shooting from a plane
+const stepShoot = (() => {
+  const s = baseState();
+  s.cells[1][2] = { type: 'Av', player: 0, state: {}, label: {} } as any;
+  s.cells[1][3] = { type: 'Sm', player: 0, state: {}, label: {} } as any;
+  s.cells[3][3] = { type: 'St', player: 1, state: {}, label: {} } as any;
+  return s;
+})();
+
+// Step 7: explode a bomb
+const stepExplode = (() => {
+  const s = baseState();
+  s.cells[2][2] = { type: 'AB', player: 0, state: {}, label: {} } as any;
+  s.cells[3][2] = { type: 'St', player: 1, state: {}, label: {} } as any;
+  return s;
+})();
+
+// Step 8: skip turn
+const stepSkip = (() => {
+  const s = baseState();
+  s.cells[0][1] = { type: 'Kr', player: 0, state: {}, label: {} } as any;
+  s.cells[4][3] = { type: 'St', player: 1, state: {}, label: {} } as any;
+  return s;
+})();
 
 export const tutorialSteps: TutorialStep[] = [
   {
+    description: 'Разместите крейсер, перетащив его в зону перед фортом.',
+    state: deepcopy(stepPlacement),
+    move: { type: 'move', from: [0, 1], to: [1, 1], mode: 'm' },
+  },
+  {
     description: 'Переместите крейсер на одну клетку вперёд.',
-    state: deepcopy(step1State),
+    state: deepcopy(stepMove),
     move: { type: 'move', from: [1, 1], to: [2, 1], mode: 'm' },
   },
   {
-    description: 'Атакуйте вражеский корабль.',
-    state: deepcopy(step2State),
+    description: 'Торпеда ходит только рядом с катером. Передвиньте её вперёд.',
+    state: deepcopy(stepDependent),
+    move: { type: 'move', from: [1, 2], to: [2, 2], mode: 'm' },
+  },
+  {
+    description: 'Атакуйте сторожевой корабль.',
+    state: deepcopy(stepAttack),
     move: { type: 'move', from: [2, 1], to: [3, 1], mode: 'a' },
+  },
+  {
+    description: 'При атаке блоком сила складывается. Нападите двумя крейсерами на линкор.',
+    state: deepcopy(stepAttackBlock),
+    move: { type: 'move', from: [2, 1], to: [3, 1], mode: 'a' },
+  },
+  {
+    description: 'Самолёт может стрелять по прямой, если рядом авианосец. Выстрелите по цели.',
+    state: deepcopy(stepShoot),
+    move: { type: 'move', from: [1, 3], to: [3, 3], mode: 's' },
+  },
+  {
+    description: 'Взорвите атомную бомбу.',
+    state: deepcopy(stepExplode),
+    move: { type: 'move', from: [2, 2], to: [2, 2], mode: 'e' },
+  },
+  {
+    description: 'Если ходить нечем, пропустите ход.',
+    state: deepcopy(stepSkip),
+    move: { type: 'skip' },
   },
 ];

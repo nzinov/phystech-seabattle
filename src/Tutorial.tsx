@@ -20,7 +20,14 @@ function createTutorialGame(step: TutorialStep) {
     ...base,
     setup: () => step.state,
     phases: {
-      play: { ...base.phases.play, start: true },
+      place: {
+        ...base.phases.place,
+        start: step.state.phase === 'place',
+      },
+      play: {
+        ...base.phases.play,
+        start: step.state.phase === 'play',
+      },
     },
   };
 }
