@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Правила игры - Морской бой по-физтеховски</title>
+    <title>Правила игры — Морской бой по-физтеховски</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -242,19 +242,37 @@
             margin-bottom: 16px;
         }
         
-        @media (max-width: 768px) {
+        @media (max-width: 500px) {
+            body {
+                padding: 0px;
+            }
+            
             .container {
-                padding: 24px;
-                margin: 16px;
+                padding: 4px;
+                margin: 0;
+                border-radius: var(--border-radius);
             }
             
             h1 {
-                font-size: 2rem;
+                font-size: 1.75rem;
+                margin-bottom: 24px;
+            }
+            
+            h2 {
+                font-size: 1.25rem;
+                padding-left: 16px;
+                margin-top: 32px;
+            }
+            
+            h3 {
+                font-size: 1.1rem;
+                margin-top: 24px;
             }
             
             .ship-item {
                 flex-direction: column;
                 text-align: center;
+                padding: 12px;
             }
             
             .ship-image {
@@ -262,12 +280,67 @@
                 margin-bottom: 12px;
                 align-self: center;
             }
+            
+            .ship-section {
+                padding: 16px;
+                margin: 16px 0;
+            }
+            
+            .phase-list {
+                padding: 16px;
+                margin: 16px 0;
+            }
+            
+            .example-section {
+                padding: 16px;
+                margin: 16px 0;
+            }
+            
+            /* Table responsiveness */
+            table {
+                font-size: 12px;
+                margin: 16px 0;
+            }
+            
+            th, td {
+                padding: 4px 4px;
+                word-break: auto-phrase;
+            }
+            
+            /* Make tables horizontally scrollable */
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 16px 0; /* Extend to container edges */
+                padding: 0 4px;
+            }
+            
+            /* Strength indicator fixes */
+            .strength-indicator {
+                display: block;
+                margin: 8px auto 0;
+                text-align: center;
+                white-space: nowrap;
+                font-size: 0.7em;
+            }
+            
+            .ship-name {
+                margin-bottom: 4px;
+            }
+            
+        }
+            
+        @media (max-width: 1024px) {
+            /* Hide combat table on mobile */
+            .combat-table {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Морской бой по-физтеховски - Правила игры</h1>
+        <h1>Морской&nbsp;бой по&#8209;физтеховски — Правила&nbsp;игры</h1>
 
         <h2>Основные правила</h2>
         <p>В Морской бой по-физтеховски играют два игрока. Игра ведется на квадратном клетчатом поле 14 на 14 клеток. Оба игрока имеют одинаковые наборы фишек. Каждый игрок видит свои фишки и положение - но не тип - фишек соперника. Перед началом игры игроки расставляют свои наборы фишек произвольным образом на первых 5-и линиях поля (друг напротив друга). После этого игроки по очереди совершают ходы.</p>
@@ -281,6 +354,7 @@
 
         <h3>Возможные действия</h3>
         <p>В разные моменты хода доступны все или некоторые из следующих действий. Чтобы выполнить действие, нужно зажать соответствующую ему клавишу клавиатуры и переместить нужную фишку с помощью мышки. Также можно просто переместить нужный корабль с помощью мышки, не зажимая клавишу. Если подходящее действие только одно, оно выполнится автоматически. Если подходящих действий несколько, то появится меню с выбором.</p>
+        <div class="table-wrapper">
         <table class="action-table">
             <tr><th>Клавиша</th><th>Название действия</th><th>Описание действия</th></tr>
             <tr><td><strong>M</strong></td><td>Перемещение</td><td>Передвижение фишки на соседнюю (не по диагонали) свободную клетку</td></tr>
@@ -289,13 +363,16 @@
             <tr><td><strong>E</strong></td><td>Взрыв</td><td>Смотрите описание фишек</td></tr>
             <tr><td><strong>Space</strong></td><td>Пропуск хода</td><td>Пропустить фазу атаки</td></tr>
         </table>
+        </div>
         <p>Также доступны вспомогательные инструменты, которые активируются, если зажать клавишу на клавиатуре</p>
+        <div class="table-wrapper">
         <table class="action-table">
             <tr><th>Клавиша</th><th>Описание действия</th></tr>
             <tr><td><strong>Shift</strong></td><td>Открывет панель, которая показывает сколько кораблей осталось у вас и у противника</td></tr>
             <tr><td><strong>Ctrl</strong></td><td>Показывает маршрут, которым следовала фишка, при наведении на нее</td></tr>
-            <tr><td><strong>Alt</strong></td><td>Показывает правила, касающиеся конкретной фишки, при наведении на нее</td></tr>
+            <tr><td><strong>Alt / Option</strong></td><td>Показывает правила, касающиеся конкретной фишки, при наведении на нее</td></tr>
         </table>
+        </div>
         <p>На мобильных устройствах вместо Ctrl и Alt кликните один или два раза на интересующий корабль.</p>
 
         <h3>Список фаз игры</h3>
@@ -304,8 +381,16 @@
             
             <h4>Диаграмма хода игрока</h4>
             <div class="example-section">
-                <div class="mermaid" style="background: white; border-radius: 8px; padding: 20px;">
-flowchart LR
+                <div class="mermaid" id="flowchart-diagram" style="background: white; border-radius: 8px; padding: 20px;">
+                </div>
+                
+                <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+                <script>
+                    function getFlowchartContent() {
+                        const isSmallScreen = window.innerWidth < 768;
+                        const direction = isSmallScreen ? 'TD' : 'LR';
+                        
+                        return `flowchart ${direction}
     Start([НАЧАЛО ХОДА<br/>Turn Start]) --> MainPhase[ОСНОВНАЯ ФАЗА<br/>Выберите действие:<br/>Ход • Атака • Выстрел • Взрыв<br/>Move • Attack • Shoot • Explode]
     
     MainPhase -->|Move| AdditionalPhase[ДОПОЛНИТЕЛЬНАЯ ФАЗА<br/>Выберите действие:<br/>Атака • Взрыв • Пропуск<br/>Attack • Explode • Skip]
@@ -328,18 +413,42 @@ flowchart LR
     class MainPhase mainPhase
     class AdditionalPhase additionalPhase
     class SuccessCheck decision
-    class EndTurn endNode
-                </div>
-                
-                <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-                <script>
+    class EndTurn endNode`;
+                    }
+                    
+                    function renderFlowchart() {
+                        const diagramElement = document.getElementById('flowchart-diagram');
+                        const flowchartContent = getFlowchartContent();
+                        
+                        // Clear previous content
+                        diagramElement.innerHTML = flowchartContent;
+                        
+                        // Re-initialize mermaid for this element
+                        mermaid.init(undefined, diagramElement);
+                    }
+                    
+                    // Initialize mermaid
                     mermaid.initialize({
-                        startOnLoad: true,
+                        startOnLoad: false,
                         theme: 'neutral',
                         themeVariables: {
                             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                            fontSize: '14px'
+                            fontSize: window.innerWidth < 768 ? '12px' : '14px'
+                        },
+                        flowchart: {
+                            useMaxWidth: true,
+                            htmlLabels: true
                         }
+                    });
+                    
+                    // Render initial flowchart
+                    document.addEventListener('DOMContentLoaded', renderFlowchart);
+                    
+                    // Re-render on window resize
+                    let resizeTimeout;
+                    window.addEventListener('resize', () => {
+                        clearTimeout(resizeTimeout);
+                        resizeTimeout = setTimeout(renderFlowchart, 250);
                     });
                 </script>
                 
@@ -481,6 +590,7 @@ flowchart LR
         </div>
 
         <div align="center">
+        <div class="table-wrapper">
         <table border="0" cellspacing="0" cellpadding="0" class="combat-table">
         <tbody>
         <tr>
@@ -902,7 +1012,7 @@ flowchart LR
         </tbody>
         </table>
         </div>
-        <p align="center">Таб. 1.2</p>
+        </div>
 
         <div class="category-header">Несамостоятельные фишки</div>
         <img src="rules/dependent.png" class="img-responsive" alt="" />
@@ -955,6 +1065,7 @@ flowchart LR
 
         <p align="center">Таблица количества фишек «МБ».</p>
         <div align="center">
+        <div class="table-wrapper">
         <table border="0" cellspacing="0" cellpadding="0" class="quantity-table">
         <tbody>
         <tr>
@@ -1099,6 +1210,7 @@ flowchart LR
         </tr>
         </tbody>
         </table>
+        </div>
         </div>
     </div>
 </body>
