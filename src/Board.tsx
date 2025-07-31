@@ -60,6 +60,7 @@ interface SquareProps {
     to: [number, number];
     position: { x: number; y: number };
   };
+  tutorialHighlightClasses?: string[];
 }
 
 const Square: React.FC<SquareProps> = props => {
@@ -338,6 +339,11 @@ const Square: React.FC<SquareProps> = props => {
       backgroundColor = 'var(--cell-active)';
       borderColor = 'var(--cell-active)';
     }
+  }
+
+  // Add tutorial highlighting CSS classes
+  if (props.tutorialHighlightClasses) {
+    cellClasses.push(...props.tutorialHighlightClasses);
   }
 
   let cellStyle: React.CSSProperties = {};
@@ -805,6 +811,20 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     // Don't clear blockArrows on square leave - they should persist during block declaration
   };
 
+  getTutorialHighlightClasses = (coord: [number, number]): string[] => {
+    if (!this.props.tutorialMove?.expectedHighlightClasses) {
+      return [];
+    }
+
+    const classes = [];
+    for (const [pos, className] of this.props.tutorialMove.expectedHighlightClasses) {
+      if (pos[0] === coord[0] && pos[1] === coord[1]) {
+        classes.push(className);
+      }
+    }
+    return classes;
+  };
+
   clickBlock = (event: any, block: any) => {
     this.setState({ highlightedBlock: undefined });
     let stage = this.props.ctx.activePlayers?.[this.props.playerID];
@@ -1224,13 +1244,17 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             highlightedBlock={this.state.highlightedBlock}
             hover={e => this.hoverSquare(e, [i, j])}
             leave={this.leaveSquare}
-            highlight={this.state.highlight}
+            highlight={[
+              ...this.state.highlight,
+              ...(this.props.tutorialMove?.expectedHighlight || []),
+            ]}
             traceHighlight={this.state.traceHighlight}
             pendingMove={this.state.pendingMove}
             onMoveStart={this.onMoveStart}
             onDrop={this.handleDrop}
             stage={this.props.ctx.activePlayers?.[this.props.playerID]}
             actionSelectionPopup={this.state.actionSelectionPopup}
+            tutorialHighlightClasses={this.getTutorialHighlightClasses([i, j])}
           ></Square>
         );
       }

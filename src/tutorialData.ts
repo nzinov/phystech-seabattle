@@ -7,7 +7,11 @@ export interface TutorialMove {
   to?: [number, number];
   mode?: string;
   coords?: [number, number][];
+  expectedHighlight?: [Position, string][];
+  expectedHighlightClasses?: [Position, string][];
 }
+
+type Position = [number, number];
 
 export interface TutorialStep {
   description: string;
@@ -119,28 +123,88 @@ export const tutorialSteps: TutorialStep[] = [
       'Размещение кораблей происходит только в первых рядах перед вашим фортом. ' +
       'Перетащите крейсер на отмеченную клетку. В реальной игре после расстановки следует нажать «Готов».',
     state: deepcopy(stepPlacement),
-    moves: [{ type: 'move', from: [0, 1], to: [1, 1], mode: 'm' }],
+    moves: [
+      {
+        type: 'move',
+        from: [0, 1],
+        to: [1, 1],
+        mode: 'm',
+        expectedHighlight: [
+          [[0, 1], 'rgba(59, 130, 246, 0.4)'], // source cell - blue
+          [[1, 1], 'rgba(34, 197, 94, 0.4)'], // target cell - green
+        ],
+        expectedHighlightClasses: [
+          [[0, 1], 'tutorial-highlight-source'], // source cell - pulsing blue
+          [[1, 1], 'tutorial-highlight-target'], // target cell - pulsing green
+        ],
+      },
+    ],
   },
   {
     description:
       'Большинство кораблей ходит на одну клетку по горизонтали или вертикали. ' +
       'Передвиньте крейсер вперёд.',
     state: deepcopy(stepMove),
-    moves: [{ type: 'move', from: [1, 1], to: [2, 1], mode: 'm' }],
+    moves: [
+      {
+        type: 'move',
+        from: [1, 1],
+        to: [2, 1],
+        mode: 'm',
+        expectedHighlight: [
+          [[1, 1], 'rgba(59, 130, 246, 0.4)'], // source cell
+          [[2, 1], 'rgba(34, 197, 94, 0.4)'], // target cell
+        ],
+        expectedHighlightClasses: [
+          [[1, 1], 'tutorial-highlight-source'], // source cell - pulsing blue
+          [[2, 1], 'tutorial-highlight-target'], // target cell - pulsing green
+        ],
+      },
+    ],
   },
   {
     description:
       'Некоторые корабли зависят от покровителей. Торпеда может двигаться только оставаясь рядом с катером. ' +
       'Сделайте ход торпедой, сохраняя соседство.',
     state: deepcopy(stepDependent),
-    moves: [{ type: 'move', from: [1, 2], to: [2, 2], mode: 'm' }],
+    moves: [
+      {
+        type: 'move',
+        from: [1, 2],
+        to: [2, 2],
+        mode: 'm',
+        expectedHighlight: [
+          [[1, 2], 'rgba(59, 130, 246, 0.4)'], // source cell
+          [[2, 2], 'rgba(34, 197, 94, 0.4)'], // target cell
+        ],
+        expectedHighlightClasses: [
+          [[1, 2], 'tutorial-highlight-source'], // source cell - pulsing blue
+          [[2, 2], 'tutorial-highlight-target'], // target cell - pulsing green
+        ],
+      },
+    ],
   },
   {
     description:
       'Чтобы атаковать, перетащите корабль на вражескую клетку и выберите действие ⚔️. ' +
       'Попробуйте уничтожить сторожевой корабль.',
     state: deepcopy(stepAttack),
-    moves: [{ type: 'move', from: [2, 1], to: [3, 1], mode: 'a' }],
+    moves: [
+      {
+        type: 'move',
+        from: [2, 1],
+        to: [3, 1],
+        mode: 'a',
+        expectedHighlight: [
+          [[2, 1], 'rgba(59, 130, 246, 0.4)'], // source cell
+          [[3, 1], 'rgba(239, 68, 68, 0.4)'], // attack target - red
+        ],
+        expectedHighlightClasses: [
+          [[2, 1], 'tutorial-highlight-source'], // source cell - pulsing blue
+          [[3, 1], 'tutorial-highlight-attack'], // attack target - pulsing red
+        ],
+      },
+    ],
   },
   {
     description:
@@ -148,12 +212,33 @@ export const tutorialSteps: TutorialStep[] = [
       'Сначала атакуйте линкор крейсером, затем выберите блок из двух крейсеров.',
     state: deepcopy(stepAttackBlock),
     moves: [
-      { type: 'move', from: [2, 1], to: [3, 1], mode: 'a' },
+      {
+        type: 'move',
+        from: [2, 1],
+        to: [3, 1],
+        mode: 'a',
+        expectedHighlight: [
+          [[2, 1], 'rgba(59, 130, 246, 0.4)'], // source cell
+          [[3, 1], 'rgba(239, 68, 68, 0.4)'], // attack target - red
+        ],
+        expectedHighlightClasses: [
+          [[2, 1], 'tutorial-highlight-source'], // source cell - pulsing blue
+          [[3, 1], 'tutorial-highlight-attack'], // attack target - pulsing red
+        ],
+      },
       {
         type: 'block',
         coords: [
           [2, 1],
           [2, 2],
+        ],
+        expectedHighlight: [
+          [[2, 1], 'rgba(168, 85, 247, 0.4)'], // block cells - purple
+          [[2, 2], 'rgba(168, 85, 247, 0.4)'],
+        ],
+        expectedHighlightClasses: [
+          [[2, 1], 'tutorial-highlight-block'], // block cells - pulsing purple
+          [[2, 2], 'tutorial-highlight-block'],
         ],
       },
     ],
@@ -163,17 +248,53 @@ export const tutorialSteps: TutorialStep[] = [
       'Самолёт стреляет по прямой на любое расстояние, пока рядом находится авианосец. ' +
       'Перетащите самолёт на цель и выберите действие выстрела.',
     state: deepcopy(stepShoot),
-    moves: [{ type: 'move', from: [1, 3], to: [3, 3], mode: 's' }],
+    moves: [
+      {
+        type: 'move',
+        from: [1, 3],
+        to: [3, 3],
+        mode: 's',
+        expectedHighlight: [
+          [[1, 3], 'rgba(59, 130, 246, 0.4)'], // source cell
+          [[3, 3], 'rgba(239, 68, 68, 0.4)'], // shoot target - red
+        ],
+        expectedHighlightClasses: [
+          [[1, 3], 'tutorial-highlight-source'], // source cell - pulsing blue
+          [[3, 3], 'tutorial-highlight-attack'], // shoot target - pulsing red
+        ],
+      },
+    ],
   },
   {
     description: 'Атомная бомба уничтожает всё вокруг себя. Активируйте её прямо в текущей клетке.',
     state: deepcopy(stepExplode),
-    moves: [{ type: 'move', from: [2, 2], to: [2, 2], mode: 'e' }],
+    moves: [
+      {
+        type: 'move',
+        from: [2, 2],
+        to: [2, 2],
+        mode: 'e',
+        expectedHighlight: [
+          [[2, 2], 'rgba(239, 68, 68, 0.6)'], // explode cell - bright red
+        ],
+        expectedHighlightClasses: [
+          [[2, 2], 'tutorial-highlight-attack'], // explode cell - pulsing red
+        ],
+      },
+    ],
   },
   {
     description:
-      'Иногда выгодно пропустить ход. Нажмите кнопку «Пропустить ход», чтобы завершить урок.',
+      'Если в фазе атаки нет выгодных ходов, можно пропустить атаку. ' +
+      'Кнопка «Пропустить ход» доступна только в фазе атаки, после совершения хода. ' +
+      'Нажмите её, чтобы завершить урок.',
     state: deepcopy(stepSkip),
-    moves: [{ type: 'skip' }],
+    moves: [
+      {
+        type: 'skip',
+        expectedHighlight: [], // No specific cell highlighting for skip
+        expectedHighlightClasses: [], // No CSS classes for skip
+      },
+    ],
   },
 ];
