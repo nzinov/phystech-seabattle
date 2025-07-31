@@ -1,15 +1,22 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Seabattle",
+  "name": "Phystech Seabattle",
+  "description": "Strategic naval battle game with complex rules originally played by students at Moscow Institute of Physics and Technology",
   "icons": [
     {
       "src": "logo_small.png",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "sizes": "50x50",
+      "type": "image/png"
     }
   ],
-  "start_url": "./index.html",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#1e3c72",
+  "background_color": "#1e3c72",
+  "categories": [
+    "games",
+    "strategy"
+  ],
+  "lang": "en"
 }

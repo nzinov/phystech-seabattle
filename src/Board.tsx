@@ -799,7 +799,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
 
     // Create highlight for the last event (similar to LogEvent.getHighlight)
-    let hl = [];
+    let hl: [any, string][] = [];
     switch (lastEvent.type) {
       case 'move':
       case 'shoot':

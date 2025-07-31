@@ -6,6 +6,7 @@ import { v4 as uuid } from 'uuid';
 import Board from './Board';
 import { DefaultGame, MiniGame } from './game';
 import MainPage from './MainPage';
+import InstallPrompt from './InstallPrompt';
 
 // Store invite link globally for BoardWrapper access
 let globalInviteLink: string | null = null;
@@ -117,7 +118,12 @@ const App: React.FC = () => {
   }
 
   if (!gameStarted) {
-    return <MainPage onStartGame={startGame} />;
+    return (
+      <div>
+        <MainPage onStartGame={startGame} />
+        <InstallPrompt />
+      </div>
+    );
   }
 
   try {
@@ -137,6 +143,7 @@ const App: React.FC = () => {
     return (
       <div>
         <SeabattleClient matchID={matchID} playerID={playerID} credentials={cookies.get('token')} />
+        <InstallPrompt />
       </div>
     );
   } catch (error: unknown) {
