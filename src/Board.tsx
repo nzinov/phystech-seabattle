@@ -467,7 +467,13 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     };
   }
 
-  Ready = () => {
+  Ready = (event: any) => {
+    // Prevent event bubbling to avoid conflicts with other touch handlers
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
     if (!this.state.readyConfirmPending) {
       // First click - show confirmation state
       this.setState({ readyConfirmPending: true });
@@ -1361,7 +1367,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             {stage == 'place' && (
               <button
                 onClick={this.Ready}
+                onTouchEnd={this.Ready}
                 className={`board-ready-button ${this.state.readyConfirmPending ? 'confirm' : 'normal'}`}
+                style={{ touchAction: 'manipulation' }}
               >
                 <span className="board-ready-button-text">
                   {this.state.readyConfirmPending ? '🎯 Confirm Ready?' : '✅ Ready to Battle'}

@@ -319,6 +319,17 @@
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
+  /* Ensure proper mobile touch target */
+  min-height: 44px;
+  min-width: 44px;
+  /* Prevent text selection on mobile */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Improve mobile touch handling */
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
 .board-ready-button.normal {
@@ -332,6 +343,25 @@
 .board-ready-button:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
+}
+
+/* Mobile-specific ready button interactions */
+@media (hover: none) and (pointer: coarse) {
+  .board-ready-button {
+    /* Increase padding for better touch targets on mobile */
+    padding: clamp(12px, 2vh, 18px) clamp(16px, 3vw, 24px);
+    /* Disable hover transform on mobile */
+  }
+
+  .board-ready-button:hover {
+    transform: none;
+  }
+
+  .board-ready-button:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.1s ease;
+  }
 }
 
 .board-ready-button-text {
