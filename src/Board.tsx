@@ -17,6 +17,7 @@ import {
 } from './game';
 import { Log } from './Log.jsx';
 import { shipInfo, shipNames, stageDescr } from './Texts';
+import type { TutorialMove } from './tutorialData';
 
 // Multi-backend configuration for seamless touch and mouse support
 const backendOptions = HTML5toTouch;
@@ -59,6 +60,7 @@ interface SquareProps {
     to: [number, number];
     position: { x: number; y: number };
   };
+  tutorialHighlightClasses?: string[];
 }
 
 const Square: React.FC<SquareProps> = props => {
@@ -339,6 +341,11 @@ const Square: React.FC<SquareProps> = props => {
     }
   }
 
+  // Add tutorial highlighting CSS classes
+  if (props.tutorialHighlightClasses) {
+    cellClasses.push(...props.tutorialHighlightClasses);
+  }
+
   let cellStyle: React.CSSProperties = {};
   if (!props.ctx.gameover) {
     if (backgroundColor !== 'var(--cell-default)') {
@@ -417,6 +424,8 @@ interface BoardPropsLocal {
   trace?: any;
   hoveredCoords?: any;
   inviteLink?: string;
+  tutorialMove?: TutorialMove;
+  onTutorialMoveDone?: () => void;
 }
 
 interface BoardState {
@@ -468,6 +477,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   }
 
   Ready = () => {
+    if (this.props.tutorialMove && this.props.tutorialMove.type !== 'ready') {
+      return;
+    }
     if (!this.state.readyConfirmPending) {
       // First click - show confirmation state
       this.setState({ readyConfirmPending: true });
@@ -479,11 +491,16 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       // Second click - actually ready up
       this.props.moves.Ready();
       this.setState({ readyConfirmPending: false });
+      this.props.onTutorialMoveDone?.();
     }
   };
 
   Skip = () => {
+    if (this.props.tutorialMove && this.props.tutorialMove.type !== 'skip') {
+      return;
+    }
     this.props.moves.Skip();
+    this.props.onTutorialMoveDone?.();
   };
 
   copyInviteLink = async () => {
@@ -508,6 +525,18 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   handleDrop = (from: [number, number], to: [number, number], event?: any) => {
     if (this.onMoveStart) {
       this.onMoveStart();
+    }
+
+    if (this.props.tutorialMove && this.props.tutorialMove.type === 'move') {
+      const tm = this.props.tutorialMove;
+      if (
+        tm.from?.[0] !== from[0] ||
+        tm.from?.[1] !== from[1] ||
+        tm.to?.[0] !== to[0] ||
+        tm.to?.[1] !== to[1]
+      ) {
+        return;
+      }
     }
 
     // Get all available actions for the piece
@@ -537,6 +566,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       console.log(mode);
       if (['r', 'e'].indexOf(mode) == -1 || confirm('Are you sure?')) {
         takeMove(this.props.G, this.props.ctx, this.props.moves, mode, from, to);
+        this.props.onTutorialMoveDone?.();
       }
     } else {
       // Multiple actions - show selection popup
@@ -567,6 +597,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     if (popup) {
       takeMove(this.props.G, this.props.ctx, this.props.moves, actionKey, popup.from, popup.to);
       this.setState({ actionSelectionPopup: undefined });
+      this.props.onTutorialMoveDone?.();
     }
   };
 
@@ -780,14 +811,43 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     // Don't clear blockArrows on square leave - they should persist during block declaration
   };
 
+  getTutorialHighlightClasses = (coord: [number, number]): string[] => {
+    if (!this.props.tutorialMove?.expectedHighlightClasses) {
+      return [];
+    }
+
+    const classes = [];
+    for (const [pos, className] of this.props.tutorialMove.expectedHighlightClasses) {
+      if (pos[0] === coord[0] && pos[1] === coord[1]) {
+        classes.push(className);
+      }
+    }
+    return classes;
+  };
+
   clickBlock = (event: any, block: any) => {
     this.setState({ highlightedBlock: undefined });
     let stage = this.props.ctx.activePlayers?.[this.props.playerID];
     if (stage == 'attackBlock') {
+      if (this.props.tutorialMove) {
+        if (this.props.tutorialMove.type !== 'block') {
+          return;
+        }
+        const exp = this.props.tutorialMove.coords || [];
+        const sort = (arr: [number, number][]) =>
+          arr.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+        const a = sort(exp);
+        const b = sort(block.coords);
+        if (a.length !== b.length || !a.every((c, i) => c[0] === b[i][0] && c[1] === b[i][1])) {
+          return;
+        }
+      }
       this.props.moves.AttackBlock(block);
+      this.props.onTutorialMoveDone?.();
     }
     if (stage == 'responseBlock') {
       this.props.moves.ResponseBlock(block);
+      this.props.onTutorialMoveDone?.();
     }
   };
 
@@ -1184,13 +1244,17 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             highlightedBlock={this.state.highlightedBlock}
             hover={e => this.hoverSquare(e, [i, j])}
             leave={this.leaveSquare}
-            highlight={this.state.highlight}
+            highlight={[
+              ...this.state.highlight,
+              ...(this.props.tutorialMove?.expectedHighlight || []),
+            ]}
             traceHighlight={this.state.traceHighlight}
             pendingMove={this.state.pendingMove}
             onMoveStart={this.onMoveStart}
             onDrop={this.handleDrop}
             stage={this.props.ctx.activePlayers?.[this.props.playerID]}
             actionSelectionPopup={this.state.actionSelectionPopup}
+            tutorialHighlightClasses={this.getTutorialHighlightClasses([i, j])}
           ></Square>
         );
       }

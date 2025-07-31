@@ -1,4 +1,5 @@
 import { Client } from 'boardgame.io/client';
+import { describe, test, expect } from 'vitest';
 import { DefaultGame as GameRules } from './game';
 
 describe('Random Game Moves Test', () => {
