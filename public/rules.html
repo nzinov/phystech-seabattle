@@ -189,7 +189,6 @@
         }
         
         .example-section {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             border: 1px solid #f59e0b;
             border-radius: var(--border-radius-lg);
             padding: 24px;
@@ -302,6 +301,58 @@
         <h3>Список фаз игры</h3>
             <p>Ход игрока состоит из основной (move, shoot or attack) и, возможно, дополнительной (attack or skip) фаз.</p>
             <p>В основную фазу можно выполнять любые действия. Если игрок в основную фазу выбрал перемещение фишки, то он получает возможность действовать в дополнительную фазу, в которой можно только атаковать или взрывать. Дополнительную фазу можно пропустить нажатием кнопки Пробел. В случае, если игрок удачно произвел атаку или выстрел, то он немедленно начинает дополнительный ход.</p>
+            
+            <h4>Диаграмма хода игрока</h4>
+            <div class="example-section">
+                <div class="mermaid" style="background: white; border-radius: 8px; padding: 20px;">
+flowchart LR
+    Start([НАЧАЛО ХОДА<br/>Turn Start]) --> MainPhase[ОСНОВНАЯ ФАЗА<br/>Выберите действие:<br/>Ход • Атака • Выстрел • Взрыв<br/>Move • Attack • Shoot • Explode]
+    
+    MainPhase -->|Move| AdditionalPhase[ДОПОЛНИТЕЛЬНАЯ ФАЗА<br/>Выберите действие:<br/>Атака • Взрыв • Пропуск<br/>Attack • Explode • Skip]
+    
+    AdditionalPhase -->|Attack/Explode| SuccessCheck
+    MainPhase -->|Attack/Shoot/Explode| SuccessCheck{УСПЕШНО?<br/>Successful?}
+    AdditionalPhase -->|Skip| EndTurn([КОНЕЦ ХОДА<br/>End Turn])
+    
+    SuccessCheck -->|YES| Start
+    SuccessCheck -->|NO| EndTurn
+
+    %% Styling
+    classDef startNode fill:#667eea,stroke:#4338ca,stroke-width:2px,color:#fff
+    classDef mainPhase fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff
+    classDef additionalPhase fill:#06b6d4,stroke:#0891b2,stroke-width:2px,color:#fff
+    classDef decision fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
+    classDef endNode fill:#34d399,stroke:#10b981,stroke-width:2px,color:#fff
+    
+    class Start startNode
+    class MainPhase mainPhase
+    class AdditionalPhase additionalPhase
+    class SuccessCheck decision
+    class EndTurn endNode
+                </div>
+                
+                <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+                <script>
+                    mermaid.initialize({
+                        startOnLoad: true,
+                        theme: 'neutral',
+                        themeVariables: {
+                            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                            fontSize: '14px'
+                        }
+                    });
+                </script>
+                
+                <div style="margin-top: 20px;">
+                    <p><strong>Примечания:</strong></p>
+                    <ul>
+                        <li><strong>Успешное действие</strong> - атака, выстрел или взрыв, которые привели к уничтожению или захвату фишки противника</li>
+                        <li><strong>После успешного действия</strong> игрок немедленно получает дополнительный ход и начинает сначала</li>
+                        <li><strong>Дополнительная фаза</strong> доступна только после хода (перемещения фишки)</li>
+                        <li><strong>В дополнительной фазе</strong> нельзя делать ходы (перемещения) или выстрелы, только атаки и взрывы</li>
+                    </ul>
+                </div>
+            </div>
             <p><strong>Надпись справа вверху помогает понять, в какой фазе игры вы находитесь:</strong></p>
             <dl class="dl-horizontal">
                 <dt>Place your ships</dt><dd>Фаза расстановки, передвиньте корабли внутри зеленой области, чтобы расставить их для начала игры. Когда будете готовы, нажмите кнопку Finish placement.</dd>
