@@ -67,6 +67,7 @@ const App: React.FC = () => {
     if (playerID === '0') {
       let other = new URL(window.location.href);
       let otherParams = new URLSearchParams(other.search);
+      otherParams.set('match', matchID);
       otherParams.set('player', '1');
       otherParams.delete('token'); // Remove token from invite link for security
       if (mini) {
@@ -76,7 +77,7 @@ const App: React.FC = () => {
       globalInviteLink = other.toString();
     }
 
-    if (!params.get('token')) {
+    if (cookies.get('token') && !params.get('token')) {
       params.set('token', cookies.get('token'));
     }
 
