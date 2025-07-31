@@ -8,7 +8,7 @@ interface MainPageProps {
 
 const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
   const gameDescription = `
-    Морской бой по-физтеховски - стратегическая морская битва с уникальными правилами. Игра проходит на поле 14×14 клеток с 21 типом кораблей, 
+    Морской бой по-физтеховски - стратегическая морская битва с уникальными правилами. Игра проходит на поле 14×14 клеток с 19 типами кораблей, 
     каждый из которых обладает особыми способностями, а противник не знает какой из ваших кораблей какого типа.
   `;
 
@@ -69,7 +69,7 @@ const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
           <div className="game-modes">
             <button className="game-button regular-game" onClick={handleStartRegular}>
               <h3>Обычная игра</h3>
-              <p>Полная версия с 21 типом кораблей</p>
+              <p>Полная версия с 19 типами кораблей</p>
             </button>
 
             <button className="game-button mini-game" onClick={handleStartMini}>
