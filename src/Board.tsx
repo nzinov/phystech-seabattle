@@ -809,10 +809,25 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     this.setState({ highlightedBlock: undefined });
     let stage = this.props.ctx.activePlayers?.[this.props.playerID];
     if (stage == 'attackBlock') {
+      if (this.props.tutorialMove) {
+        if (this.props.tutorialMove.type !== 'block') {
+          return;
+        }
+        const exp = this.props.tutorialMove.coords || [];
+        const sort = (arr: [number, number][]) =>
+          arr.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+        const a = sort(exp);
+        const b = sort(block.coords);
+        if (a.length !== b.length || !a.every((c, i) => c[0] === b[i][0] && c[1] === b[i][1])) {
+          return;
+        }
+      }
       this.props.moves.AttackBlock(block);
+      this.props.onTutorialMoveDone?.();
     }
     if (stage == 'responseBlock') {
       this.props.moves.ResponseBlock(block);
+      this.props.onTutorialMoveDone?.();
     }
   };
 

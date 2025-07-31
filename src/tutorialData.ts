@@ -2,16 +2,17 @@ import deepcopy from 'deepcopy';
 import type { GameState, GameConfig } from './game';
 
 export interface TutorialMove {
-  type: 'move' | 'ready' | 'skip';
+  type: 'move' | 'ready' | 'skip' | 'block';
   from?: [number, number];
   to?: [number, number];
   mode?: string;
+  coords?: [number, number][];
 }
 
 export interface TutorialStep {
   description: string;
   state: GameState;
-  move: TutorialMove;
+  moves: TutorialMove[];
 }
 
 const tutorialConfig: GameConfig = {
@@ -114,43 +115,65 @@ const stepSkip = (() => {
 
 export const tutorialSteps: TutorialStep[] = [
   {
-    description: 'Разместите крейсер, перетащив его в зону перед фортом.',
+    description:
+      'Размещение кораблей происходит только в первых рядах перед вашим фортом. ' +
+      'Перетащите крейсер на отмеченную клетку. В реальной игре после расстановки следует нажать «Готов».',
     state: deepcopy(stepPlacement),
-    move: { type: 'move', from: [0, 1], to: [1, 1], mode: 'm' },
+    moves: [{ type: 'move', from: [0, 1], to: [1, 1], mode: 'm' }],
   },
   {
-    description: 'Переместите крейсер на одну клетку вперёд.',
+    description:
+      'Большинство кораблей ходит на одну клетку по горизонтали или вертикали. ' +
+      'Передвиньте крейсер вперёд.',
     state: deepcopy(stepMove),
-    move: { type: 'move', from: [1, 1], to: [2, 1], mode: 'm' },
+    moves: [{ type: 'move', from: [1, 1], to: [2, 1], mode: 'm' }],
   },
   {
-    description: 'Торпеда ходит только рядом с катером. Передвиньте её вперёд.',
+    description:
+      'Некоторые корабли зависят от покровителей. Торпеда может двигаться только оставаясь рядом с катером. ' +
+      'Сделайте ход торпедой, сохраняя соседство.',
     state: deepcopy(stepDependent),
-    move: { type: 'move', from: [1, 2], to: [2, 2], mode: 'm' },
+    moves: [{ type: 'move', from: [1, 2], to: [2, 2], mode: 'm' }],
   },
   {
-    description: 'Атакуйте сторожевой корабль.',
+    description:
+      'Чтобы атаковать, перетащите корабль на вражескую клетку и выберите действие ⚔️. ' +
+      'Попробуйте уничтожить сторожевой корабль.',
     state: deepcopy(stepAttack),
-    move: { type: 'move', from: [2, 1], to: [3, 1], mode: 'a' },
+    moves: [{ type: 'move', from: [2, 1], to: [3, 1], mode: 'a' }],
   },
   {
-    description: 'При атаке блоком сила складывается. Нападите двумя крейсерами на линкор.',
+    description:
+      'Несколько одинаковых кораблей могут объединиться в блок и атаковать одной силой. ' +
+      'Сначала атакуйте линкор крейсером, затем выберите блок из двух крейсеров.',
     state: deepcopy(stepAttackBlock),
-    move: { type: 'move', from: [2, 1], to: [3, 1], mode: 'a' },
+    moves: [
+      { type: 'move', from: [2, 1], to: [3, 1], mode: 'a' },
+      {
+        type: 'block',
+        coords: [
+          [2, 1],
+          [2, 2],
+        ],
+      },
+    ],
   },
   {
-    description: 'Самолёт может стрелять по прямой, если рядом авианосец. Выстрелите по цели.',
+    description:
+      'Самолёт стреляет по прямой на любое расстояние, пока рядом находится авианосец. ' +
+      'Перетащите самолёт на цель и выберите действие выстрела.',
     state: deepcopy(stepShoot),
-    move: { type: 'move', from: [1, 3], to: [3, 3], mode: 's' },
+    moves: [{ type: 'move', from: [1, 3], to: [3, 3], mode: 's' }],
   },
   {
-    description: 'Взорвите атомную бомбу.',
+    description: 'Атомная бомба уничтожает всё вокруг себя. Активируйте её прямо в текущей клетке.',
     state: deepcopy(stepExplode),
-    move: { type: 'move', from: [2, 2], to: [2, 2], mode: 'e' },
+    moves: [{ type: 'move', from: [2, 2], to: [2, 2], mode: 'e' }],
   },
   {
-    description: 'Если ходить нечем, пропустите ход.',
+    description:
+      'Иногда выгодно пропустить ход. Нажмите кнопку «Пропустить ход», чтобы завершить урок.',
     state: deepcopy(stepSkip),
-    move: { type: 'skip' },
+    moves: [{ type: 'skip' }],
   },
 ];

@@ -32,3 +32,9 @@
   border-radius: var(--border-radius);
   color: var(--text-primary);
 }
+
+.tutorial-next {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+  color: #fff;
+}

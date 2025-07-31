@@ -10,8 +10,10 @@ interface TutorialProps {
   onExit: () => void;
 }
 
-const BoardWrapper = (props: any & { tutorialMove: TutorialMove; onDone: () => void }) => {
-  return <Board {...props} tutorialMove={props.tutorialMove} onTutorialMoveDone={props.onDone} />;
+const BoardWrapper = (props: any & { tutorialMove: TutorialMove; onMoveDone: () => void }) => {
+  return (
+    <Board {...props} tutorialMove={props.tutorialMove} onTutorialMoveDone={props.onMoveDone} />
+  );
 };
 
 function createTutorialGame(step: TutorialStep) {
@@ -34,11 +36,23 @@ function createTutorialGame(step: TutorialStep) {
 
 const Tutorial: React.FC<TutorialProps> = ({ onExit }) => {
   const [index, setIndex] = useState(0);
+  const [moveIndex, setMoveIndex] = useState(0);
+  const [stepDone, setStepDone] = useState(false);
   const step = tutorialSteps[index];
 
-  const handleDone = useCallback(() => {
+  const handleMoveDone = useCallback(() => {
+    if (moveIndex < step.moves.length - 1) {
+      setMoveIndex(i => i + 1);
+    } else {
+      setStepDone(true);
+    }
+  }, [moveIndex, step]);
+
+  const nextStep = useCallback(() => {
     if (index < tutorialSteps.length - 1) {
       setIndex(i => i + 1);
+      setMoveIndex(0);
+      setStepDone(false);
     } else {
       onExit();
     }
@@ -48,11 +62,13 @@ const Tutorial: React.FC<TutorialProps> = ({ onExit }) => {
     const game = createTutorialGame(step);
     return Client({
       game,
-      board: props => <BoardWrapper {...props} tutorialMove={step.move} onDone={handleDone} />,
+      board: props => (
+        <BoardWrapper {...props} tutorialMove={step.moves[moveIndex]} onMoveDone={handleMoveDone} />
+      ),
       debug: false,
       numPlayers: 2,
     });
-  }, [step, handleDone]);
+  }, [step, moveIndex, handleMoveDone]);
 
   return (
     <div className="tutorial-container">
@@ -61,6 +77,11 @@ const Tutorial: React.FC<TutorialProps> = ({ onExit }) => {
       </div>
       <div className="tutorial-panel">
         <div className="tutorial-description">{step.description}</div>
+        {stepDone && (
+          <button className="tutorial-next" onClick={nextStep}>
+            Далее
+          </button>
+        )}
         <button onClick={onExit}>Выйти</button>
       </div>
     </div>
