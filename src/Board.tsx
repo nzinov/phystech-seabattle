@@ -71,7 +71,12 @@ const Square: React.FC<SquareProps> = props => {
     if (isMobileDevice()) {
       // Mobile: Only handle tooltip/trace cycling for squares with figures
       if (props.figure && props.hover) {
-        props.hover({ type: 'mobile-cycle-click', coord: props.coord });
+        props.hover({
+          type: 'mobile-cycle-click',
+          coord: props.coord,
+          figure: props.figure,
+          G: props.G,
+        });
       }
     } else {
       // Desktop: Only handle label functionality for Unknown/Sinking
@@ -509,7 +514,7 @@ interface BoardState {
   linkCopied?: boolean;
   readyConfirmPending?: boolean;
   longPressTraceActive?: boolean;
-  mobileClickStates?: Map<string, 'trace' | 'tooltip' | 'none'>;
+  mobileClickStates?: Map<string, 'trace' | 'tooltip' | 'label' | 'none'>;
   actionSelectionPopup?: {
     visible: boolean;
     actions: any[];
@@ -668,14 +673,20 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     position: { x: number; y: number },
     currentLabels?: any
   ) => {
-    this.setState({
-      labelSelectionPopup: {
-        visible: true,
-        coord,
-        position,
-        currentLabels: currentLabels || {},
+    console.log('showLabelPopup called, setting state...');
+    this.setState(
+      {
+        labelSelectionPopup: {
+          visible: true,
+          coord,
+          position,
+          currentLabels: currentLabels || {},
+        },
       },
-    });
+      () => {
+        console.log('Label popup state after setState:', this.state.labelSelectionPopup);
+      }
+    );
   };
 
   cancelLabelSelection = () => {
@@ -867,8 +878,12 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       const coordKey = `${event.coord[0]}-${event.coord[1]}`;
       const currentState = this.state.mobileClickStates?.get(coordKey) || 'none';
 
-      // Cycle through: none → trace → tooltip → none
-      let nextState: 'trace' | 'tooltip' | 'none';
+      // Check if this is a labelable ship (Unknown/Sinking)
+      const isLabelable =
+        event.figure && ['Unknown', 'Sinking'].includes(event.figure?.type) && !event.G?.attackFrom;
+
+      // Cycle through: none → trace → tooltip → (label if labelable) → none
+      let nextState: 'trace' | 'tooltip' | 'label' | 'none';
       switch (currentState) {
         case 'none':
           nextState = 'trace';
@@ -877,6 +892,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
           nextState = 'tooltip';
           break;
         case 'tooltip':
+          nextState = isLabelable ? 'label' : 'none';
+          break;
+        case 'label':
           nextState = 'none';
           break;
         default:
@@ -887,28 +905,55 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       const newClickStates = new Map(this.state.mobileClickStates);
       newClickStates.set(coordKey, nextState);
 
-      // Clear all other mobile states when starting a new one
-      if (nextState !== 'none') {
+      // Clear all other mobile states when starting a new one (except when showing label popup)
+      if (nextState !== 'none' && nextState !== 'label') {
         for (const [key, value] of newClickStates) {
           if (key !== coordKey && value !== 'none') {
             newClickStates.set(key, 'none');
           }
+        }
+      } else if (nextState === 'label') {
+        // When showing label popup, clear all states including current one
+        // This prevents the cycle from continuing
+        for (const [key] of newClickStates) {
+          newClickStates.set(key, 'none');
         }
       }
 
       this.setState(
         {
           mobileClickStates: newClickStates,
-          hoveredCoords: nextState !== 'none' ? event.coord : undefined,
-          longPressTraceActive: nextState !== 'none',
+          hoveredCoords: nextState !== 'none' && nextState !== 'label' ? event.coord : undefined,
+          longPressTraceActive: nextState !== 'none' && nextState !== 'label',
           tooltip: nextState === 'tooltip',
           trace: nextState === 'trace',
-          traceHighlight: nextState === 'none' ? [] : this.state.traceHighlight,
-          traceArrows: nextState === 'none' ? [] : this.state.traceArrows,
+          traceHighlight:
+            nextState === 'none' || nextState === 'label' ? [] : this.state.traceHighlight,
+          traceArrows: nextState === 'none' || nextState === 'label' ? [] : this.state.traceArrows,
         },
         () => {
           if (nextState === 'trace') {
             this.HighlightTrace();
+          } else if (nextState === 'label') {
+            // Show label popup for mobile - use setTimeout to avoid state conflicts
+            setTimeout(() => {
+              const target = document.querySelector(
+                `[data-cell="${event.coord[0]}-${event.coord[1]}"]`
+              );
+              const rect = target?.getBoundingClientRect();
+              const position = rect
+                ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+                : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+              // Get current labels if they exist
+              const currentLabels = event.figure?.label;
+              let parsedLabels: any = undefined;
+              if (currentLabels && typeof currentLabels === 'object') {
+                parsedLabels = currentLabels;
+              }
+
+              this.showLabelPopup(event.coord, position, parsedLabels);
+            }, 10);
           }
         }
       );
@@ -1317,9 +1362,12 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
   renderLabelSelectionPopup() {
     const popup = this.state.labelSelectionPopup;
+    console.log('renderLabelSelectionPopup called, popup state:', popup);
     if (!popup?.visible) {
+      console.log('Popup not visible, returning null');
       return null;
     }
+    console.log('Rendering popup...');
 
     // Available ship types for dropdown
     const availableShips = Object.entries(shipNames).filter(
