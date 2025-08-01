@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getShipName } from './utils/translations';
-import { getPossessivePronoun, getGenderedVerb } from './utils/russianGrammar';
 import './Log.css';
+import { getGenderedVerb, getPossessivePronoun } from './utils/russianGrammar';
+import { getShipName } from './utils/translations';
 
 function getShipDescr(ship, currentPlayer) {
   return getPossessivePronoun(ship.type, ship.player, currentPlayer) + ' ' + getShipName(ship.type);
@@ -86,7 +86,7 @@ const LogEvent = ({ event, player, highlight, highlightLastMove }) => {
         return (
           <span>
             <b>
-              {t('log.blockDeclaredPrefix')} {event.size} x {getShipName(event.ship_type)}
+              {t('log.blockDeclaredPrefix')} {event.size}&nbsp;x&nbsp;{getShipName(event.ship_type)}
             </b>
           </span>
         );
