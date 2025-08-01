@@ -1,396 +1,558 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Правила игры — Морской бой по-физтеховски</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        :root {
-            --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --bg-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --surface-1: #ffffff;
-            --surface-2: #f8fafc;
-            --surface-3: #f1f5f9;
-            --accent-primary: #8b5cf6;
-            --accent-secondary: #06b6d4;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --text-tertiary: #94a3b8;
-            --text-light: #ffffff;
-            --border-light: #e2e8f0;
-            --border-medium: #cbd5e1;
-            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            --border-radius-sm: 6px;
-            --border-radius: 8px;
-            --border-radius-lg: 12px;
-            --border-radius-xl: 16px;
-        }
-        
+      :root {
+        --bg-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --bg-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --surface-1: #ffffff;
+        --surface-2: #f8fafc;
+        --surface-3: #f1f5f9;
+        --accent-primary: #8b5cf6;
+        --accent-secondary: #06b6d4;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --text-tertiary: #94a3b8;
+        --text-light: #ffffff;
+        --border-light: #e2e8f0;
+        --border-medium: #cbd5e1;
+        --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        --border-radius-sm: 6px;
+        --border-radius: 8px;
+        --border-radius-lg: 12px;
+        --border-radius-xl: 16px;
+      }
+
+      body {
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        line-height: 1.6;
+        margin: 0;
+        padding: 20px;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        font-size: 14px;
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        letter-spacing: -0.01em;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: var(--surface-1);
+        padding: 40px;
+        border-radius: var(--border-radius-xl);
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border-light);
+      }
+
+      h1 {
+        color: var(--text-primary);
+        text-align: center;
+        border-bottom: 3px solid var(--accent-primary);
+        padding-bottom: 15px;
+        margin-bottom: 40px;
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+
+      h2 {
+        color: var(--text-primary);
+        border-left: 4px solid var(--accent-primary);
+        padding-left: 20px;
+        margin-top: 40px;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      h3 {
+        color: var(--text-secondary);
+        margin-top: 30px;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .ship-section {
+        background: var(--surface-2);
+        border-radius: var(--border-radius-lg);
+        padding: 24px;
+        margin: 24px 0;
+        border-left: 4px solid var(--accent-secondary);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .ship-item {
+        display: flex;
+        align-items: flex-start;
+        margin: 16px 0;
+        padding: 16px;
+        background: var(--surface-1);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-light);
+        transition: all 0.2s ease;
+      }
+
+      .ship-item:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+      }
+
+      .ship-image {
+        width: 48px;
+        height: 48px;
+        margin-right: 16px;
+        border: 2px solid var(--border-light);
+        border-radius: var(--border-radius);
+        background: var(--surface-2);
+      }
+
+      .ship-description {
+        flex: 1;
+      }
+
+      .ship-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 1.1em;
+        margin-bottom: 8px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 24px 0;
+        background: var(--surface-1);
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-light);
+      }
+
+      th,
+      td {
+        border: 1px solid var(--border-light);
+        padding: 12px;
+        text-align: center;
+      }
+
+      th {
+        background: var(--accent-primary);
+        color: var(--text-light);
+        font-weight: 600;
+      }
+
+      tr:nth-child(even) {
+        background-color: var(--surface-2);
+      }
+
+      .action-table th {
+        background: var(--accent-primary);
+      }
+
+      .combat-table th {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      }
+
+      .quantity-table th {
+        background: var(--accent-primary);
+      }
+
+      .phase-list {
+        background: var(--surface-2);
+        padding: 24px;
+        border-radius: var(--border-radius-lg);
+        margin: 24px 0;
+        border: 1px solid var(--border-light);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .dl-horizontal dt {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-top: 12px;
+      }
+
+      .dl-horizontal dd {
+        margin-left: 24px;
+        margin-bottom: 12px;
+        color: var(--text-secondary);
+      }
+
+      .example-section {
+        border: 1px solid #f59e0b;
+        border-radius: var(--border-radius-lg);
+        padding: 24px;
+        margin: 24px 0;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .example-section h4 {
+        color: #92400e;
+        margin-top: 0;
+        font-weight: 600;
+      }
+
+      img.img-responsive {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
+        margin: 16px 0;
+      }
+
+      .category-header {
+        background: var(--bg-primary);
+        color: var(--text-light);
+        padding: 20px;
+        border-radius: var(--border-radius-lg);
+        text-align: center;
+        font-weight: 600;
+        margin: 32px 0 20px 0;
+        box-shadow: var(--shadow-md);
+        font-size: 1.1rem;
+      }
+
+      .strength-indicator {
+        background: var(--accent-secondary);
+        color: var(--text-light);
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 0.8em;
+        margin-left: 12px;
+        font-weight: 500;
+      }
+
+      strong {
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      p {
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+      }
+
+      @media (max-width: 500px) {
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            font-size: 14px;
-            font-weight: 400;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            letter-spacing: -0.01em;
+          padding: 0px;
         }
-        
+
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: var(--surface-1);
-            padding: 40px;
-            border-radius: var(--border-radius-xl);
-            box-shadow: var(--shadow-xl);
-            border: 1px solid var(--border-light);
+          padding: 4px;
+          margin: 0;
+          border-radius: var(--border-radius);
         }
-        
+
         h1 {
-            color: var(--text-primary);
-            text-align: center;
-            border-bottom: 3px solid var(--accent-primary);
-            padding-bottom: 15px;
-            margin-bottom: 40px;
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
+          font-size: 1.75rem;
+          margin-bottom: 24px;
         }
-        
+
         h2 {
-            color: var(--text-primary);
-            border-left: 4px solid var(--accent-primary);
-            padding-left: 20px;
-            margin-top: 40px;
-            font-size: 1.5rem;
-            font-weight: 600;
+          font-size: 1.25rem;
+          padding-left: 16px;
+          margin-top: 32px;
         }
-        
+
         h3 {
-            color: var(--text-secondary);
-            margin-top: 30px;
-            font-size: 1.25rem;
-            font-weight: 600;
+          font-size: 1.1rem;
+          margin-top: 24px;
         }
-        
-        .ship-section {
-            background: var(--surface-2);
-            border-radius: var(--border-radius-lg);
-            padding: 24px;
-            margin: 24px 0;
-            border-left: 4px solid var(--accent-secondary);
-            box-shadow: var(--shadow-sm);
-        }
-        
+
         .ship-item {
-            display: flex;
-            align-items: flex-start;
-            margin: 16px 0;
-            padding: 16px;
-            background: var(--surface-1);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-light);
-            transition: all 0.2s ease;
+          flex-direction: column;
+          text-align: center;
+          padding: 12px;
         }
-        
-        .ship-item:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-1px);
-        }
-        
+
         .ship-image {
-            width: 48px;
-            height: 48px;
-            margin-right: 16px;
-            border: 2px solid var(--border-light);
-            border-radius: var(--border-radius);
-            background: var(--surface-2);
+          margin-right: 0;
+          margin-bottom: 12px;
+          align-self: center;
         }
-        
-        .ship-description {
-            flex: 1;
+
+        .ship-section {
+          padding: 16px;
+          margin: 16px 0;
         }
-        
-        .ship-name {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 1.1em;
-            margin-bottom: 8px;
-        }
-        
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 24px 0;
-            background: var(--surface-1);
-            border-radius: var(--border-radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-light);
-        }
-        
-        th, td {
-            border: 1px solid var(--border-light);
-            padding: 12px;
-            text-align: center;
-        }
-        
-        th {
-            background: var(--accent-primary);
-            color: var(--text-light);
-            font-weight: 600;
-        }
-        
-        tr:nth-child(even) {
-            background-color: var(--surface-2);
-        }
-        
-        .action-table th {
-            background: var(--accent-primary);
-        }
-        
-        .combat-table th {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        }
-        
-        .quantity-table th {
-            background: var(--accent-primary);
-        }
-        
+
         .phase-list {
-            background: var(--surface-2);
-            padding: 24px;
-            border-radius: var(--border-radius-lg);
-            margin: 24px 0;
-            border: 1px solid var(--border-light);
-            box-shadow: var(--shadow-sm);
+          padding: 16px;
+          margin: 16px 0;
         }
-        
-        .dl-horizontal dt {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-top: 12px;
-        }
-        
-        .dl-horizontal dd {
-            margin-left: 24px;
-            margin-bottom: 12px;
-            color: var(--text-secondary);
-        }
-        
+
         .example-section {
-            border: 1px solid #f59e0b;
-            border-radius: var(--border-radius-lg);
-            padding: 24px;
-            margin: 24px 0;
-            box-shadow: var(--shadow-sm);
+          padding: 16px;
+          margin: 16px 0;
         }
-        
-        .example-section h4 {
-            color: #92400e;
-            margin-top: 0;
-            font-weight: 600;
+
+        /* Table responsiveness */
+        table {
+          font-size: 12px;
+          margin: 16px 0;
         }
-        
-        img.img-responsive {
-            max-width: 100%;
-            height: auto;
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-lg);
-            margin: 16px 0;
+
+        th,
+        td {
+          padding: 4px 4px;
+          word-break: auto-phrase;
         }
-        
-        .category-header {
-            background: var(--bg-primary);
-            color: var(--text-light);
-            padding: 20px;
-            border-radius: var(--border-radius-lg);
-            text-align: center;
-            font-weight: 600;
-            margin: 32px 0 20px 0;
-            box-shadow: var(--shadow-md);
-            font-size: 1.1rem;
+
+        /* Make tables horizontally scrollable */
+        .table-wrapper {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          margin: 16px 0; /* Extend to container edges */
+          padding: 0 4px;
         }
-        
+
+        /* Strength indicator fixes */
         .strength-indicator {
-            background: var(--accent-secondary);
-            color: var(--text-light);
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 0.8em;
-            margin-left: 12px;
-            font-weight: 500;
+          display: block;
+          margin: 8px auto 0;
+          text-align: center;
+          white-space: nowrap;
+          font-size: 0.7em;
         }
-        
-        strong {
-            color: var(--text-primary);
-            font-weight: 600;
+
+        .ship-name {
+          margin-bottom: 4px;
         }
-        
-        p {
-            color: var(--text-secondary);
-            margin-bottom: 16px;
+      }
+
+      @media (max-width: 1300px) {
+        /* Hide combat table on mobile */
+        .combat-table {
+          display: none;
         }
-        
-        @media (max-width: 500px) {
-            body {
-                padding: 0px;
-            }
-            
-            .container {
-                padding: 4px;
-                margin: 0;
-                border-radius: var(--border-radius);
-            }
-            
-            h1 {
-                font-size: 1.75rem;
-                margin-bottom: 24px;
-            }
-            
-            h2 {
-                font-size: 1.25rem;
-                padding-left: 16px;
-                margin-top: 32px;
-            }
-            
-            h3 {
-                font-size: 1.1rem;
-                margin-top: 24px;
-            }
-            
-            .ship-item {
-                flex-direction: column;
-                text-align: center;
-                padding: 12px;
-            }
-            
-            .ship-image {
-                margin-right: 0;
-                margin-bottom: 12px;
-                align-self: center;
-            }
-            
-            .ship-section {
-                padding: 16px;
-                margin: 16px 0;
-            }
-            
-            .phase-list {
-                padding: 16px;
-                margin: 16px 0;
-            }
-            
-            .example-section {
-                padding: 16px;
-                margin: 16px 0;
-            }
-            
-            /* Table responsiveness */
-            table {
-                font-size: 12px;
-                margin: 16px 0;
-            }
-            
-            th, td {
-                padding: 4px 4px;
-                word-break: auto-phrase;
-            }
-            
-            /* Make tables horizontally scrollable */
-            .table-wrapper {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                margin: 16px 0; /* Extend to container edges */
-                padding: 0 4px;
-            }
-            
-            /* Strength indicator fixes */
-            .strength-indicator {
-                display: block;
-                margin: 8px auto 0;
-                text-align: center;
-                white-space: nowrap;
-                font-size: 0.7em;
-            }
-            
-            .ship-name {
-                margin-bottom: 4px;
-            }
-            
-        }
-            
-        @media (max-width: 1300px) {
-            /* Hide combat table on mobile */
-            .combat-table {
-                display: none;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>Морской&nbsp;бой по&#8209;физтеховски — Правила&nbsp;игры</h1>
+      <h1>Морской&nbsp;бой по&#8209;физтеховски — Правила&nbsp;игры</h1>
 
-        <h2>Основные правила</h2>
-        <p>В Морской бой по-физтеховски играют два игрока. Игра ведется на квадратном клетчатом поле 14 на 14 клеток. Оба игрока имеют одинаковые наборы фишек. Каждый игрок видит свои фишки и положение - но не тип - фишек соперника. Перед началом игры игроки расставляют свои наборы фишек произвольным образом на первых 5-и линиях поля (друг напротив друга). После этого игроки по очереди совершают ходы.</p>
+      <h2>Основные правила</h2>
+      <p>
+        В Морской бой по-физтеховски играют два игрока. Игра ведется на квадратном клетчатом поле 14
+        на 14 клеток. Оба игрока имеют одинаковые наборы фишек. Каждый игрок видит свои фишки и
+        положение - но не тип - фишек соперника. Перед началом игры игроки расставляют свои наборы
+        фишек произвольным образом на первых 5-и линиях поля (друг напротив друга). После этого
+        игроки по очереди совершают ходы.
+      </p>
+      <div class="ship-item">
+        <img src="figures/F.png" alt="Форт" class="ship-image" />
+        <div class="ship-description">
+          <div class="ship-name">Цель игры</div>
+          <p>Уничтожить или захватить оба <strong>Фортa</strong> противника.</p>
+        </div>
+      </div>
+
+      <h3>Возможные действия</h3>
+      <p>
+        В разные моменты хода доступны все или некоторые из следующих действий. Чтобы выполнить
+        действие, нужно зажать соответствующую ему клавишу клавиатуры и переместить нужную фишку с
+        помощью мышки. Также можно просто переместить нужный корабль с помощью мышки, не зажимая
+        клавишу. Если подходящее действие только одно, оно выполнится автоматически. Если подходящих
+        действий несколько, то появится меню с выбором.
+      </p>
+      <div class="table-wrapper">
+        <table class="action-table">
+          <tr>
+            <th>Клавиша</th>
+            <th>Название действия</th>
+            <th>Описание действия</th>
+          </tr>
+          <tr>
+            <td><strong>M</strong></td>
+            <td>Перемещение</td>
+            <td>Передвижение фишки на соседнюю (не по диагонали) свободную клетку</td>
+          </tr>
+          <tr>
+            <td><strong>A</strong></td>
+            <td>Атака</td>
+            <td>Выбранная фишка атакует соседнюю (не по диагонали) фишку противника</td>
+          </tr>
+          <tr>
+            <td><strong>S</strong></td>
+            <td>Выстрел</td>
+            <td>Смотрите описание фишек</td>
+          </tr>
+          <tr>
+            <td><strong>E</strong></td>
+            <td>Взрыв</td>
+            <td>Смотрите описание фишек</td>
+          </tr>
+          <tr>
+            <td><strong>Space</strong></td>
+            <td>Пропуск хода</td>
+            <td>Пропустить фазу атаки</td>
+          </tr>
+        </table>
+      </div>
+      <p>
+        Также доступны вспомогательные инструменты, которые активируются, если зажать клавишу на
+        клавиатуре
+      </p>
+      <div class="table-wrapper">
+        <table class="action-table">
+          <tr>
+            <th>Клавиша</th>
+            <th>Описание действия</th>
+          </tr>
+          <tr>
+            <td><strong>Shift</strong></td>
+            <td>
+              Открывет панель, которая показывает сколько кораблей осталось у вас и у противника
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Ctrl</strong></td>
+            <td>Показывает маршрут, которым следовала фишка, при наведении на нее</td>
+          </tr>
+          <tr>
+            <td><strong>Alt / Option</strong></td>
+            <td>Показывает правила, касающиеся конкретной фишки, при наведении на нее</td>
+          </tr>
+        </table>
+      </div>
+      <p>
+        На мобильных устройствах вместо Ctrl и Alt кликните один или два раза на интересующий
+        корабль.
+      </p>
+
+      <h3>Маркировка кораблей противника</h3>
+      <p>
+        Игра предоставляет мощную систему маркировки для отслеживания кораблей противника. Вы можете
+        помечать вражеские корабли тремя способами одновременно:
+      </p>
+      <div class="ship-section">
         <div class="ship-item">
-            <img src="figures/F.png" alt="Форт" class="ship-image">
-            <div class="ship-description">
-                <div class="ship-name">Цель игры</div>
-                <p>Уничтожить или захватить оба <strong>Фортa</strong> противника.</p>
-            </div>
+          <img src="figures/Av.png" alt="Тип корабля" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Тип корабля</div>
+            <p>
+              Выберите из выпадающего списка предполагаемый тип вражеского корабля. На клетке
+              появится полупрозрачное изображение выбранного корабля для быстрой идентификации.
+            </p>
+          </div>
         </div>
+        <div class="ship-item">
+          <div
+            style="
+              width: 48px;
+              height: 48px;
+              margin-right: 16px;
+              border: 2px solid var(--border-light);
+              border-radius: var(--border-radius);
+              background: var(--surface-2);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 24px;
+              color: #ef4444;
+            "
+          >
+            ★
+          </div>
+          <div class="ship-description">
+            <div class="ship-name">Цветовая метка</div>
+            <p>
+              Добавьте цветную звездочку в угол клетки для быстрой визуальной категоризации.
+              Доступно 8 цветов: красный, синий, зеленый, желтый, фиолетовый, розовый, оранжевый и
+              голубой.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <div
+            style="
+              width: 48px;
+              height: 48px;
+              margin-right: 16px;
+              border: 2px solid var(--border-light);
+              border-radius: var(--border-radius);
+              background: var(--surface-2);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 14px;
+              color: var(--text-secondary);
+            "
+          >
+            ABC
+          </div>
+          <div class="ship-description">
+            <div class="ship-name">Заметки</div>
+            <p>
+              Добавьте персональные заметки к кораблю (до 400 символов). Текст заметки заменит
+              стандартную подсказку корабля и будет виден при наведении курсора с клавишей Alt.
+            </p>
+          </div>
+        </div>
+      </div>
+      <p><strong>Как использовать:</strong></p>
+      <ul>
+        <li>
+          <strong>На компьютере:</strong> Кликните на корабль противника 
+        </li>
+        <li>
+          <strong>На мобильном:</strong> Кликните три раза на корабль противника: 1-й клик
+          показывает маршрут, 2-й — подсказку, 3-й — открывает редактор меток
+        </li>
+      </ul>
+      <p>
+        Все три типа меток можно использовать одновременно на одном корабле. Метки видны только вам
+        и помогают разрабатывать стратегию против флота противника.
+      </p>
 
-        <h3>Возможные действия</h3>
-        <p>В разные моменты хода доступны все или некоторые из следующих действий. Чтобы выполнить действие, нужно зажать соответствующую ему клавишу клавиатуры и переместить нужную фишку с помощью мышки. Также можно просто переместить нужный корабль с помощью мышки, не зажимая клавишу. Если подходящее действие только одно, оно выполнится автоматически. Если подходящих действий несколько, то появится меню с выбором.</p>
-        <div class="table-wrapper">
-        <table class="action-table">
-            <tr><th>Клавиша</th><th>Название действия</th><th>Описание действия</th></tr>
-            <tr><td><strong>M</strong></td><td>Перемещение</td><td>Передвижение фишки на соседнюю (не по диагонали) свободную клетку</td></tr>
-            <tr><td><strong>A</strong></td><td>Атака</td><td>Выбранная фишка атакует соседнюю (не по диагонали) фишку противника</td></tr>
-            <tr><td><strong>S</strong></td><td>Выстрел</td><td>Смотрите описание фишек</td></tr>
-            <tr><td><strong>E</strong></td><td>Взрыв</td><td>Смотрите описание фишек</td></tr>
-            <tr><td><strong>Space</strong></td><td>Пропуск хода</td><td>Пропустить фазу атаки</td></tr>
-        </table>
-        </div>
-        <p>Также доступны вспомогательные инструменты, которые активируются, если зажать клавишу на клавиатуре</p>
-        <div class="table-wrapper">
-        <table class="action-table">
-            <tr><th>Клавиша</th><th>Описание действия</th></tr>
-            <tr><td><strong>Shift</strong></td><td>Открывет панель, которая показывает сколько кораблей осталось у вас и у противника</td></tr>
-            <tr><td><strong>Ctrl</strong></td><td>Показывает маршрут, которым следовала фишка, при наведении на нее</td></tr>
-            <tr><td><strong>Alt / Option</strong></td><td>Показывает правила, касающиеся конкретной фишки, при наведении на нее</td></tr>
-        </table>
-        </div>
-        <p>На мобильных устройствах вместо Ctrl и Alt кликните один или два раза на интересующий корабль.</p>
+      <h3>Список фаз игры</h3>
+      <p>
+        Ход игрока состоит из основной (move, shoot or attack) и, возможно, дополнительной (attack
+        or skip) фаз.
+      </p>
+      <p>
+        В основную фазу можно выполнять любые действия. Если игрок в основную фазу выбрал
+        перемещение фишки, то он получает возможность действовать в дополнительную фазу, в которой
+        можно только атаковать или взрывать. Дополнительную фазу можно пропустить нажатием кнопки
+        Пробел. В случае, если игрок удачно произвел атаку или выстрел, то он немедленно начинает
+        дополнительный ход.
+      </p>
 
-        <h3>Список фаз игры</h3>
-            <p>Ход игрока состоит из основной (move, shoot or attack) и, возможно, дополнительной (attack or skip) фаз.</p>
-            <p>В основную фазу можно выполнять любые действия. Если игрок в основную фазу выбрал перемещение фишки, то он получает возможность действовать в дополнительную фазу, в которой можно только атаковать или взрывать. Дополнительную фазу можно пропустить нажатием кнопки Пробел. В случае, если игрок удачно произвел атаку или выстрел, то он немедленно начинает дополнительный ход.</p>
-            
-            <h4>Диаграмма хода игрока</h4>
-            <div class="example-section">
-                <div class="mermaid" id="flowchart-diagram" style="background: white; border-radius: 8px; padding: 20px;">
-                </div>
-                
-                <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-                <script>
-                    function getFlowchartContent() {
-                        const isSmallScreen = window.innerWidth < 768;
-                        const direction = isSmallScreen ? 'TD' : 'LR';
-                        
-                        return `flowchart ${direction}
+      <h4>Диаграмма хода игрока</h4>
+      <div class="example-section">
+        <div
+          class="mermaid"
+          id="flowchart-diagram"
+          style="background: white; border-radius: 8px; padding: 20px"
+        ></div>
+
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+        <script>
+          function getFlowchartContent() {
+            const isSmallScreen = window.innerWidth < 768;
+            const direction = isSmallScreen ? 'TD' : 'LR';
+
+            return `flowchart ${direction}
     Start([НАЧАЛО ХОДА<br/>Turn Start]) --> MainPhase[ОСНОВНАЯ ФАЗА<br/>Выберите действие:<br/>Ход • Атака • Выстрел • Взрыв<br/>Move • Attack • Shoot • Explode]
     
     MainPhase -->|Move| AdditionalPhase[ДОПОЛНИТЕЛЬНАЯ ФАЗА<br/>Выберите действие:<br/>Атака • Взрыв • Пропуск<br/>Attack • Explode • Skip]
@@ -414,804 +576,1854 @@
     class AdditionalPhase additionalPhase
     class SuccessCheck decision
     class EndTurn endNode`;
-                    }
-                    
-                    function renderFlowchart() {
-                        const diagramElement = document.getElementById('flowchart-diagram');
-                        const flowchartContent = getFlowchartContent();
-                        
-                        // Clear previous content
-                        diagramElement.innerHTML = flowchartContent;
-                        
-                        // Re-initialize mermaid for this element
-                        mermaid.init(undefined, diagramElement);
-                    }
-                    
-                    // Initialize mermaid
-                    mermaid.initialize({
-                        startOnLoad: false,
-                        theme: 'neutral',
-                        themeVariables: {
-                            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                            fontSize: window.innerWidth < 768 ? '12px' : '14px'
-                        },
-                        flowchart: {
-                            useMaxWidth: true,
-                            htmlLabels: true
-                        }
-                    });
-                    
-                    // Render initial flowchart
-                    document.addEventListener('DOMContentLoaded', renderFlowchart);
-                    
-                    // Re-render on window resize
-                    let resizeTimeout;
-                    window.addEventListener('resize', () => {
-                        clearTimeout(resizeTimeout);
-                        resizeTimeout = setTimeout(renderFlowchart, 250);
-                    });
-                </script>
-                
-                <div style="margin-top: 20px;">
-                    <p><strong>Примечания:</strong></p>
-                    <ul>
-                        <li><strong>Успешное действие</strong> - атака, выстрел или взрыв, которые привели к уничтожению или захвату фишки противника</li>
-                        <li><strong>После успешного действия</strong> игрок немедленно получает дополнительный ход и начинает сначала</li>
-                        <li><strong>Дополнительная фаза</strong> доступна только после хода (перемещения фишки)</li>
-                        <li><strong>В дополнительной фазе</strong> нельзя делать ходы (перемещения) или выстрелы, только атаки и взрывы</li>
-                    </ul>
-                </div>
-            </div>
-            <p><strong>Надпись справа вверху помогает понять, в какой фазе игры вы находитесь:</strong></p>
-            <dl class="dl-horizontal">
-                <dt>Place your ships</dt><dd>Фаза расстановки, передвиньте корабли внутри зеленой области, чтобы расставить их для начала игры. Когда будете готовы, нажмите кнопку Finish placement.</dd>
-                <dt>Wait</dt><dd>Сейчас действует ваш противник, вам остается ждать, ну или обдумывать следующие ходы</dd>
-                <dt>Move, shoot or attack</dt><dd>Доступны действия хода, выстрела, атаки и взрыва.</dd>
-                <dt>Attack or skip</dt><dd>В эту фазу можно только атаковать и взрывать, если хотите, можно ее пропустить, нажав Пробел</dd>
-                <dt>Select you block</dt><dd>Вам нужно заявить блок, нажав на одну из кнопок с названиями блоков в правой панели</dd>
-            </dl>
+          }
 
-        <h3>Подробнее об атаке: блоки</h3>
-        <p>Два корабля (фишки) одного типа стоящие рядом (не по диагонали) образуют блок из двух кораблей. Если рядом с одним из них (опять же не по диагонали) стоит третий корабль, то получается блок из трёх кораблей (ясно, что тройной блок может стоять или «линией» или «уголком»). Блоков больше трёх кораблей не бывает. Не все типы кораблей могут образовывать блоки, а <strong>Рейдер</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;"> может образовывать блоки не только с другими <strong>Рейдерами</strong>, но  и с фишками других типов. (подробности будут дальше).</p>
-        <p>Во время атаки игрок выбирает какой-нибудь корабль противника как цель атаки. Противник должен выбрать, в какой блок входит его атакованный корабль. Так, например, если вы атаковали один из трех стоящих в линию рядышком <strong>Эсминцев</strong>, он может заявить блок из одного, двух, или трех эсминцев (так как не обязательно включать в блок рядом стоящие корабли). Атаковавший видит, какой блок заявил его противник, но не наоборот. Если ваш блок сильнее - противник потеряет атакованную фишку. Если ваш блок слабее - вы теряете фишку, которой атаковали. А вот если ваш блок и блок противника равны по силе, то и ваш блок (все корабли, а не только один) и блок противника полностью уничтожаются.</p>
-        <p>Когда вам нужно выделить блок, на панели состояния появляется надпись "Select your block", и атакующий и атакованный корабль выделяются синим и красным фоном соответсвенно. В правой панели появляются кнопки, позволяющие выбрать блок (обратите внимание, что при наведении на кнопку блок подсвечивается).</p>
+          function renderFlowchart() {
+            const diagramElement = document.getElementById('flowchart-diagram');
+            const flowchartContent = getFlowchartContent();
 
-        <h2>Фишки</h2>
-        <p>Разных типов фишек довольно много, но многие из них не отличаются друг от друга ничем, кроме силы. Условно их можно разделить на несколько классов:</p>
-        
-        <div class="category-header">Фишки, образующие блоки</div>
-        <div class="ship-section">
-            <div class="ship-item">
-                <img src="figures/Av.png" alt="Авианосец" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Авианосец <span class="strength-indicator">11.4 силы тральщика</span></div>
-                    <p>Формально самая сильная фишка, один на один бьёт любую другую фишку кроме <strong>Крейсерской подводной лодки</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 20px; height: 20px; vertical-align: middle;">. Также бьётся блоками <strong>2-х Линкоров</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 20px; height: 20px; vertical-align: middle;"> или <strong>3-х Крейсеров</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 20px; height: 20px; vertical-align: middle;">. Способность «нести» рядом с собой <strong>Самолёт</strong> <img src="figures/Sm.png" alt="Самолёт" style="width: 20px; height: 20px; vertical-align: middle;"> и производить «выстрел» им.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Lk.png" alt="Линкор" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Линкор <span class="strength-indicator">7.6 сил тральщика</span></div>
-                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Крейсерской подводной лодки</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Подводной лодки</strong> <img src="figures/Pl.png" alt="Подводная Лодка" style="width: 20px; height: 20px; vertical-align: middle;">(!!!). Также бьётся блоками <strong>2-х Крейсеров</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 20px; height: 20px; vertical-align: middle;"> или <strong>3-х Эсминцев</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;">. <strong>2 Линкора = 3 Крейсера</strong>. <strong>3 Линкора = 2 Авианосца</strong>. В наборе их всего по 2 штуки у каждого игрока.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Kr.png" alt="Крейсер" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Крейсер <span class="strength-indicator">5 сил тральщика</span></div>
-                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Линкора</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 20px; height: 20px; vertical-align: middle;">. Бьётся блоками <strong>2-х Рейдеров</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;"> (!), <strong>2-х Эсминцев</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;"> или <strong>3-х Сторожей</strong> <img src="figures/St.png" alt="Сторож" style="width: 20px; height: 20px; vertical-align: middle;">. <strong>2 Крейсера = 3 Эсминца</strong>, <strong>3 Крейсера = 2 Линкора</strong>.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Rd.png" alt="Рейдер" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Рейдер <span class="strength-indicator">4.5 сил тральщика</span></div>
-                    <p>Следующая по рангу за Крейсером фишка, один на один бьёт всех кроме <strong>Авианосца</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Линкора</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Крейсера</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 20px; height: 20px; vertical-align: middle;">. Бьётся блоками <strong>2 Эсминца</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>3 Сторожа</strong> <img src="figures/St.png" alt="Сторож" style="width: 20px; height: 20px; vertical-align: middle;">. По силе в точности равен <strong>2 Сторожам</strong> <img src="figures/St.png" alt="Сторож" style="width: 20px; height: 20px; vertical-align: middle;">. <strong>Рейдер = 2 Сторожа = 3 Торпедных катера</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;">. <strong>Рейдер</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;"> может создавать блоки с любыми фишками младших классов (естественно, только теми, которые могут образовывать блоки, то есть <strong>Эсминцами</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Сторожами</strong> <img src="figures/St.png" alt="Сторож" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Торпедными катерами</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Тральщиками</strong> <img src="figures/Tr.png" alt="Тральщик" style="width: 20px; height: 20px; vertical-align: middle;">). В таком блоке <strong>Рейдер</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;"> притворяется стоящей рядом фишкой, например, если рядом стоит <strong>Торпедный катер</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;">, то такой блок может объявить себя как <strong>2 Торпедных катера</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;"> (а, если рядом ещё один <strong>Торпедный катер</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;">, то соответственно, <strong>3 Торпедных катера</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;">). Такие комбинации обычно используются, когда вашу фишку атакует более сильная, чтобы защитить её. Но, учтите, что будет очень обидно разменять, например, <strong>2 Торпедных катера + Рейдер</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;"> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;"> (объявленные <strong>3 Торпедных катера</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;">) на <strong>2 Сторожа</strong> <img src="figures/St.png" alt="Сторож" style="width: 20px; height: 20px; vertical-align: middle;">!</p>
-                    <p>В качестве исключения блок из <strong>Рейдера</strong> и <strong>Сторожа</strong> может быть заявлен как <strong>2 Эсминца</strong>, а <strong>Рейдер, Эсминец и Сторож</strong> могут быть заявлены как <strong>3 Эсминца</strong>. <strong>Сторож</strong> в этом случае обязан быть рядом с <strong>Рейдером</strong>.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Es.png" alt="Эсминец" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Эсминец <span class="strength-indicator">3.4 силы тральщика</span></div>
-                    <p>Следующая по рангу фишка (если пропустить <strong>Рейдера</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;">), один на один бьёт всех кроме <strong>Авианосца</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Линкора</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Крейсера</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Рейдера</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;"> (!). Бьётся блоками <strong>2 Сторожа</strong> <img src="figures/St.png" alt="Сторож" style="width: 20px; height: 20px; vertical-align: middle;"> или <strong>3 Торпедных катера</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;">. <strong>2 Эсминца = 3 Сторожа</strong>. <strong>3 Эсминца = 2 Крейсера</strong>. Может нести <strong>Мины</strong> <img src="figures/Mn.png" alt="Мина" style="width: 20px; height: 20px; vertical-align: middle;">.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/St.png" alt="Сторож" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Сторож <span class="strength-indicator">2.25 сил тральщика</span></div>
-                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Линкора</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Крейсера</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Рейдера</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Эсминца</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Крейсерской подводной лодки</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 20px; height: 20px; vertical-align: middle;">. Бьётся блоками <strong>2 Торпедных катера</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;"> или <strong>3 Тральщика</strong> <img src="figures/Tr.png" alt="Тральщик" style="width: 20px; height: 20px; vertical-align: middle;">. <strong>2 Сторожа = 3 Торпедных катера = 1 Рейдер</strong>. <strong>3 Сторожа = 2 Эсминца</strong>.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Tk.png" alt="Торпедный катер" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Торпедный Катер <span class="strength-indicator">1.5 сил тральщика</span></div>
-                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Линкора</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Крейсера</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Рейдера</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Эсминца</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Сторожа</strong> <img src="figures/St.png" alt="Сторож" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Крейсерской подводной лодки</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 20px; height: 20px; vertical-align: middle;">. Бьётся блоком <strong>2 Тральщика</strong> <img src="figures/Tr.png" alt="Тральщик" style="width: 20px; height: 20px; vertical-align: middle;">. <strong>2 Торпедных катера = 3 Тральщика</strong>. <strong>3 Торпедных катера = 2 Сторожа = 1 Рейдер</strong>. Особые свойства: способен таскать рядом с собой <strong>Торпеды</strong> <img src="figures/T.png" alt="Торпеда" style="width: 20px; height: 20px; vertical-align: middle;"> и запускать их; может двигаться, как по одной клетке в ход, так и по две (но не по диагонали!). Так, например, может сделать ход вперёд-вправо или вправо-вперёд по свободным клеткам, но, если справа и спереди стоят корабли, то занять клетку «проскользнув» между ними он не может!</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Tr.png" alt="Тральщик" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Тральщик <span class="strength-indicator">1 сила тральщика</span></div>
-                    <p>Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Линкора</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Крейсера</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Рейдера</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Эсминца</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Сторожа</strong> <img src="figures/St.png" alt="Сторож" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Торпедного катера</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Крейсерской подводной лодки</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 20px; height: 20px; vertical-align: middle;">. То есть бьёт только <strong>Подводную лодку</strong> <img src="figures/Pl.png" alt="Подводная Лодка" style="width: 20px; height: 20px; vertical-align: middle;">. <strong>3 Тральщика = 2 Торпедных катера</strong>. При всей своей слабости, обладает неоценимым свойством - способен разминировать (уничтожать не погибая сам) <strong>Мины</strong> <img src="figures/Mn.png" alt="Мина" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Торпеды</strong> <img src="figures/T.png" alt="Торпеда" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Брандеры</strong> <img src="figures/Br.png" alt="Брандер" style="width: 20px; height: 20px; vertical-align: middle;">.</p>
-                </div>
-            </div>
+            // Clear previous content
+            diagramElement.innerHTML = flowchartContent;
+
+            // Re-initialize mermaid for this element
+            mermaid.init(undefined, diagramElement);
+          }
+
+          // Initialize mermaid
+          mermaid.initialize({
+            startOnLoad: false,
+            theme: 'neutral',
+            themeVariables: {
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              fontSize: window.innerWidth < 768 ? '12px' : '14px',
+            },
+            flowchart: {
+              useMaxWidth: true,
+              htmlLabels: true,
+            },
+          });
+
+          // Render initial flowchart
+          document.addEventListener('DOMContentLoaded', renderFlowchart);
+
+          // Re-render on window resize
+          let resizeTimeout;
+          window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(renderFlowchart, 250);
+          });
+        </script>
+
+        <div style="margin-top: 20px">
+          <p><strong>Примечания:</strong></p>
+          <ul>
+            <li>
+              <strong>Успешное действие</strong> - атака, выстрел или взрыв, которые привели к
+              уничтожению или захвату фишки противника
+            </li>
+            <li>
+              <strong>После успешного действия</strong> игрок немедленно получает дополнительный ход
+              и начинает сначала
+            </li>
+            <li>
+              <strong>Дополнительная фаза</strong> доступна только после хода (перемещения фишки)
+            </li>
+            <li>
+              <strong>В дополнительной фазе</strong> нельзя делать ходы (перемещения) или выстрелы,
+              только атаки и взрывы
+            </li>
+          </ul>
         </div>
+      </div>
+      <p>
+        <strong>Надпись справа вверху помогает понять, в какой фазе игры вы находитесь:</strong>
+      </p>
+      <dl class="dl-horizontal">
+        <dt>Place your ships</dt>
+        <dd>
+          Фаза расстановки, передвиньте корабли внутри зеленой области, чтобы расставить их для
+          начала игры. Когда будете готовы, нажмите кнопку Finish placement.
+        </dd>
+        <dt>Wait</dt>
+        <dd>
+          Сейчас действует ваш противник, вам остается ждать, ну или обдумывать следующие ходы
+        </dd>
+        <dt>Move, shoot or attack</dt>
+        <dd>Доступны действия хода, выстрела, атаки и взрыва.</dd>
+        <dt>Attack or skip</dt>
+        <dd>
+          В эту фазу можно только атаковать и взрывать, если хотите, можно ее пропустить, нажав
+          Пробел
+        </dd>
+        <dt>Select you block</dt>
+        <dd>Вам нужно заявить блок, нажав на одну из кнопок с названиями блоков в правой панели</dd>
+      </dl>
 
-        <p>Все перечисленные фишки образуют строгую вертикаль, где каждый корабль следующего по старшинству ранга ровно в 1,5 раза слабее предыдущего. Т. е. <strong>Ав = 1,5Лк = 1,5*1,5Кр = 1,5*1,5*1,5Эс = 1,5*1,5*1,5*1,5Ст = …</strong> и т. д.</p>
-        <p>Но есть фишка, находящаяся между рангов - это <strong>Рейдер</strong>. <strong>Рейдер</strong> - промежуточная между <strong>Кр</strong> и <strong>Эс</strong> фишка, способная образовывать блоки, как между собой, так и с младшими фишками.</p>
+      <h3>Подробнее об атаке: блоки</h3>
+      <p>
+        Два корабля (фишки) одного типа стоящие рядом (не по диагонали) образуют блок из двух
+        кораблей. Если рядом с одним из них (опять же не по диагонали) стоит третий корабль, то
+        получается блок из трёх кораблей (ясно, что тройной блок может стоять или «линией» или
+        «уголком»). Блоков больше трёх кораблей не бывает. Не все типы кораблей могут образовывать
+        блоки, а <strong>Рейдер</strong>
+        <img
+          src="figures/Rd.png"
+          alt="Рейдер"
+          style="width: 20px; height: 20px; vertical-align: middle"
+        />
+        может образовывать блоки не только с другими <strong>Рейдерами</strong>, но и с фишками
+        других типов. (подробности будут дальше).
+      </p>
+      <p>
+        Во время атаки игрок выбирает какой-нибудь корабль противника как цель атаки. Противник
+        должен выбрать, в какой блок входит его атакованный корабль. Так, например, если вы
+        атаковали один из трех стоящих в линию рядышком <strong>Эсминцев</strong>, он может заявить
+        блок из одного, двух, или трех эсминцев (так как не обязательно включать в блок рядом
+        стоящие корабли). Атаковавший видит, какой блок заявил его противник, но не наоборот. Если
+        ваш блок сильнее - противник потеряет атакованную фишку. Если ваш блок слабее - вы теряете
+        фишку, которой атаковали. А вот если ваш блок и блок противника равны по силе, то и ваш блок
+        (все корабли, а не только один) и блок противника полностью уничтожаются.
+      </p>
+      <p>
+        Когда вам нужно выделить блок, на панели состояния появляется надпись "Select your block", и
+        атакующий и атакованный корабль выделяются синим и красным фоном соответсвенно. В правой
+        панели появляются кнопки, позволяющие выбрать блок (обратите внимание, что при наведении на
+        кнопку блок подсвечивается).
+      </p>
 
-        <div class="category-header">Самостоятельно ходящие фишки, не образующие блоки</div>
-        <div class="ship-section">
-            <div class="ship-item">
-                <img src="figures/Pl.png" alt="Подводная Лодка" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Подводная Лодка</div>
-                    <p>Охотница на <strong>Линкоры</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 20px; height: 20px; vertical-align: middle;">. Бьётся всеми кроме <strong>Линкоров</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 20px; height: 20px; vertical-align: middle;"> (одиночного, или входящего в блок, роли не играет) и <strong>Транспортов</strong> <img src="figures/Tp.png" alt="Транспорт" style="width: 20px; height: 20px; vertical-align: middle;">.</p>
-                </div>
+      <h2>Фишки</h2>
+      <p>
+        Разных типов фишек довольно много, но многие из них не отличаются друг от друга ничем, кроме
+        силы. Условно их можно разделить на несколько классов:
+      </p>
+
+      <div class="category-header">Фишки, образующие блоки</div>
+      <div class="ship-section">
+        <div class="ship-item">
+          <img src="figures/Av.png" alt="Авианосец" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">
+              Авианосец <span class="strength-indicator">11.4 силы тральщика</span>
             </div>
-            <div class="ship-item">
-                <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Крейсерская подводная Лодка</div>
-                    <p>Очень «крута». Бьёт всех кроме <strong>Крейсеров</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Рейдеров</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 20px; height: 20px; vertical-align: middle;">, <strong>Эсминцев</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;">. Бьет фишки входящие в блоки, как отдельные. То есть, атаковав входящий в блок <strong>3 Эсминца</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;"> <strong>Сторож</strong> <img src="figures/St.png" alt="Сторож" style="width: 20px; height: 20px; vertical-align: middle;">, Крейсерская Подводная Лодка уничтожает его. Может нести <strong>Ракеты</strong> <img src="figures/Rk.png" alt="Ракета" style="width: 20px; height: 20px; vertical-align: middle;">.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Br.png" alt="Брандер" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Брандер</div>
-                    <p>Может выстрелить в стоящий рядом корабль противника и таким образом захватить его. Это значит, что этот корабль становится вашим кораблём. После захвата ход остается у вас. Не может стрелять несколько раз подряд. Корабли, атакующие <strong>Брандер</strong>, взрываются вместе с ним, как на <strong>Мине</strong> (кроме <strong>Тральщика</strong>, естественно).</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/AB.png" alt="Атомная бомба" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Атомная бомба</div>
-                    <p>Особая фишка, ходит как обычный корабль, не может атаковать, но может «взорваться». При взрыве уничтожает все корабли и чужие, и свои в квадрате 5 на 5 клеток вокруг себя. Взрывается как при атаке чужим кораблём, так самостоятельно - «пошёл и взорвался» (для этого в фазу атаки нужно нажать на нее).</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/NB.png" alt="Нейтронная бомба" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Нейтронная бомба</div>
-                    <p>Особая фишка, все правила игры <strong>Нейтронной бомбой</strong> совпадают с правилами по <strong>Атомной бомбе</strong>. Единственное отличие - результат от взрыва. Если при взрыве <strong>Атомной бомбы</strong> все фишки в квадрате 5х5 «уничтожаются», то при взрыве <strong>Нейтронной бомбы</strong> фишки в квадрате 5х5 становятся «ничейными». Чтобы «захватить» такую «ничейную» фишку достаточно подойти к ней своей и атаковать её.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Tp.png" alt="Транспорт" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Транспорт</div>
-                    <p>Самый слабый из кораблей, бьётся даже Пл. Особое свойство – может перемещать ЛЮБЫЕ несамостоятельные фишки: мины, торпеды, самолеты, ракеты…(форты, конечно, не двигаются). Т.е. рядом с ней все эти фишки могут двигаться не имея «родных» носителей.</p>
-                </div>
-            </div>
+            <p>
+              Формально самая сильная фишка, один на один бьёт любую другую фишку кроме
+              <strong>Крейсерской подводной лодки</strong>
+              <img
+                src="figures/KrPl.png"
+                alt="Крейсерская Подводная Лодка"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Также бьётся блоками <strong>2-х Линкоров</strong>
+              <img
+                src="figures/Lk.png"
+                alt="Линкор"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              или <strong>3-х Крейсеров</strong>
+              <img
+                src="figures/Kr.png"
+                alt="Крейсер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Способность «нести» рядом с собой <strong>Самолёт</strong>
+              <img
+                src="figures/Sm.png"
+                alt="Самолёт"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и производить «выстрел» им.
+            </p>
+          </div>
         </div>
+        <div class="ship-item">
+          <img src="figures/Lk.png" alt="Линкор" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">
+              Линкор <span class="strength-indicator">7.6 сил тральщика</span>
+            </div>
+            <p>
+              Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong>
+              <img
+                src="figures/Av.png"
+                alt="Авианосец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Крейсерской подводной лодки</strong>
+              <img
+                src="figures/KrPl.png"
+                alt="Крейсерская Подводная Лодка"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Подводной лодки</strong>
+              <img
+                src="figures/Pl.png"
+                alt="Подводная Лодка"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />(!!!). Также бьётся блоками <strong>2-х Крейсеров</strong>
+              <img
+                src="figures/Kr.png"
+                alt="Крейсер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              или <strong>3-х Эсминцев</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. <strong>2 Линкора = 3 Крейсера</strong>. <strong>3 Линкора = 2 Авианосца</strong>.
+              В наборе их всего по 2 штуки у каждого игрока.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/Kr.png" alt="Крейсер" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">
+              Крейсер <span class="strength-indicator">5 сил тральщика</span>
+            </div>
+            <p>
+              Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong>
+              <img
+                src="figures/Av.png"
+                alt="Авианосец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Линкора</strong>
+              <img
+                src="figures/Lk.png"
+                alt="Линкор"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Бьётся блоками <strong>2-х Рейдеров</strong>
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              (!), <strong>2-х Эсминцев</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              или <strong>3-х Сторожей</strong>
+              <img
+                src="figures/St.png"
+                alt="Сторож"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. <strong>2 Крейсера = 3 Эсминца</strong>, <strong>3 Крейсера = 2 Линкора</strong>.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/Rd.png" alt="Рейдер" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">
+              Рейдер <span class="strength-indicator">4.5 сил тральщика</span>
+            </div>
+            <p>
+              Следующая по рангу за Крейсером фишка, один на один бьёт всех кроме
+              <strong>Авианосца</strong>
+              <img
+                src="figures/Av.png"
+                alt="Авианосец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Линкора</strong>
+              <img
+                src="figures/Lk.png"
+                alt="Линкор"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Крейсера</strong>
+              <img
+                src="figures/Kr.png"
+                alt="Крейсер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Бьётся блоками <strong>2 Эсминца</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>3 Сторожа</strong>
+              <img
+                src="figures/St.png"
+                alt="Сторож"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. По силе в точности равен <strong>2 Сторожам</strong>
+              <img
+                src="figures/St.png"
+                alt="Сторож"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. <strong>Рейдер = 2 Сторожа = 3 Торпедных катера</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. <strong>Рейдер</strong>
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              может создавать блоки с любыми фишками младших классов (естественно, только теми,
+              которые могут образовывать блоки, то есть <strong>Эсминцами</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Сторожами</strong>
+              <img
+                src="figures/St.png"
+                alt="Сторож"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Торпедными катерами</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Тральщиками</strong>
+              <img
+                src="figures/Tr.png"
+                alt="Тральщик"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />). В таком блоке <strong>Рейдер</strong>
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              притворяется стоящей рядом фишкой, например, если рядом стоит
+              <strong>Торпедный катер</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, то такой блок может объявить себя как <strong>2 Торпедных катера</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              (а, если рядом ещё один <strong>Торпедный катер</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, то соответственно, <strong>3 Торпедных катера</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />). Такие комбинации обычно используются, когда вашу фишку атакует более сильная,
+              чтобы защитить её. Но, учтите, что будет очень обидно разменять, например,
+              <strong>2 Торпедных катера + Рейдер</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              (объявленные <strong>3 Торпедных катера</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />) на <strong>2 Сторожа</strong>
+              <img
+                src="figures/St.png"
+                alt="Сторож"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />!
+            </p>
+            <p>
+              В качестве исключения блок из <strong>Рейдера</strong> и
+              <strong>Сторожа</strong> может быть заявлен как <strong>2 Эсминца</strong>, а
+              <strong>Рейдер, Эсминец и Сторож</strong> могут быть заявлены как
+              <strong>3 Эсминца</strong>. <strong>Сторож</strong> в этом случае обязан быть рядом с
+              <strong>Рейдером</strong>.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/Es.png" alt="Эсминец" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">
+              Эсминец <span class="strength-indicator">3.4 силы тральщика</span>
+            </div>
+            <p>
+              Следующая по рангу фишка (если пропустить <strong>Рейдера</strong>
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />), один на один бьёт всех кроме <strong>Авианосца</strong>
+              <img
+                src="figures/Av.png"
+                alt="Авианосец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Линкора</strong>
+              <img
+                src="figures/Lk.png"
+                alt="Линкор"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Крейсера</strong>
+              <img
+                src="figures/Kr.png"
+                alt="Крейсер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Рейдера</strong>
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              (!). Бьётся блоками <strong>2 Сторожа</strong>
+              <img
+                src="figures/St.png"
+                alt="Сторож"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              или <strong>3 Торпедных катера</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. <strong>2 Эсминца = 3 Сторожа</strong>. <strong>3 Эсминца = 2 Крейсера</strong>.
+              Может нести <strong>Мины</strong>
+              <img
+                src="figures/Mn.png"
+                alt="Мина"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/St.png" alt="Сторож" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">
+              Сторож <span class="strength-indicator">2.25 сил тральщика</span>
+            </div>
+            <p>
+              Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong>
+              <img
+                src="figures/Av.png"
+                alt="Авианосец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Линкора</strong>
+              <img
+                src="figures/Lk.png"
+                alt="Линкор"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Крейсера</strong>
+              <img
+                src="figures/Kr.png"
+                alt="Крейсер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Рейдера</strong>
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Эсминца</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Крейсерской подводной лодки</strong>
+              <img
+                src="figures/KrPl.png"
+                alt="Крейсерская Подводная Лодка"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Бьётся блоками <strong>2 Торпедных катера</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              или <strong>3 Тральщика</strong>
+              <img
+                src="figures/Tr.png"
+                alt="Тральщик"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. <strong>2 Сторожа = 3 Торпедных катера = 1 Рейдер</strong>.
+              <strong>3 Сторожа = 2 Эсминца</strong>.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/Tk.png" alt="Торпедный катер" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">
+              Торпедный Катер <span class="strength-indicator">1.5 сил тральщика</span>
+            </div>
+            <p>
+              Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong>
+              <img
+                src="figures/Av.png"
+                alt="Авианосец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Линкора</strong>
+              <img
+                src="figures/Lk.png"
+                alt="Линкор"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Крейсера</strong>
+              <img
+                src="figures/Kr.png"
+                alt="Крейсер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Рейдера</strong>
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Эсминца</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Сторожа</strong>
+              <img
+                src="figures/St.png"
+                alt="Сторож"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Крейсерской подводной лодки</strong>
+              <img
+                src="figures/KrPl.png"
+                alt="Крейсерская Подводная Лодка"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Бьётся блоком <strong>2 Тральщика</strong>
+              <img
+                src="figures/Tr.png"
+                alt="Тральщик"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. <strong>2 Торпедных катера = 3 Тральщика</strong>.
+              <strong>3 Торпедных катера = 2 Сторожа = 1 Рейдер</strong>. Особые свойства: способен
+              таскать рядом с собой <strong>Торпеды</strong>
+              <img
+                src="figures/T.png"
+                alt="Торпеда"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и запускать их; может двигаться, как по одной клетке в ход, так и по две (но не по
+              диагонали!). Так, например, может сделать ход вперёд-вправо или вправо-вперёд по
+              свободным клеткам, но, если справа и спереди стоят корабли, то занять клетку
+              «проскользнув» между ними он не может!
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/Tr.png" alt="Тральщик" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">
+              Тральщик <span class="strength-indicator">1 сила тральщика</span>
+            </div>
+            <p>
+              Следующая по рангу фишка, один на один бьёт всех кроме <strong>Авианосца</strong>
+              <img
+                src="figures/Av.png"
+                alt="Авианосец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Линкора</strong>
+              <img
+                src="figures/Lk.png"
+                alt="Линкор"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Крейсера</strong>
+              <img
+                src="figures/Kr.png"
+                alt="Крейсер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Рейдера</strong>
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Эсминца</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Сторожа</strong>
+              <img
+                src="figures/St.png"
+                alt="Сторож"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Торпедного катера</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Крейсерской подводной лодки</strong>
+              <img
+                src="figures/KrPl.png"
+                alt="Крейсерская Подводная Лодка"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. То есть бьёт только <strong>Подводную лодку</strong>
+              <img
+                src="figures/Pl.png"
+                alt="Подводная Лодка"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. <strong>3 Тральщика = 2 Торпедных катера</strong>. При всей своей слабости,
+              обладает неоценимым свойством - способен разминировать (уничтожать не погибая сам)
+              <strong>Мины</strong>
+              <img
+                src="figures/Mn.png"
+                alt="Мина"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Торпеды</strong>
+              <img
+                src="figures/T.png"
+                alt="Торпеда"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Брандеры</strong>
+              <img
+                src="figures/Br.png"
+                alt="Брандер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />.
+            </p>
+          </div>
+        </div>
+      </div>
 
-        <div align="center">
+      <p>
+        Все перечисленные фишки образуют строгую вертикаль, где каждый корабль следующего по
+        старшинству ранга ровно в 1,5 раза слабее предыдущего. Т. е.
+        <strong>Ав = 1,5Лк = 1,5*1,5Кр = 1,5*1,5*1,5Эс = 1,5*1,5*1,5*1,5Ст = …</strong> и т. д.
+      </p>
+      <p>
+        Но есть фишка, находящаяся между рангов - это <strong>Рейдер</strong>.
+        <strong>Рейдер</strong> - промежуточная между <strong>Кр</strong> и
+        <strong>Эс</strong> фишка, способная образовывать блоки, как между собой, так и с младшими
+        фишками.
+      </p>
+
+      <div class="category-header">Самостоятельно ходящие фишки, не образующие блоки</div>
+      <div class="ship-section">
+        <div class="ship-item">
+          <img src="figures/Pl.png" alt="Подводная Лодка" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Подводная Лодка</div>
+            <p>
+              Охотница на <strong>Линкоры</strong>
+              <img
+                src="figures/Lk.png"
+                alt="Линкор"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Бьётся всеми кроме <strong>Линкоров</strong>
+              <img
+                src="figures/Lk.png"
+                alt="Линкор"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              (одиночного, или входящего в блок, роли не играет) и <strong>Транспортов</strong>
+              <img
+                src="figures/Tp.png"
+                alt="Транспорт"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Крейсерская подводная Лодка</div>
+            <p>
+              Очень «крута». Бьёт всех кроме <strong>Крейсеров</strong>
+              <img
+                src="figures/Kr.png"
+                alt="Крейсер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Рейдеров</strong>
+              <img
+                src="figures/Rd.png"
+                alt="Рейдер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, <strong>Эсминцев</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Бьет фишки входящие в блоки, как отдельные. То есть, атаковав входящий в блок
+              <strong>3 Эсминца</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              <strong>Сторож</strong>
+              <img
+                src="figures/St.png"
+                alt="Сторож"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, Крейсерская Подводная Лодка уничтожает его. Может нести <strong>Ракеты</strong>
+              <img
+                src="figures/Rk.png"
+                alt="Ракета"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/Br.png" alt="Брандер" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Брандер</div>
+            <p>
+              Может выстрелить в стоящий рядом корабль противника и таким образом захватить его. Это
+              значит, что этот корабль становится вашим кораблём. После захвата ход остается у вас.
+              Не может стрелять несколько раз подряд. Корабли, атакующие <strong>Брандер</strong>,
+              взрываются вместе с ним, как на <strong>Мине</strong> (кроме
+              <strong>Тральщика</strong>, естественно).
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/AB.png" alt="Атомная бомба" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Атомная бомба</div>
+            <p>
+              Особая фишка, ходит как обычный корабль, не может атаковать, но может «взорваться».
+              При взрыве уничтожает все корабли и чужие, и свои в квадрате 5 на 5 клеток вокруг
+              себя. Взрывается как при атаке чужим кораблём, так самостоятельно - «пошёл и
+              взорвался» (для этого в фазу атаки нужно нажать на нее).
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/NB.png" alt="Нейтронная бомба" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Нейтронная бомба</div>
+            <p>
+              Особая фишка, все правила игры <strong>Нейтронной бомбой</strong> совпадают с
+              правилами по <strong>Атомной бомбе</strong>. Единственное отличие - результат от
+              взрыва. Если при взрыве <strong>Атомной бомбы</strong> все фишки в квадрате 5х5
+              «уничтожаются», то при взрыве <strong>Нейтронной бомбы</strong> фишки в квадрате 5х5
+              становятся «ничейными». Чтобы «захватить» такую «ничейную» фишку достаточно подойти к
+              ней своей и атаковать её.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/Tp.png" alt="Транспорт" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Транспорт</div>
+            <p>
+              Самый слабый из кораблей, бьётся даже Пл. Особое свойство – может перемещать ЛЮБЫЕ
+              несамостоятельные фишки: мины, торпеды, самолеты, ракеты…(форты, конечно, не
+              двигаются). Т.е. рядом с ней все эти фишки могут двигаться не имея «родных» носителей.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div align="center">
         <div class="table-wrapper">
-        <table border="0" cellspacing="0" cellpadding="0" class="combat-table">
-        <tbody>
-        <tr>
-        <td width="43">&nbsp;</td>
-        <td width="43">
-        <p align="center"><strong>Авианосец</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Линкор</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Крейсер</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Рейдер</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Эсминец</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Крейсерская Подводная Лодка</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Сторож</strong> <img src="figures/St.png" alt="Сторож" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Торпедный катер</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Тральщик</strong> <img src="figures/Tr.png" alt="Тральщик" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Подводная Лодка</strong> <img src="figures/Pl.png" alt="Подводная Лодка" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="77">
-        <p align="center">сила в "тральщиках"</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Авианосец</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>-</strong></p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="77">
-        <p align="center">11,390625</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Линкор</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>-</strong></p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>-</strong></p>
-        </td>
-        <td width="77">
-        <p align="center">7,59375</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Крейсер</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="77">
-        <p align="center">5,0625</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Рейдер</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="77">
-        <p align="center">4,5</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Эсминец</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="77">
-        <p align="center">3,375</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Крейсерская Подводная Лодка</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>+</strong></p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>+</strong></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="77">
-        <p align="center">-</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Сторож</strong> <img src="figures/St.png" alt="Сторож" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="77">
-        <p align="center">2,25</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Торпедный катер</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="77">
-        <p align="center">1,5</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Тральщик</strong> <img src="figures/Tr.png" alt="Тральщик" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="43">
-        <p align="center">+</p>
-        </td>
-        <td width="77">
-        <p align="center">1</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Подводная Лодка</strong> <img src="figures/Pl.png" alt="Подводная Лодка" style="width: 14px; height: 14px; vertical-align: middle;"></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>+</strong></p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">-</p>
-        </td>
-        <td width="43">
-        <p align="center">=</p>
-        </td>
-        <td width="77">
-        <p align="center">-</p>
-        </td>
-        </tr>
-        </tbody>
-        </table>
+          <table border="0" cellspacing="0" cellpadding="0" class="combat-table">
+            <tbody>
+              <tr>
+                <td width="43">&nbsp;</td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Авианосец</strong>
+                    <img
+                      src="figures/Av.png"
+                      alt="Авианосец"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Линкор</strong>
+                    <img
+                      src="figures/Lk.png"
+                      alt="Линкор"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Крейсер</strong>
+                    <img
+                      src="figures/Kr.png"
+                      alt="Крейсер"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Рейдер</strong>
+                    <img
+                      src="figures/Rd.png"
+                      alt="Рейдер"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Эсминец</strong>
+                    <img
+                      src="figures/Es.png"
+                      alt="Эсминец"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Крейсерская Подводная Лодка</strong>
+                    <img
+                      src="figures/KrPl.png"
+                      alt="Крейсерская Подводная Лодка"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Сторож</strong>
+                    <img
+                      src="figures/St.png"
+                      alt="Сторож"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Торпедный катер</strong>
+                    <img
+                      src="figures/Tk.png"
+                      alt="Торпедный катер"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Тральщик</strong>
+                    <img
+                      src="figures/Tr.png"
+                      alt="Тральщик"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Подводная Лодка</strong>
+                    <img
+                      src="figures/Pl.png"
+                      alt="Подводная Лодка"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="77">
+                  <p align="center">сила в "тральщиках"</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Авианосец</strong>
+                    <img
+                      src="figures/Av.png"
+                      alt="Авианосец"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center"><strong>-</strong></p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="77">
+                  <p align="center">11,390625</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Линкор</strong>
+                    <img
+                      src="figures/Lk.png"
+                      alt="Линкор"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center"><strong>-</strong></p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center"><strong>-</strong></p>
+                </td>
+                <td width="77">
+                  <p align="center">7,59375</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Крейсер</strong>
+                    <img
+                      src="figures/Kr.png"
+                      alt="Крейсер"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="77">
+                  <p align="center">5,0625</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Рейдер</strong>
+                    <img
+                      src="figures/Rd.png"
+                      alt="Рейдер"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="77">
+                  <p align="center">4,5</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Эсминец</strong>
+                    <img
+                      src="figures/Es.png"
+                      alt="Эсминец"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="77">
+                  <p align="center">3,375</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Крейсерская Подводная Лодка</strong>
+                    <img
+                      src="figures/KrPl.png"
+                      alt="Крейсерская Подводная Лодка"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center"><strong>+</strong></p>
+                </td>
+                <td width="43">
+                  <p align="center"><strong>+</strong></p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="77">
+                  <p align="center">-</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Сторож</strong>
+                    <img
+                      src="figures/St.png"
+                      alt="Сторож"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="77">
+                  <p align="center">2,25</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Торпедный катер</strong>
+                    <img
+                      src="figures/Tk.png"
+                      alt="Торпедный катер"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="77">
+                  <p align="center">1,5</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Тральщик</strong>
+                    <img
+                      src="figures/Tr.png"
+                      alt="Тральщик"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="43">
+                  <p align="center">+</p>
+                </td>
+                <td width="77">
+                  <p align="center">1</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Подводная Лодка</strong>
+                    <img
+                      src="figures/Pl.png"
+                      alt="Подводная Лодка"
+                      style="width: 14px; height: 14px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center"><strong>+</strong></p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">-</p>
+                </td>
+                <td width="43">
+                  <p align="center">=</p>
+                </td>
+                <td width="77">
+                  <p align="center">-</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        </div>
+      </div>
 
-        <div class="category-header">Несамостоятельные фишки</div>
-        <img src="rules/dependent.png" class="img-responsive" alt="" />
-        <div class="ship-section">
-            <div class="ship-item">
-                <img src="figures/Mn.png" alt="Мина" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Мина</div>
-                    <p>Фишка ходящая рядом с <strong>Эсминцем</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;">. Может передвигаться только по 8 клеткам вокруг <strong>Эсминца</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;"> (в том числе и диагональным). Может передаваться с «поля ответственности» одного <strong>Эсминца</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;"> к другому <strong>Эсминцу</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 20px; height: 20px; vertical-align: middle;">. При атаке <strong>Мины</strong> <img src="figures/Mn.png" alt="Мина" style="width: 20px; height: 20px; vertical-align: middle;"> кораблём противника взрывается вместе с ним (за исключением <strong>Тральщика</strong> <img src="figures/Tr.png" alt="Тральщик" style="width: 20px; height: 20px; vertical-align: middle;">). Сама атаковать и стрелять не может (!).</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/T.png" alt="Торпеда" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Торпеда</div>
-                    <p>Аналогично, ходит только рядом с <strong>Торпедным катером</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;">. Может ходить на 2 клетки, как <strong>Торпедный катер</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;">. При атаке кораблём, взрывается как <strong>Мина</strong> <img src="figures/Mn.png" alt="Мина" style="width: 20px; height: 20px; vertical-align: middle;">, также тралится <strong>Тральщиком</strong> <img src="figures/Tr.png" alt="Тральщик" style="width: 20px; height: 20px; vertical-align: middle;">. Может стрелять, если рядом находится <strong>Торпедный катер</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 20px; height: 20px; vertical-align: middle;">. При выстреле <strong>Торпеда</strong> <img src="figures/T.png" alt="Торпеда" style="width: 20px; height: 20px; vertical-align: middle;"> поражает любую фишку (кроме <strong>Форта</strong> <img src="figures/F.png" alt="Форт" style="width: 20px; height: 20px; vertical-align: middle;">) на расстоянии не более чем 4 клетки и сама уничтожается. Бьёт только по прямой в любом направлении. Через корабли не прыгает, поэтому может поразить только ближайший по прямой корабль.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Sm.png" alt="Самолёт" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Самолёт</div>
-                    <p>Ходит только рядом с <strong>Авианосцем</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 20px; height: 20px; vertical-align: middle;">. Стреляет, если рядом есть <strong>Авианосец</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 20px; height: 20px; vertical-align: middle;">, при этом уничтожает любую фишку (кроме <strong>Форта</strong> <img src="figures/F.png" alt="Форт" style="width: 20px; height: 20px; vertical-align: middle;">) на любом расстоянии по прямой (в любом направлении, даже по диагонали), при этом погибает сам. Летает над кораблями. При атаке противником взрывается уничтожая любой(!!!) корабль в том числе и <strong>Тральщик</strong> <img src="figures/Tr.png" alt="Тральщик" style="width: 20px; height: 20px; vertical-align: middle;">.</p>
-                </div>
-            </div>
-            <div class="ship-item">
-                <img src="figures/Rk.png" alt="Ракета" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Ракета</div>
-                    <p>Ходит только вокруг <strong>Крейсерской подводной лодки</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 20px; height: 20px; vertical-align: middle;">, стреляет тоже, если рядом <strong>Крейсерская Подводная Лодка</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 20px; height: 20px; vertical-align: middle;">. Выстрелить <strong>Ракета</strong> <img src="figures/Rk.png" alt="Ракета" style="width: 20px; height: 20px; vertical-align: middle;"> может одним из двух способов:</p>
-                    <ol>
-                    <li><strong>Ракета</strong> <img src="figures/Rk.png" alt="Ракета" style="width: 20px; height: 20px; vertical-align: middle;"> запускается на расстояние не более 2-х клеток по прямой (над кораблями, как и <strong>Самолёт</strong> <img src="figures/Sm.png" alt="Самолёт" style="width: 20px; height: 20px; vertical-align: middle;">), при попадании поражает квадрат 3х3 вокруг себя</li>
-                    <li><strong>Ракета</strong> <img src="figures/Rk.png" alt="Ракета" style="width: 20px; height: 20px; vertical-align: middle;"> запускается по прямой не более, чем на 3 клетки (над кораблями) и поражает только корабль, в который попала.</li>
-                    </ol>
-                    <p>Чтобы выбрать способ, которым использовать <strong>Ракету</strong> <img src="figures/Rk.png" alt="Ракета" style="width: 20px; height: 20px; vertical-align: middle;"> нажмите R при включенном режиме выстрела (подсказка показывается на панели состояния)</p>
-                </div>
-            </div>
+      <div class="category-header">Несамостоятельные фишки</div>
+      <img src="rules/dependent.png" class="img-responsive" alt="" />
+      <div class="ship-section">
+        <div class="ship-item">
+          <img src="figures/Mn.png" alt="Мина" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Мина</div>
+            <p>
+              Фишка ходящая рядом с <strong>Эсминцем</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Может передвигаться только по 8 клеткам вокруг <strong>Эсминца</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              (в том числе и диагональным). Может передаваться с «поля ответственности» одного
+              <strong>Эсминца</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              к другому <strong>Эсминцу</strong>
+              <img
+                src="figures/Es.png"
+                alt="Эсминец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. При атаке <strong>Мины</strong>
+              <img
+                src="figures/Mn.png"
+                alt="Мина"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              кораблём противника взрывается вместе с ним (за исключением
+              <strong>Тральщика</strong>
+              <img
+                src="figures/Tr.png"
+                alt="Тральщик"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />). Сама атаковать и стрелять не может (!).
+            </p>
+          </div>
         </div>
-
-        <div class="category-header">Неподвижные фишки</div>
-        <div class="ship-section">
-            <div class="ship-item">
-                <img src="figures/F.png" alt="Форт" class="ship-image">
-                <div class="ship-description">
-                    <div class="ship-name">Форт</div>
-                    <p><strong>Форт</strong> <img src="figures/F.png" alt="Форт" style="width: 20px; height: 20px; vertical-align: middle;"> единственная абсолютно неподвижная фишка. В сущности, это просто флаг. Он не может ничего - просто стоит и ждёт, пока его возьмут. <strong>Форт</strong> <img src="figures/F.png" alt="Форт" style="width: 20px; height: 20px; vertical-align: middle;"> можно взять любой атакующей фишкой, его можно уничтожить <strong>Атомной бомбой</strong> <img src="figures/AB.png" alt="Атомная бомба" style="width: 20px; height: 20px; vertical-align: middle;">, его можно захватить <strong>Брандером</strong> <img src="figures/Br.png" alt="Брандер" style="width: 20px; height: 20px; vertical-align: middle;"> или <strong>Нейтронной Бомбой</strong> <img src="figures/NB.png" alt="Нейтронная бомба" style="width: 20px; height: 20px; vertical-align: middle;">. Внимание: <strong>Торпеды</strong> <img src="figures/T.png" alt="Торпеда" style="width: 20px; height: 20px; vertical-align: middle;"> и <strong>Самолёты</strong> <img src="figures/Sm.png" alt="Самолёт" style="width: 20px; height: 20px; vertical-align: middle;"> вреда <strong>Форту</strong> <img src="figures/F.png" alt="Форт" style="width: 20px; height: 20px; vertical-align: middle;"> не наносят. Форты в начале игры расставляются на произвольные позиции, где и находятся до конца игры или пока их не возьмут.</p>
-                </div>
-            </div>
+        <div class="ship-item">
+          <img src="figures/T.png" alt="Торпеда" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Торпеда</div>
+            <p>
+              Аналогично, ходит только рядом с <strong>Торпедным катером</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Может ходить на 2 клетки, как <strong>Торпедный катер</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. При атаке кораблём, взрывается как <strong>Мина</strong>
+              <img
+                src="figures/Mn.png"
+                alt="Мина"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, также тралится <strong>Тральщиком</strong>
+              <img
+                src="figures/Tr.png"
+                alt="Тральщик"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Может стрелять, если рядом находится <strong>Торпедный катер</strong>
+              <img
+                src="figures/Tk.png"
+                alt="Торпедный катер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. При выстреле <strong>Торпеда</strong>
+              <img
+                src="figures/T.png"
+                alt="Торпеда"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              поражает любую фишку (кроме <strong>Форта</strong>
+              <img
+                src="figures/F.png"
+                alt="Форт"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />) на расстоянии не более чем 4 клетки и сама уничтожается. Бьёт только по прямой в
+              любом направлении. Через корабли не прыгает, поэтому может поразить только ближайший
+              по прямой корабль.
+            </p>
+          </div>
         </div>
+        <div class="ship-item">
+          <img src="figures/Sm.png" alt="Самолёт" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Самолёт</div>
+            <p>
+              Ходит только рядом с <strong>Авианосцем</strong>
+              <img
+                src="figures/Av.png"
+                alt="Авианосец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Стреляет, если рядом есть <strong>Авианосец</strong>
+              <img
+                src="figures/Av.png"
+                alt="Авианосец"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, при этом уничтожает любую фишку (кроме <strong>Форта</strong>
+              <img
+                src="figures/F.png"
+                alt="Форт"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />) на любом расстоянии по прямой (в любом направлении, даже по диагонали), при этом
+              погибает сам. Летает над кораблями. При атаке противником взрывается уничтожая
+              любой(!!!) корабль в том числе и <strong>Тральщик</strong>
+              <img
+                src="figures/Tr.png"
+                alt="Тральщик"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />.
+            </p>
+          </div>
+        </div>
+        <div class="ship-item">
+          <img src="figures/Rk.png" alt="Ракета" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Ракета</div>
+            <p>
+              Ходит только вокруг <strong>Крейсерской подводной лодки</strong>
+              <img
+                src="figures/KrPl.png"
+                alt="Крейсерская Подводная Лодка"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, стреляет тоже, если рядом <strong>Крейсерская Подводная Лодка</strong>
+              <img
+                src="figures/KrPl.png"
+                alt="Крейсерская Подводная Лодка"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Выстрелить <strong>Ракета</strong>
+              <img
+                src="figures/Rk.png"
+                alt="Ракета"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              может одним из двух способов:
+            </p>
+            <ol>
+              <li>
+                <strong>Ракета</strong>
+                <img
+                  src="figures/Rk.png"
+                  alt="Ракета"
+                  style="width: 20px; height: 20px; vertical-align: middle"
+                />
+                запускается на расстояние не более 2-х клеток по прямой (над кораблями, как и
+                <strong>Самолёт</strong>
+                <img
+                  src="figures/Sm.png"
+                  alt="Самолёт"
+                  style="width: 20px; height: 20px; vertical-align: middle"
+                />), при попадании поражает квадрат 3х3 вокруг себя
+              </li>
+              <li>
+                <strong>Ракета</strong>
+                <img
+                  src="figures/Rk.png"
+                  alt="Ракета"
+                  style="width: 20px; height: 20px; vertical-align: middle"
+                />
+                запускается по прямой не более, чем на 3 клетки (над кораблями) и поражает только
+                корабль, в который попала.
+              </li>
+            </ol>
+            <p>
+              Чтобы выбрать способ, которым использовать <strong>Ракету</strong>
+              <img
+                src="figures/Rk.png"
+                alt="Ракета"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              нажмите R при включенном режиме выстрела (подсказка показывается на панели состояния)
+            </p>
+          </div>
+        </div>
+      </div>
 
-        <p align="center">Таблица количества фишек «МБ».</p>
-        <div align="center">
+      <div class="category-header">Неподвижные фишки</div>
+      <div class="ship-section">
+        <div class="ship-item">
+          <img src="figures/F.png" alt="Форт" class="ship-image" />
+          <div class="ship-description">
+            <div class="ship-name">Форт</div>
+            <p>
+              <strong>Форт</strong>
+              <img
+                src="figures/F.png"
+                alt="Форт"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              единственная абсолютно неподвижная фишка. В сущности, это просто флаг. Он не может
+              ничего - просто стоит и ждёт, пока его возьмут. <strong>Форт</strong>
+              <img
+                src="figures/F.png"
+                alt="Форт"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              можно взять любой атакующей фишкой, его можно уничтожить
+              <strong>Атомной бомбой</strong>
+              <img
+                src="figures/AB.png"
+                alt="Атомная бомба"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />, его можно захватить <strong>Брандером</strong>
+              <img
+                src="figures/Br.png"
+                alt="Брандер"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              или <strong>Нейтронной Бомбой</strong>
+              <img
+                src="figures/NB.png"
+                alt="Нейтронная бомба"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />. Внимание: <strong>Торпеды</strong>
+              <img
+                src="figures/T.png"
+                alt="Торпеда"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              и <strong>Самолёты</strong>
+              <img
+                src="figures/Sm.png"
+                alt="Самолёт"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              вреда <strong>Форту</strong>
+              <img
+                src="figures/F.png"
+                alt="Форт"
+                style="width: 20px; height: 20px; vertical-align: middle"
+              />
+              не наносят. Форты в начале игры расставляются на произвольные позиции, где и находятся
+              до конца игры или пока их не возьмут.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <p align="center">Таблица количества фишек «МБ».</p>
+      <div align="center">
         <div class="table-wrapper">
-        <table border="0" cellspacing="0" cellpadding="0" class="quantity-table">
-        <tbody>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Авианосец</strong> <img src="figures/Av.png" alt="Авианосец" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">1</p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>Самолёт</strong> <img src="figures/Sm.png" alt="Самолёт" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">1</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Линкор</strong> <img src="figures/Lk.png" alt="Линкор" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">2</p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>Ракета</strong> <img src="figures/Rk.png" alt="Ракета" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">1</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Крейсер</strong> <img src="figures/Kr.png" alt="Крейсер" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">6</p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>Торпеда</strong> <img src="figures/T.png" alt="Торпеда" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">4</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Рейдер</strong> <img src="figures/Rd.png" alt="Рейдер" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">2</p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>Мина</strong> <img src="figures/Mn.png" alt="Мина" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">7</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Эсминец</strong> <img src="figures/Es.png" alt="Эсминец" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">6</p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>Брандер</strong> <img src="figures/Br.png" alt="Брандер" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">2</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Крейсерская Подводная Лодка</strong> <img src="figures/KrPl.png" alt="Крейсерская Подводная Лодка" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">1</p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>Атомная бомба</strong> <img src="figures/AB.png" alt="Атомная бомба" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">1</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Сторож</strong> <img src="figures/St.png" alt="Сторож" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">7</p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>Нейтронная бомба</strong> <img src="figures/NB.png" alt="Нейтронная бомба" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">1</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Торпедный катер</strong> <img src="figures/Tk.png" alt="Торпедный катер" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">6</p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>Форт</strong> <img src="figures/F.png" alt="Форт" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">2</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Тральщик</strong> <img src="figures/Tr.png" alt="Тральщик" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">7</p>
-        </td>
-        <td width="43">
-        <p align="center"><strong>Транспорт</strong> <img src="figures/Tp.png" alt="Транспорт" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">1</p>
-        </td>
-        </tr>
-        <tr>
-        <td width="43">
-        <p align="center"><strong>Подводная Лодка</strong> <img src="figures/Pl.png" alt="Подводная Лодка" style="width: 16px; height: 16px; vertical-align: middle;"></p>
-        </td>
-        <td width="74">
-        <p align="center">4</p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>Итого</strong></p>
-        </td>
-        <td width="74">
-        <p align="center"><strong>62</strong></p>
-        </td>
-        </tr>
-        </tbody>
-        </table>
+          <table border="0" cellspacing="0" cellpadding="0" class="quantity-table">
+            <tbody>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Авианосец</strong>
+                    <img
+                      src="figures/Av.png"
+                      alt="Авианосец"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">1</p>
+                </td>
+                <td width="74">
+                  <p align="center">
+                    <strong>Самолёт</strong>
+                    <img
+                      src="figures/Sm.png"
+                      alt="Самолёт"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">1</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Линкор</strong>
+                    <img
+                      src="figures/Lk.png"
+                      alt="Линкор"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">2</p>
+                </td>
+                <td width="74">
+                  <p align="center">
+                    <strong>Ракета</strong>
+                    <img
+                      src="figures/Rk.png"
+                      alt="Ракета"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">1</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Крейсер</strong>
+                    <img
+                      src="figures/Kr.png"
+                      alt="Крейсер"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">6</p>
+                </td>
+                <td width="74">
+                  <p align="center">
+                    <strong>Торпеда</strong>
+                    <img
+                      src="figures/T.png"
+                      alt="Торпеда"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">4</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Рейдер</strong>
+                    <img
+                      src="figures/Rd.png"
+                      alt="Рейдер"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">2</p>
+                </td>
+                <td width="74">
+                  <p align="center">
+                    <strong>Мина</strong>
+                    <img
+                      src="figures/Mn.png"
+                      alt="Мина"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">7</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Эсминец</strong>
+                    <img
+                      src="figures/Es.png"
+                      alt="Эсминец"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">6</p>
+                </td>
+                <td width="74">
+                  <p align="center">
+                    <strong>Брандер</strong>
+                    <img
+                      src="figures/Br.png"
+                      alt="Брандер"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">2</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Крейсерская Подводная Лодка</strong>
+                    <img
+                      src="figures/KrPl.png"
+                      alt="Крейсерская Подводная Лодка"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">1</p>
+                </td>
+                <td width="74">
+                  <p align="center">
+                    <strong>Атомная бомба</strong>
+                    <img
+                      src="figures/AB.png"
+                      alt="Атомная бомба"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">1</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Сторож</strong>
+                    <img
+                      src="figures/St.png"
+                      alt="Сторож"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">7</p>
+                </td>
+                <td width="74">
+                  <p align="center">
+                    <strong>Нейтронная бомба</strong>
+                    <img
+                      src="figures/NB.png"
+                      alt="Нейтронная бомба"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">1</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Торпедный катер</strong>
+                    <img
+                      src="figures/Tk.png"
+                      alt="Торпедный катер"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">6</p>
+                </td>
+                <td width="74">
+                  <p align="center">
+                    <strong>Форт</strong>
+                    <img
+                      src="figures/F.png"
+                      alt="Форт"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">2</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Тральщик</strong>
+                    <img
+                      src="figures/Tr.png"
+                      alt="Тральщик"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">7</p>
+                </td>
+                <td width="43">
+                  <p align="center">
+                    <strong>Транспорт</strong>
+                    <img
+                      src="figures/Tp.png"
+                      alt="Транспорт"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">1</p>
+                </td>
+              </tr>
+              <tr>
+                <td width="43">
+                  <p align="center">
+                    <strong>Подводная Лодка</strong>
+                    <img
+                      src="figures/Pl.png"
+                      alt="Подводная Лодка"
+                      style="width: 16px; height: 16px; vertical-align: middle"
+                    />
+                  </p>
+                </td>
+                <td width="74">
+                  <p align="center">4</p>
+                </td>
+                <td width="74">
+                  <p align="center"><strong>Итого</strong></p>
+                </td>
+                <td width="74">
+                  <p align="center"><strong>62</strong></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        </div>
+      </div>
     </div>
-</body>
+  </body>
 </html>
