@@ -53,3 +53,29 @@ export const MiniGameConfig: GameConfig = {
     ['Pl', 2],
   ],
 };
+
+export const MicroGameConfig: GameConfig = {
+  name: 'Micro',
+  fieldSize: 8,
+  placementZoneSize: 3,
+  initialShips: [
+    ['Av', 0],
+    ['Sm', 1],
+    ['Lk', 0],
+    ['Kr', 2],
+    ['T', 2],
+    ['Rd', 2],
+    ['Mn', 3],
+    ['Es', 2],
+    ['Br', 0],
+    ['KrPl', 0],
+    ['AB', 0],
+    ['St', 3],
+    ['NB', 0],
+    ['Tk', 2],
+    ['F', 2],
+    ['Tr', 3],
+    ['Tp', 1],
+    ['Pl', 0],
+  ],
+};

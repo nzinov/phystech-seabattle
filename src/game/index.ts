@@ -1,7 +1,7 @@
 import type { Ctx, Game } from 'boardgame.io';
 import { TurnOrder } from 'boardgame.io/core';
 import deepcopy from 'deepcopy';
-import { DefaultGameConfig, MiniGameConfig } from './config';
+import { DefaultGameConfig, MiniGameConfig, MicroGameConfig } from './config';
 import { Effects } from './effects';
 import {
   AttackBlockMove,
@@ -245,3 +245,4 @@ export * from './utils';
 
 export const DefaultGame = createGameRules(DefaultGameConfig);
 export const MiniGame = createGameRules(MiniGameConfig);
+export const MicroGame = createGameRules(MicroGameConfig);

@@ -3,7 +3,7 @@ import './MainPage.css';
 import { shipInfo, shipNames } from './Texts';
 
 interface MainPageProps {
-  onStartGame: (mini: boolean) => void;
+  onStartGame: (gameMode: 'default' | 'mini' | 'micro') => void;
 }
 
 const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
@@ -31,11 +31,15 @@ const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
   }, [shipTypes.length]);
 
   const handleStartRegular = () => {
-    onStartGame(false);
+    onStartGame('default');
   };
 
   const handleStartMini = () => {
-    onStartGame(true);
+    onStartGame('mini');
+  };
+
+  const handleStartMicro = () => {
+    onStartGame('micro');
   };
 
   const currentShip = shipTypes[currentShipIndex];
@@ -75,6 +79,11 @@ const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
             <button className="game-button mini-game" onClick={handleStartMini}>
               <h3>Мини-игра</h3>
               <p>Упрощенная версия для быстрой игры на поле 10х10</p>
+            </button>
+
+            <button className="game-button micro-game" onClick={handleStartMicro}>
+              <h3>Микро-игра</h3>
+              <p>Сверхбыстрая игра на поле 8х8 с минимальным набором кораблей</p>
             </button>
           </div>
 

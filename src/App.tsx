@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Cookies from 'universal-cookie';
 import { v4 as uuid } from 'uuid';
 import Board from './Board';
-import { DefaultGame, MiniGame } from './game';
+import { DefaultGame, MiniGame, MicroGame } from './game';
 import MainPage from './MainPage';
 import InstallPrompt from './InstallPrompt';
 
@@ -32,7 +32,7 @@ const App: React.FC = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const startGame = (mini: boolean) => {
+  const startGame = (gameMode: 'default' | 'mini' | 'micro') => {
     setIsLoading(true);
 
     // Initialize game parameters
@@ -57,11 +57,13 @@ const App: React.FC = () => {
       params.set('player', playerID);
     }
 
-    // Set mini game parameter
-    if (mini) {
+    // Set game mode parameter
+    params.delete('mini');
+    params.delete('micro');
+    if (gameMode === 'mini') {
       params.set('mini', '1');
-    } else {
-      params.delete('mini');
+    } else if (gameMode === 'micro') {
+      params.set('micro', '1');
     }
 
     // Generate invite link for player 0 (without token for security)
@@ -71,8 +73,10 @@ const App: React.FC = () => {
       otherParams.set('match', matchID);
       otherParams.set('player', '1');
       otherParams.delete('token'); // Remove token from invite link for security
-      if (mini) {
+      if (gameMode === 'mini') {
         otherParams.set('mini', '1');
+      } else if (gameMode === 'micro') {
+        otherParams.set('micro', '1');
       }
       other.search = otherParams.toString();
       globalInviteLink = other.toString();
@@ -95,7 +99,9 @@ const App: React.FC = () => {
     const search = window.location.search;
     const params = new URLSearchParams(search);
     if (params.get('match')) {
-      startGame(params.get('mini') === '1');
+      const gameMode =
+        params.get('micro') === '1' ? 'micro' : params.get('mini') === '1' ? 'mini' : 'default';
+      startGame(gameMode);
     }
   }, []);
 
@@ -131,10 +137,14 @@ const App: React.FC = () => {
     const params = new URLSearchParams(search);
     const matchID = params.get('match');
     const playerID = params.get('player');
-    const mini = params.get('mini') === '1';
+    const gameMode =
+      params.get('micro') === '1' ? 'micro' : params.get('mini') === '1' ? 'mini' : 'default';
+
+    const gameRules =
+      gameMode === 'micro' ? MicroGame : gameMode === 'mini' ? MiniGame : DefaultGame;
 
     const SeabattleClient = Client({
-      game: mini ? MiniGame : DefaultGame,
+      game: gameRules,
       board: BoardWrapper,
       multiplayer: SocketIO({ server: getServerUrl() }),
       debug: { collapseOnLoad: true },
