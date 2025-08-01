@@ -1,3 +1,4 @@
+// Legacy stage descriptions - use i18n instead
 export const stageDescr = {
   place: 'Place your ships',
   move: 'Move, shoot or attack',
@@ -7,7 +8,7 @@ export const stageDescr = {
   wait: 'Wait',
 };
 
-// Ship names extracted from shipInfo for alt text and accessibility
+// Legacy ship names - use i18n instead
 export const shipNames = {
   AB: 'Атомная бомба',
   Av: 'Авианосец',
@@ -32,6 +33,7 @@ export const shipNames = {
   Sinking: 'Ничейный корабль',
 };
 
+// Legacy ship info - use i18n instead
 export const shipInfo = {
   AB: '<p><b>Атомная бомба</b><br><br>Щелкнув в фазу атаки можно взорвать - уничтожить все корабли в квадрате 5х5 клеток. Если ее атакуют - взрывается.</p>',
   Av: '<p><b>Авианосец</b><br><br>Образует блоки. Может нести Самолет. 729 е.с.</p>',

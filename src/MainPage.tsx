@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './MainPage.css';
-import { shipInfo, shipNames } from './Texts';
+import { shipNames } from './Texts';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 interface MainPageProps {
   onStartGame: (gameMode: 'default' | 'mini' | 'micro') => void;
 }
 
 const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
-  const gameDescription = `
-    Морской бой по-физтеховски - стратегическая морская битва с уникальными правилами. Игра проходит на поле 14×14 клеток с 19 типами кораблей, 
-    каждый из которых обладает особыми способностями, а противник не знает какой из ваших кораблей какого типа.
-  `;
+  const { t } = useTranslation();
 
   // Ship types for rotation (excluding Unknown and Sinking)
   const shipTypes = Object.keys(shipNames).filter(key => key !== 'Unknown' && key !== 'Sinking');
@@ -43,8 +42,8 @@ const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
   };
 
   const currentShip = shipTypes[currentShipIndex];
-  const currentShipName = shipNames[currentShip as keyof typeof shipNames];
-  const currentShipDescription = shipInfo[currentShip as keyof typeof shipInfo];
+  const currentShipName = t(`ships.${currentShip}`);
+  const currentShipDescription = `<p><b>${currentShipName}</b><br><br>${t(`shipDescriptions.${currentShip}`)}</p>`;
 
   // Extract clean text from HTML description and remove ship name
   const getCleanDescription = (htmlText: string) => {
@@ -62,34 +61,35 @@ const MainPage: React.FC<MainPageProps> = ({ onStartGame }) => {
 
   return (
     <div className="main-page">
+      <LanguageSwitcher />
       <div className="main-content">
         <div className="main-left">
-          <h1>Морской бой по&#8209;физтеховски</h1>
+          <h1>{t('game.title')}</h1>
 
           <div className="game-description">
-            <p>{gameDescription}</p>
+            <p>{t('game.description')}</p>
           </div>
 
           <div className="game-modes">
             <button className="game-button regular-game" onClick={handleStartRegular}>
-              <h3>Обычная игра</h3>
-              <p>Полная версия с 19 типами кораблей</p>
+              <h3>{t('game.startRegular')}</h3>
+              <p>{t('gameDescriptions.regular')}</p>
             </button>
 
             <button className="game-button mini-game" onClick={handleStartMini}>
-              <h3>Мини-игра</h3>
-              <p>Упрощенная версия для быстрой игры на поле 10х10</p>
+              <h3>{t('game.startMini')}</h3>
+              <p>{t('gameDescriptions.mini')}</p>
             </button>
 
             <button className="game-button micro-game" onClick={handleStartMicro}>
-              <h3>Микро-игра</h3>
-              <p>Сверхбыстрая игра на поле 8х8 с минимальным набором кораблей</p>
+              <h3>{t('game.startMicro')}</h3>
+              <p>{t('gameDescriptions.micro')}</p>
             </button>
           </div>
 
           <div className="rules-section">
             <a className="rules-button" href="rules.html">
-              Правила игры
+              {t('game.rules')}
             </a>
           </div>
         </div>

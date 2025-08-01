@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -6,6 +7,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const InstallPrompt: React.FC = () => {
+  const { t } = useTranslation();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
@@ -64,9 +66,7 @@ const InstallPrompt: React.FC = () => {
     if (!deferredPrompt) {
       console.log('No deferred prompt available - showing browser instructions');
       // Show manual installation instructions
-      alert(
-        'Для установки приложения:\n\nChrome/Edge: Меню → Установить приложение\nSafari: Поделиться → На экран "Домой"\nFirefox: Меню → Установить'
-      );
+      alert(t('pwa.installInstructions'));
       setShowInstallPrompt(false);
       return;
     }
@@ -118,10 +118,8 @@ const InstallPrompt: React.FC = () => {
         gap: '12px',
       }}
     >
-      <div style={{ fontSize: '16px', fontWeight: 'bold' }}>Установить Phystech Seabattle</div>
-      <div style={{ fontSize: '14px', opacity: 0.9 }}>
-        Добавьте игру на главный экран для лучшего игрового опыта в полноэкранном режиме
-      </div>
+      <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{t('pwa.installTitle')}</div>
+      <div style={{ fontSize: '14px', opacity: 0.9 }}>{t('pwa.installDescription')}</div>
       <div style={{ display: 'flex', gap: '8px' }}>
         <button
           onClick={handleInstallClick}
@@ -136,7 +134,7 @@ const InstallPrompt: React.FC = () => {
             fontWeight: 'bold',
           }}
         >
-          Установить
+          {t('pwa.install')}
         </button>
         <button
           onClick={handleDismiss}
@@ -153,7 +151,7 @@ const InstallPrompt: React.FC = () => {
             zIndex: 1001,
           }}
         >
-          Позже
+          {t('pwa.later')}
         </button>
       </div>
     </div>

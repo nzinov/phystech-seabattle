@@ -16,7 +16,10 @@ import {
   takeMove,
 } from './game';
 import { Log } from './Log.jsx';
-import { shipInfo, shipNames, stageDescr } from './Texts';
+import { shipNames } from './Texts';
+import { getStageDescription, getShipName, getShipDescription } from './utils/translations';
+import i18n from './i18n';
+import LanguageSwitcher from './components/LanguageSwitcher';
 
 // Multi-backend configuration for seamless touch and mouse support
 const backendOptions = HTML5toTouch;
@@ -402,7 +405,7 @@ const Square: React.FC<SquareProps> = props => {
               key="ship-label"
               className="board-cell-ship-label"
               src={`/figures/${playerLabel.shipType}.png`}
-              alt={shipNames[playerLabel.shipType as keyof typeof shipNames] || ''}
+              alt={getShipName(playerLabel.shipType) || ''}
             />
           );
         }
@@ -439,15 +442,13 @@ const Square: React.FC<SquareProps> = props => {
   };
 
   // Get ship name and custom tooltip text
-  const shipName = props.figure?.type
-    ? shipNames[props.figure.type as keyof typeof shipNames]
-    : null;
+  const shipName = props.figure?.type ? getShipName(props.figure.type) : null;
 
   const playerLabel = props.figure?.label;
   const customText =
     typeof playerLabel === 'object' && playerLabel.customText ? playerLabel.customText : null;
 
-  const altText = shipName || 'Empty square';
+  const altText = shipName || i18n.t('board.emptySquare');
 
   // Build tooltip content
   let tooltipContent;
@@ -456,8 +457,8 @@ const Square: React.FC<SquareProps> = props => {
     const sanitizedText = customText.replace(/[<>"'&]/g, '').slice(0, 400);
     tooltipContent = `<div style="font-style: italic; color: #fbbf24;">${sanitizedText}</div>`;
   } else {
-    // Use default ship info
-    tooltipContent = shipInfo?.[props.figure?.type as keyof typeof shipInfo];
+    // Use default ship info with translation
+    tooltipContent = props.figure?.type ? getShipDescription(props.figure.type) : undefined;
   }
 
   return (
@@ -1455,7 +1456,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 {currentLabels.shipType && (
                   <img
                     src={`/figures/${currentLabels.shipType}.png`}
-                    alt={shipNames[currentLabels.shipType as keyof typeof shipNames]}
+                    alt={getShipName(currentLabels.shipType)}
                     className="label-ship-preview-image"
                   />
                 )}
@@ -1583,7 +1584,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       remaining_tbody.push(
         <tr key="header">
           <td colSpan={Object.keys(my_remaining).length + 1} className="board-remaining-header">
-            🚢 Fleet Status
+            🚢 {i18n.t('board.fleetStatus')}
           </td>
         </tr>
       );
@@ -1602,8 +1603,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
               style={{
                 backgroundImage: `url(/figures/${ship}.png)`,
               }}
-              aria-label={shipNames[ship as keyof typeof shipNames] || ship}
-              title={shipNames[ship as keyof typeof shipNames] || ship}
+              aria-label={getShipName(ship) || ship}
+              title={getShipName(ship) || ship}
             />
           </td>
         );
@@ -1676,6 +1677,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             content ? <div dangerouslySetInnerHTML={{ __html: content }} /> : null
           }
         />
+        <LanguageSwitcher />
         <div
           className="board-container"
           style={
@@ -1732,7 +1734,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
               <div className="board-status-container">
                 <div className={`board-status-shimmer ${stage ? 'active' : ''}`} />
                 <h2 className="board-status-title">
-                  {!stage ? '⏳ Waiting...' : `${stageDescr[stage as keyof typeof stageDescr]}`}
+                  {!stage ? i18n.t('ui.waiting') : getStageDescription(stage)}
                 </h2>
               </div>
             )}
@@ -1744,14 +1746,16 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 style={{ touchAction: 'manipulation' }}
               >
                 <span className="board-ready-button-text">
-                  {this.state.readyConfirmPending ? '🎯 Confirm Ready?' : '✅ Ready to Battle'}
+                  {this.state.readyConfirmPending
+                    ? i18n.t('board.confirmReady')
+                    : i18n.t('board.readyToBattle')}
                 </span>
               </button>
             )}
             {stage == 'attack' && (
               <button onClick={this.Skip} className="board-skip-button">
                 <span className="board-skip-button-text">
-                  ⏭ Skip Turn (<i>space</i>)
+                  {i18n.t('board.skipTurn')} (<i>space</i>)
                 </span>
               </button>
             )}
@@ -1761,7 +1765,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 className={`board-invite-button ${this.state.linkCopied ? 'copied' : 'normal'}`}
               >
                 <span className="board-invite-button-text">
-                  {this.state.linkCopied ? '✅ Link Copied!' : '🔗 Copy Invite Link'}
+                  {this.state.linkCopied
+                    ? i18n.t('board.linkCopied')
+                    : i18n.t('board.copyInviteLink')}
                 </span>
               </button>
             )}
@@ -1778,12 +1784,12 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                       this.leaveBlock();
                     }}
                     onClick={e => this.clickBlock(e, block)}
-                    aria-label={`${shipNames[block.type as keyof typeof shipNames] || block.type} block (size ${block.size})`}
+                    aria-label={`${getShipName(block.type) || block.type} block (size ${block.size})`}
                   >
                     {/* Ship Icon */}
                     <img
                       src={`/figures/${block.type}.png`}
-                      alt={shipNames[block.type as keyof typeof shipNames] || block.type}
+                      alt={getShipName(block.type) || block.type}
                       className="board-block-ship-icon"
                     />
 
@@ -1805,7 +1811,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
           <button
             className="board-fleet-button"
             onClick={this.toggleMobileFleetStatus}
-            title="Fleet Status"
+            title={i18n.t('board.fleetStatus')}
           >
             🚢
           </button>

@@ -1,34 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { getShipName } from './utils/translations';
+import { getPossessivePronoun, getGenderedVerb } from './utils/russianGrammar';
 import './Log.css';
 
-function getSide(player, currentPlayer) {
-  return player == currentPlayer ? 'your' : "opponent's";
-}
-
 function getShipDescr(ship, currentPlayer) {
-  return getSide(ship.player, currentPlayer) + ' ' + ship.type;
+  return getPossessivePronoun(ship.type, ship.player, currentPlayer) + ' ' + getShipName(ship.type);
 }
 
-class LogEvent extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      mobileHighlightActive: false,
-    };
-  }
+const LogEvent = ({ event, player, highlight, highlightLastMove }) => {
+  const { t } = useTranslation();
 
-  handleMobileClick = () => {
+  const handleMobileClick = () => {
     // Always highlight this entry when clicked on mobile
-    this.props.highlight(this.getHighlight());
-    this.setState({ mobileHighlightActive: true });
+    highlight(getHighlight());
   };
 
-  isMobileDevice = () => {
+  const isMobileDevice = () => {
     return navigator.maxTouchPoints > 0;
   };
 
-  getHighlight = () => {
-    let event = this.props.event;
+  const getHighlight = () => {
     // Use purple shades to match arrow colors
     let hl = [
       [event.from, 'rgba(147, 51, 234, 0.4)'], // Light purple for origin
@@ -52,72 +44,89 @@ class LogEvent extends React.Component {
     }
   };
 
-  renderText = () => {
-    let event = this.props.event;
+  const renderText = () => {
     switch (event.type) {
       case 'move':
-        return <span>{getSide(event.player, this.props.player)} ship moved</span>;
+        // For move events, we need to determine ship type from context
+        // Since we don't have ship type in move events, we'll use a generic approach
+        return (
+          <span>
+            {getPossessivePronoun('Unknown', event.player, player)} {t('log.ship')}{' '}
+            {getGenderedVerb('Unknown', 'shipMoved')}
+          </span>
+        );
       case 'shoot':
         return (
           <span>
-            {getShipDescr(event.ship, this.props.player)} made a {event.area && 'area '} shot
+            {getShipDescr(event.ship, player)}{' '}
+            {getGenderedVerb(event.ship.type, event.area ? 'madeAreaShot' : 'madeShot')}
           </span>
         );
       case 'attack':
-        return <span>{getSide(event.player, this.props.player)} ship attacked</span>;
+        // For attack events, we need to determine ship type from context
+        return (
+          <span>
+            {getPossessivePronoun('Unknown', event.player, player)} {t('log.ship')}{' '}
+            {getGenderedVerb('Unknown', 'shipAttacked')}
+          </span>
+        );
       case 'die':
-        return <span>{getShipDescr(event.ship, this.props.player)} was destroyed</span>;
+        return (
+          <span>
+            {getShipDescr(event.ship, player)} {getGenderedVerb(event.ship.type, 'wasDestroyed')}
+          </span>
+        );
       case 'explode':
-        return <span>{getShipDescr(event.ship, this.props.player)} exploded</span>;
+        return (
+          <span>
+            {getShipDescr(event.ship, player)} {getGenderedVerb(event.ship.type, 'exploded')}
+          </span>
+        );
       case 'response':
         return (
           <span>
             <b>
-              {event.size} x {event.ship_type} block was declared
+              {t('log.blockDeclaredPrefix')} {event.size} x {getShipName(event.ship_type)}
             </b>
           </span>
         );
       default:
-        return <span>unknown event</span>;
+        return <span>{t('log.unknownEvent')}</span>;
     }
   };
 
-  render() {
-    const event = this.props.event;
-    const isCurrentPlayer = event.player === this.props.player;
+  const isCurrentPlayer = event.player === player;
 
-    return (
-      <div
-        className={`log-event-container ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}
-        onMouseEnter={_e => {
-          // Only highlight on hover for desktop
-          if (!this.isMobileDevice()) {
-            this.props.highlight(this.getHighlight());
-          }
-        }}
-        onMouseLeave={_e => {
-          if (!this.isMobileDevice()) {
-            this.props.highlightLastMove();
-          }
-        }}
-        onClick={_e => {
-          // Only handle clicks on mobile
-          if (this.isMobileDevice()) {
-            this.handleMobileClick();
-          }
-        }}
-      >
-        <div
-          className={`log-event-bubble ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}
-        >
-          {this.renderText()}
-        </div>
+  return (
+    <div
+      className={`log-event-container ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}
+      onMouseEnter={_e => {
+        // Only highlight on hover for desktop
+        if (!isMobileDevice()) {
+          highlight(getHighlight());
+        }
+      }}
+      onMouseLeave={_e => {
+        if (!isMobileDevice()) {
+          highlightLastMove();
+        }
+      }}
+      onClick={_e => {
+        // Only handle clicks on mobile
+        if (isMobileDevice()) {
+          handleMobileClick();
+        }
+      }}
+    >
+      <div className={`log-event-bubble ${isCurrentPlayer ? 'current-player' : 'opponent-player'}`}>
+        {renderText()}
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export const Log = ({ events, player, highlight }) => {
+  const { t } = useTranslation();
   const scrollRef = useRef(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showTopArrow, setShowTopArrow] = useState(false);
@@ -211,15 +220,38 @@ export const Log = ({ events, player, highlight }) => {
     }
   }, [events.length]);
 
+  // Utility function to get highlight for an event
+  const getHighlightForEvent = event => {
+    // Use purple shades to match arrow colors
+    let hl = [
+      [event.from, 'rgba(147, 51, 234, 0.4)'], // Light purple for origin
+      [event.to, 'rgba(147, 51, 234, 0.6)'], // Darker purple for destination
+    ];
+    switch (event.type) {
+      case 'move':
+        return hl;
+      case 'shoot':
+        return hl;
+      case 'attack':
+        return hl;
+      case 'die':
+        return [[event.from, 'rgba(239, 68, 68, 0.5)']];
+      case 'explode':
+        return [[event.to, 'rgba(239, 68, 68, 0.5)']];
+      case 'response':
+        return [];
+      default:
+        return [];
+    }
+  };
+
   // Auto-highlight last move when mouse is not over log
   const highlightLastMove = () => {
     const lastEvent = events[events.length - 1];
     if (!lastEvent) {
       return;
     }
-    // Create LogEvent instance to get highlight for the last event
-    const logEventInstance = new LogEvent({ event: lastEvent });
-    const lastMoveHighlight = logEventInstance.getHighlight();
+    const lastMoveHighlight = getHighlightForEvent(lastEvent);
     if (lastMoveHighlight.length > 0) {
       highlight(lastMoveHighlight);
     }
@@ -249,7 +281,7 @@ export const Log = ({ events, player, highlight }) => {
 
       <div ref={scrollRef} className="log-scroll-container" onScroll={checkScrollPosition}>
         {events.length === 0 ? (
-          <div className="log-empty-state">No events yet...</div>
+          <div className="log-empty-state">{t('log.noEventsYet')}</div>
         ) : (
           events.map((event, index) => (
             <LogEvent
