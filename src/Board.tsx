@@ -759,8 +759,11 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     const fieldSize = this.props.G.config?.fieldSize || DefaultGameConfig.fieldSize;
 
     let my_remaining: Record<string, number> = {};
-    for (const [ship] of initialShips) {
-      my_remaining[ship] = 0;
+    // Only include ships that have count > 0 in config
+    for (const [ship, count] of initialShips) {
+      if (count > 0) {
+        my_remaining[ship] = 0;
+      }
     }
     for (let i = 0; i < fieldSize; ++i) {
       for (let j = 0; j < fieldSize; ++j) {
@@ -771,8 +774,11 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       }
     }
     let other_remaining: Record<string, number> = {};
+    // Only include ships that have count > 0 in config
     for (const [ship, count] of initialShips) {
-      other_remaining[ship] = count as number;
+      if (count > 0) {
+        other_remaining[ship] = count as number;
+      }
     }
     for (let event of this.props.G.log) {
       if (event.type == 'die' && event.ship.player != parseInt(this.props.playerID)) {
@@ -1369,9 +1375,15 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
     console.log('Rendering popup...');
 
-    // Available ship types for dropdown
+    // Available ship types for dropdown - only show ships present in current game config
+    const initialShips = this.props.G.config?.initialShips || DefaultGameConfig.initialShips;
+    const configuredShips = new Set(
+      initialShips
+        .filter(([, count]: [string, number]) => count > 0)
+        .map(([ship]: [string, number]) => ship)
+    );
     const availableShips = Object.entries(shipNames).filter(
-      ([key]) => !['Unknown', 'Sinking'].includes(key)
+      ([key]) => !['Unknown', 'Sinking'].includes(key) && configuredShips.has(key)
     );
 
     // Color options
