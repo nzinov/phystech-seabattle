@@ -86,7 +86,8 @@ const LogEvent = ({ event, player, highlight, highlightLastMove }) => {
         return (
           <span>
             <b>
-              {t('log.blockDeclaredPrefix')} {event.size}&nbsp;x&nbsp;{getShipName(event.ship_type)}
+              {getPossessivePronoun('Unknown', event.player, player)} {t('log.blockDeclaredPrefix')}{' '}
+              {event.size}&nbsp;x&nbsp;{getShipName(event.ship_type)}
             </b>
           </span>
         );

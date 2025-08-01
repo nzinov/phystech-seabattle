@@ -70,7 +70,7 @@
     "Tk": "Forms blocks. Can move 2 cells. Carries Torpedoes. 96 u.p.",
     "Tp": "Doesn't form blocks. Can carry and launch any pieces. Destroyed by any ship.",
     "Tr": "Can remove mines, torpedoes and fire ships (by attacking them). Forms blocks. 64 u.p.",
-    "Unknown": "Enemy ship",
+    "Unknown": "",
     "Sinking": "Attack it with any ship to capture it. Turn will pass to opponent."
   },
   "actions": {
@@ -116,15 +116,15 @@
     "enterCustomText": "Enter custom text...",
     "none": "None",
     "readyToBattle": "✅ Ready to Battle",
-    "confirmReady": "🎯 Confirm Ready?",
+    "confirmReady": "🎯 Are you sure?",
     "copyInviteLink": "🔗 Copy Invite Link",
     "linkCopied": "✅ Link Copied!",
     "skipTurn": "⏭ Skip Turn",
     "emptySquare": "Empty square"
   },
   "log": {
-    "your": "your",
-    "opponents": "opponent's",
+    "your": "Your",
+    "opponents": "Opponent's",
     "ship": "ship",
     "shipMoved": "moved",
     "madeShot": "made a shot",
@@ -132,7 +132,7 @@
     "shipAttacked": "attacked",
     "wasDestroyed": "was destroyed",
     "exploded": "exploded",
-    "blockDeclaredPrefix": "Block declared:",
+    "blockDeclaredPrefix": "block declared:",
     "unknownEvent": "unknown event",
     "noEventsYet": "No events yet..."
   }
