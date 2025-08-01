@@ -59,10 +59,15 @@ interface SquareProps {
     to: [number, number];
     position: { x: number; y: number };
   };
+  onShowLabelPopup?: (
+    coord: [number, number],
+    position: { x: number; y: number },
+    currentLabels?: any
+  ) => void;
 }
 
 const Square: React.FC<SquareProps> = props => {
-  const click = () => {
+  const click = (event?: React.MouseEvent) => {
     if (isMobileDevice()) {
       // Mobile: Only handle tooltip/trace cycling for squares with figures
       if (props.figure && props.hover) {
@@ -71,7 +76,25 @@ const Square: React.FC<SquareProps> = props => {
     } else {
       // Desktop: Only handle label functionality for Unknown/Sinking
       if (['Unknown', 'Sinking'].includes(props.figure?.type) && !props.G.attackFrom) {
-        props.moves.Label(props.coord, prompt('Enter label'));
+        const target = event?.currentTarget as HTMLElement;
+        const rect = target?.getBoundingClientRect();
+        const position = rect
+          ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+          : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+        // Get current labels if they exist
+        const currentLabels = props.figure?.label;
+        let parsedLabels: any = undefined;
+        if (currentLabels && typeof currentLabels === 'object') {
+          parsedLabels = currentLabels;
+        }
+
+        // Use setTimeout to ensure the popup shows after any potential state conflicts
+        setTimeout(() => {
+          if ((props as any).onShowLabelPopup) {
+            (props as any).onShowLabelPopup(props.coord, position, parsedLabels);
+          }
+        }, 0);
       }
     }
   };
@@ -358,17 +381,50 @@ const Square: React.FC<SquareProps> = props => {
       cellStyle.boxShadow = 'var(--shadow-lg)';
     }
   }
-  let label = undefined;
+  let labels = [];
   if (props.figure) {
     cellStyle.backgroundImage = 'url(/figures/' + props.figure.type + '.png)';
-    if (props.figure.label) {
-      label = (
-        <img
-          className="board-cell-ship-label"
-          src={'/figures/' + props.figure.label + '.png'}
-          alt=""
-        />
-      );
+
+    // The server sends only the player's own label data directly in figure.label
+    const playerLabel = props.figure.label;
+    if (playerLabel) {
+      // Handle new multi-type label format
+      if (typeof playerLabel === 'object') {
+        // Ship type label (background image)
+        if (playerLabel.shipType) {
+          labels.push(
+            <img
+              key="ship-label"
+              className="board-cell-ship-label"
+              src={`/figures/${playerLabel.shipType}.png`}
+              alt={shipNames[playerLabel.shipType as keyof typeof shipNames] || ''}
+            />
+          );
+        }
+
+        // Color label (asterisk in corner)
+        if (playerLabel.color) {
+          labels.push(
+            <div
+              key="color-label"
+              className="board-cell-color-label"
+              style={{ color: playerLabel.color }}
+            >
+              ★
+            </div>
+          );
+        }
+      } else if (typeof playerLabel === 'string') {
+        // Handle legacy string labels (backwards compatibility)
+        labels.push(
+          <img
+            key="legacy-label"
+            className="board-cell-ship-label"
+            src={`/figures/${playerLabel}.png`}
+            alt=""
+          />
+        );
+      }
     }
   }
 
@@ -377,17 +433,33 @@ const Square: React.FC<SquareProps> = props => {
     dropRef(el);
   };
 
-  // Get ship name for accessibility
+  // Get ship name and custom tooltip text
   const shipName = props.figure?.type
     ? shipNames[props.figure.type as keyof typeof shipNames]
     : null;
+
+  const playerLabel = props.figure?.label;
+  const customText =
+    typeof playerLabel === 'object' && playerLabel.customText ? playerLabel.customText : null;
+
   const altText = shipName || 'Empty square';
+
+  // Build tooltip content
+  let tooltipContent;
+  if (customText) {
+    // Sanitize custom text and replace default tooltip
+    const sanitizedText = customText.replace(/[<>"'&]/g, '').slice(0, 400);
+    tooltipContent = `<div style="font-style: italic; color: #fbbf24;">${sanitizedText}</div>`;
+  } else {
+    // Use default ship info
+    tooltipContent = shipInfo?.[props.figure?.type as keyof typeof shipInfo];
+  }
 
   return (
     <td ref={combinedRef}>
       <div
         data-tooltip-id="ship-tooltip"
-        data-tooltip-content={shipInfo?.[props.figure?.type as keyof typeof shipInfo]}
+        data-tooltip-content={tooltipContent}
         data-cell={`${props.coord[0]}-${props.coord[1]}`}
         onClick={click}
         className={cellClasses.join(' ')}
@@ -399,7 +471,7 @@ const Square: React.FC<SquareProps> = props => {
         role="gridcell"
         tabIndex={0}
       >
-        {label}
+        {labels}
       </div>
     </td>
   );
@@ -445,6 +517,16 @@ interface BoardState {
     to: [number, number];
     position: { x: number; y: number };
   };
+  labelSelectionPopup?: {
+    visible: boolean;
+    coord: [number, number];
+    position: { x: number; y: number };
+    currentLabels?: {
+      shipType?: string;
+      color?: string;
+      customText?: string;
+    };
+  };
 }
 
 class Board extends React.Component<BoardPropsLocal, BoardState> {
@@ -463,6 +545,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       longPressTraceActive: false,
       mobileClickStates: new Map(),
       actionSelectionPopup: undefined,
+      labelSelectionPopup: undefined,
       mobileFleetStatus: false,
     };
   }
@@ -580,6 +663,38 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     this.setState({ actionSelectionPopup: undefined });
   };
 
+  showLabelPopup = (
+    coord: [number, number],
+    position: { x: number; y: number },
+    currentLabels?: any
+  ) => {
+    this.setState({
+      labelSelectionPopup: {
+        visible: true,
+        coord,
+        position,
+        currentLabels: currentLabels || {},
+      },
+    });
+  };
+
+  cancelLabelSelection = () => {
+    this.setState({ labelSelectionPopup: undefined });
+  };
+
+  updateLabel = (labelData: { shipType?: string; color?: string; customText?: string }) => {
+    const popup = this.state.labelSelectionPopup;
+    if (popup) {
+      // Filter out empty values
+      const filteredData = Object.fromEntries(
+        Object.entries(labelData).filter(([, value]) => value && value.trim() !== '')
+      );
+
+      this.props.moves.Label(popup.coord, filteredData);
+      this.setState({ labelSelectionPopup: undefined });
+    }
+  };
+
   HighlightTrace = () => {
     if (!this.state.trace) {
       return;
@@ -657,10 +772,39 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
   };
 
   handleKeyDown = (event: KeyboardEvent) => {
-    // Handle ESC key to cancel action selection popup
-    if (event.key === 'Escape' && this.state.actionSelectionPopup?.visible) {
-      this.cancelActionSelection();
-      event.preventDefault();
+    // Don't process keyboard shortcuts if focus is inside a popup input
+    const activeElement = document.activeElement;
+    const isInputFocused =
+      activeElement &&
+      (activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'SELECT' ||
+        activeElement.tagName === 'TEXTAREA');
+
+    // Always handle ESC and Enter keys for popups
+    if (event.key === 'Escape') {
+      if (this.state.actionSelectionPopup?.visible) {
+        this.cancelActionSelection();
+        event.preventDefault();
+        return;
+      }
+      if (this.state.labelSelectionPopup?.visible) {
+        this.cancelLabelSelection();
+        event.preventDefault();
+        return;
+      }
+    }
+
+    if (event.key === 'Enter') {
+      if (this.state.labelSelectionPopup?.visible) {
+        const currentLabels = this.state.labelSelectionPopup.currentLabels || {};
+        this.updateLabel(currentLabels);
+        event.preventDefault();
+        return;
+      }
+    }
+
+    // Don't process other shortcuts if input is focused
+    if (isInputFocused) {
       return;
     }
 
@@ -709,11 +853,11 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     event.preventDefault();
   };
 
-  hoverBlock = (_event: any, block: any) => {
+  hoverBlock = (block: any) => {
     this.setState({ highlightedBlock: block });
   };
 
-  leaveBlock = (_event: any) => {
+  leaveBlock = () => {
     this.setState({ highlightedBlock: undefined });
   };
 
@@ -999,6 +1143,14 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       }
     }
 
+    // Cancel label selection popup if clicking outside of it
+    if (this.state.labelSelectionPopup?.visible) {
+      const popup = document.querySelector('.label-selection-popup');
+      if (popup && !popup.contains(event.target as Node)) {
+        this.cancelLabelSelection();
+      }
+    }
+
     // Close mobile fleet status if clicking outside of it or the fleet status button
     if (this.state.mobileFleetStatus) {
       const fleetOverlay = document.querySelector('.board-remaining-overlay');
@@ -1163,6 +1315,165 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     );
   }
 
+  renderLabelSelectionPopup() {
+    const popup = this.state.labelSelectionPopup;
+    if (!popup?.visible) {
+      return null;
+    }
+
+    // Available ship types for dropdown
+    const availableShips = Object.entries(shipNames).filter(
+      ([key]) => !['Unknown', 'Sinking'].includes(key)
+    );
+
+    // Color options
+    const colors = [
+      { name: 'Red', value: '#ef4444' },
+      { name: 'Blue', value: '#3b82f6' },
+      { name: 'Green', value: '#10b981' },
+      { name: 'Yellow', value: '#f59e0b' },
+      { name: 'Purple', value: '#8b5cf6' },
+      { name: 'Pink', value: '#ec4899' },
+      { name: 'Orange', value: '#f97316' },
+      { name: 'Cyan', value: '#06b6d4' },
+    ];
+
+    // Calculate popup dimensions for boundary detection
+    const popupWidth = 300;
+    const popupHeight = 400;
+
+    // Get viewport dimensions
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate bounded position to keep popup on screen
+    let left = popup.position.x - popupWidth / 2;
+    let top = popup.position.y - popupHeight / 2;
+
+    // Boundary checks with padding
+    const padding = 16;
+    if (left < padding) left = padding;
+    if (left + popupWidth > viewportWidth - padding) left = viewportWidth - popupWidth - padding;
+    if (top < padding) top = padding;
+    if (top + popupHeight > viewportHeight - padding) top = viewportHeight - popupHeight - padding;
+
+    const currentLabels = popup.currentLabels || {};
+
+    return (
+      <div
+        className="label-selection-popup"
+        style={{
+          position: 'fixed',
+          left: left,
+          top: top,
+          zIndex: 10000,
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="label-selection-content">
+          {/* Ship Type Selection */}
+          <div className="label-section">
+            <div className="label-ship-row">
+              <select
+                className="label-ship-select"
+                value={currentLabels.shipType || ''}
+                onChange={e => {
+                  const newLabels = { ...currentLabels, shipType: e.target.value };
+                  this.setState({
+                    labelSelectionPopup: { ...popup, currentLabels: newLabels },
+                  });
+                }}
+              >
+                <option value="">None</option>
+                {availableShips.map(([key, name]) => (
+                  <option key={key} value={key}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <div className="label-ship-preview">
+                {currentLabels.shipType && (
+                  <img
+                    src={`/figures/${currentLabels.shipType}.png`}
+                    alt={shipNames[currentLabels.shipType as keyof typeof shipNames]}
+                    className="label-ship-preview-image"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Color Selection */}
+          <div className="label-section">
+            <div className="label-color-grid">
+              <button
+                className={`label-color-option ${!currentLabels.color ? 'selected' : ''}`}
+                onClick={() => {
+                  const newLabels = { ...currentLabels };
+                  delete newLabels.color;
+                  this.setState({
+                    labelSelectionPopup: { ...popup, currentLabels: newLabels },
+                  });
+                }}
+              >
+                None
+              </button>
+              {colors.map(color => (
+                <button
+                  key={color.value}
+                  className={`label-color-option ${currentLabels.color === color.value ? 'selected' : ''}`}
+                  style={{ backgroundColor: color.value }}
+                  onClick={() => {
+                    const newLabels = { ...currentLabels, color: color.value };
+                    this.setState({
+                      labelSelectionPopup: { ...popup, currentLabels: newLabels },
+                    });
+                  }}
+                  title={color.name}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom Text */}
+          <div className="label-section">
+            <textarea
+              className="label-text-input"
+              placeholder="Enter custom text..."
+              value={currentLabels.customText || ''}
+              onChange={e => {
+                // Sanitize input to prevent XSS
+                const sanitizedText = e.target.value
+                  .replace(/[<>"'&]/g, '') // Remove HTML/script characters
+                  .slice(0, 400); // Limit length
+                const newLabels = { ...currentLabels, customText: sanitizedText };
+                this.setState({
+                  labelSelectionPopup: { ...popup, currentLabels: newLabels },
+                });
+              }}
+              maxLength={400}
+              rows={3}
+            />
+          </div>
+        </div>
+
+        <div className="label-selection-footer">
+          <button className="label-button label-cancel" onClick={this.cancelLabelSelection}>
+            Cancel
+          </button>
+          <button
+            className="label-button label-apply"
+            onClick={() => this.updateLabel(currentLabels)}
+          >
+            Apply
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   render() {
     // Wait for game state to initialize
     if (!this.props.G || !this.props.G.cells) {
@@ -1197,6 +1508,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             onDrop={this.handleDrop}
             stage={this.props.ctx.activePlayers?.[this.props.playerID]}
             actionSelectionPopup={this.state.actionSelectionPopup}
+            onShowLabelPopup={this.showLabelPopup}
           ></Square>
         );
       }
@@ -1399,11 +1711,11 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   <button
                     key={i}
                     className="board-block-button"
-                    onMouseEnter={e => {
-                      this.hoverBlock(e, block);
+                    onMouseEnter={() => {
+                      this.hoverBlock(block);
                     }}
-                    onMouseLeave={e => {
-                      this.leaveBlock(e);
+                    onMouseLeave={() => {
+                      this.leaveBlock();
                     }}
                     onClick={e => this.clickBlock(e, block)}
                     aria-label={`${shipNames[block.type as keyof typeof shipNames] || block.type} block (size ${block.size})`}
@@ -1448,6 +1760,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
           ?
         </a>
         {this.renderActionSelectionPopup()}
+        {this.renderLabelSelectionPopup()}
       </DndProvider>
     );
   }

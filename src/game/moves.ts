@@ -88,8 +88,19 @@ export const ResponseBlockMove = (
 };
 ResponseBlockMove.redact = true;
 
-export const LabelMove = ({ G, playerID }: MoveContext, pos: Position, label: string): void => {
-  getPos(G, pos)!.label![playerID!] = label;
+export const LabelMove = (
+  { G, playerID }: MoveContext,
+  pos: Position,
+  label: string | object
+): void => {
+  const cell = getPos(G, pos);
+  if (!cell) {
+    return;
+  }
+  if (!cell.label) {
+    cell.label = {};
+  }
+  cell.label[playerID!] = label;
 };
 LabelMove.redact = true;
 LabelMove.client = false;
