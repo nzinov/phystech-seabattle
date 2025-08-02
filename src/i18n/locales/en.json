@@ -86,7 +86,7 @@
     "installDescription": "Add the game to your home screen for the best full‑screen gaming experience",
     "install": "Install",
     "later": "Later",
-    "installInstructions": "To install the app:\\n\\nChrome/Edge: Menu → Install app\\nSafari: Share → Add to Home Screen\\nFirefox: Menu → Install"
+    "installInstructions": "To install the app:\n\nChrome/Edge: Menu → Install app\nSafari: Share → Add to Home Screen\nFirefox: Menu → Install"
   },
   "ui": {
     "close": "Close",
