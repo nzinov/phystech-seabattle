@@ -5,7 +5,35 @@ import { getGenderedVerb, getPossessivePronoun } from './utils/russianGrammar';
 import { getShipName } from './utils/translations';
 
 function getShipDescr(ship, currentPlayer) {
-  return getPossessivePronoun(ship.type, ship.player, currentPlayer) + ' ' + getShipName(ship.type);
+  const possessivePronoun = getPossessivePronoun(ship.type, ship.player, currentPlayer);
+  const shipName = getShipName(ship.type);
+  return (
+    <span>
+      {possessivePronoun}{' '}
+      <span className="ship-pill">
+        {shipName}
+        {getShipIcon(ship.type)}
+      </span>
+    </span>
+  );
+}
+
+function getShipIcon(shipType) {
+  if (!shipType || shipType === 'Unknown') return null;
+  return (
+    <img
+      src={`/figures/${shipType}.png`}
+      alt={shipType}
+      className="log-ship-icon"
+      style={{
+        width: '24px',
+        height: '24px',
+        marginLeft: '6px',
+        verticalAlign: 'middle',
+        display: 'inline-block',
+      }}
+    />
+  );
 }
 
 const LogEvent = ({ event, player, highlight, highlightLastMove }) => {
@@ -87,7 +115,10 @@ const LogEvent = ({ event, player, highlight, highlightLastMove }) => {
           <span>
             <b>
               {getPossessivePronoun('Unknown', event.player, player)} {t('log.blockDeclaredPrefix')}{' '}
-              {event.size}&nbsp;x&nbsp;{getShipName(event.ship_type)}
+              <span className="ship-pill">
+                {event.size}&nbsp;x&nbsp;{getShipName(event.ship_type)}
+                {getShipIcon(event.ship_type)}
+              </span>
             </b>
           </span>
         );

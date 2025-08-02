@@ -110,3 +110,39 @@
 .log-scroll-arrow:hover {
   background: var(--accent-secondary);
 }
+
+/* Ship icon styles */
+.log-ship-icon {
+  width: 24px;
+  height: 24px;
+  margin-left: 6px;
+  vertical-align: middle;
+  display: inline-block;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Ship pill background */
+.ship-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 12px;
+  padding: 2px 6px;
+  margin: 0 1px;
+  font-size: 0.85em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ship pill backgrounds based on player */
+.log-event-bubble.current-player .ship-pill {
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.log-event-bubble.opponent-player .ship-pill {
+  background: rgba(107, 114, 128, 0.2);
+  border: 1px solid rgba(107, 114, 128, 0.4);
+}
