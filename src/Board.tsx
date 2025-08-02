@@ -5,6 +5,7 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { MultiBackend } from 'react-dnd-multi-backend';
 import { Tooltip } from 'react-tooltip';
 import './Board.css';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import {
   DefaultGameConfig,
   dist,
@@ -15,11 +16,10 @@ import {
   playerAdjacent,
   takeMove,
 } from './game';
+import i18n from './i18n';
 import { Log } from './Log.jsx';
 import { shipNames } from './Texts';
-import { getStageDescription, getShipName, getShipDescription } from './utils/translations';
-import i18n from './i18n';
-import LanguageSwitcher from './components/LanguageSwitcher';
+import { getShipDescription, getShipName, getStageDescription } from './utils/translations';
 
 // Multi-backend configuration for seamless touch and mouse support
 const backendOptions = HTML5toTouch;
@@ -629,7 +629,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     } else if (validActions.length === 1) {
       // Only one action - execute it directly
       const mode = validActions[0].key;
-      console.log(mode);
+
       if (['r', 'e'].indexOf(mode) == -1 || confirm('Are you sure?')) {
         takeMove(this.props.G, this.props.ctx, this.props.moves, mode, from, to);
       }
@@ -674,20 +674,14 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     position: { x: number; y: number },
     currentLabels?: any
   ) => {
-    console.log('showLabelPopup called, setting state...');
-    this.setState(
-      {
-        labelSelectionPopup: {
-          visible: true,
-          coord,
-          position,
-          currentLabels: currentLabels || {},
-        },
+    this.setState({
+      labelSelectionPopup: {
+        visible: true,
+        coord,
+        position,
+        currentLabels: currentLabels || {},
       },
-      () => {
-        console.log('Label popup state after setState:', this.state.labelSelectionPopup);
-      }
-    );
+    });
   };
 
   cancelLabelSelection = () => {
@@ -1369,12 +1363,10 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
   renderLabelSelectionPopup() {
     const popup = this.state.labelSelectionPopup;
-    console.log('renderLabelSelectionPopup called, popup state:', popup);
+
     if (!popup?.visible) {
-      console.log('Popup not visible, returning null');
       return null;
     }
-    console.log('Rendering popup...');
 
     // Available ship types for dropdown - only show ships present in current game config
     const initialShips = this.props.G.config?.initialShips || DefaultGameConfig.initialShips;

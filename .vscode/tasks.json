@@ -16,7 +16,7 @@
     },
     {
       "label": "npm: format",
-      "type": "npm", 
+      "type": "npm",
       "script": "format",
       "group": "build",
       "presentation": {

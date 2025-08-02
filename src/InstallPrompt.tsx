@@ -16,7 +16,6 @@ const InstallPrompt: React.FC = () => {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
-      console.log('beforeinstallprompt event fired');
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
 
@@ -24,8 +23,6 @@ const InstallPrompt: React.FC = () => {
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent
       );
-      console.log('Is mobile device:', isMobile);
-      console.log('User agent:', navigator.userAgent);
 
       // Show on mobile or localhost for testing, but not if dismissed
       if (!isDismissed && (isMobile || window.location.hostname === 'localhost')) {
@@ -38,20 +35,14 @@ const InstallPrompt: React.FC = () => {
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true
     ) {
-      console.log('App is already installed');
       return;
     }
-
-    console.log('Setting up beforeinstallprompt listener');
-    console.log('Service worker supported:', 'serviceWorker' in navigator);
-    console.log('Manifest link present:', !!document.querySelector('link[rel="manifest"]'));
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // Fallback for testing - show prompt after 2 seconds if no event fires
     const fallbackTimer = setTimeout(() => {
       if (!deferredPrompt && !isDismissed && window.location.hostname === 'localhost') {
-        console.log('Fallback: showing install prompt for testing');
         setShowInstallPrompt(true);
       }
     }, 2000);
@@ -64,7 +55,6 @@ const InstallPrompt: React.FC = () => {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      console.log('No deferred prompt available - showing browser instructions');
       // Show manual installation instructions
       alert(t('pwa.installInstructions'));
       setShowInstallPrompt(false);
@@ -73,13 +63,6 @@ const InstallPrompt: React.FC = () => {
 
     try {
       deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-
-      if (outcome === 'accepted') {
-        console.log('PWA installed');
-      } else {
-        console.log('PWA installation dismissed');
-      }
     } catch (error) {
       console.error('Error during PWA installation:', error);
     }
@@ -89,7 +72,6 @@ const InstallPrompt: React.FC = () => {
   };
 
   const handleDismiss = () => {
-    console.log('Dismiss button clicked');
     setShowInstallPrompt(false);
     setDeferredPrompt(null);
     setIsDismissed(true);

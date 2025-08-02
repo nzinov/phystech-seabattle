@@ -88,7 +88,6 @@ const App: React.FC = () => {
 
     // Update URL and start game
     window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
-    console.log(matchID, playerID);
 
     setGameStarted(true);
     setIsLoading(false);

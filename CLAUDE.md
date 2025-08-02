@@ -39,6 +39,7 @@ npm run pre-commit
 ## Architecture
 
 ### Tech Stack
+
 - **Frontend**: React 19.1.0 with Vite build system
 - **Game Engine**: BoardGame.io 0.50.2 for turn-based multiplayer logic
 - **Backend**: Node.js with Koa 3.0.0 server
@@ -50,6 +51,7 @@ npm run pre-commit
 - **TypeScript**: Full TypeScript support with strict mode
 
 ### Key Files
+
 - `src/Game.ts` - Core game logic, rules, and BoardGame.io game definition
 - `src/Board.tsx` - Main game board UI component with drag-and-drop
 - `src/server.ts` - Backend server with authentication and database setup
@@ -58,6 +60,7 @@ npm run pre-commit
 - `public/figures/` - Ship imagery for 21 different ship types
 
 ### Game Architecture
+
 - **Grid-based**: 14x14 board with player sides (rows 0-4 vs 9-13)
 - **Ship System**: 21 unique ship types with special abilities and movement patterns
 - **Turn Phases**: Move → Attack → Special Actions
@@ -65,6 +68,7 @@ npm run pre-commit
 - **Authentication**: Token-based player credentials stored in game metadata
 
 ### Development Setup
+
 - **Vite Dev Server**: Runs on port 3000 with proxy to backend on port 8000
 - **Environment-based database**: PostgreSQL (production) vs in-memory (development)
 - **Node.js 18+ required**
@@ -73,6 +77,7 @@ npm run pre-commit
 - **Husky**: Git hooks for code quality enforcement
 
 ### Package Versions (Current)
+
 - **BoardGame.io**: 0.50.2
 - **React**: 19.1.0
 - **React DnD**: 16.0.1 (hooks API)
@@ -84,9 +89,11 @@ npm run pre-commit
 - **Vitest**: 3.2.4
 
 ### Database
+
 Uses PostgreSQL in production with `bgio-postgres` adapter. Game state and player authentication persisted automatically by BoardGame.io framework.
 
 ### Code Standards
+
 - **TypeScript First**: All new code should be written in TypeScript
 - **Strict TypeScript**: Project uses strict mode with noImplicitAny
 - **ESLint + Prettier**: Enforced code formatting and linting
@@ -94,11 +101,13 @@ Uses PostgreSQL in production with `bgio-postgres` adapter. Game state and playe
 - **BoardGame.io 0.50+ API**: Destructured parameters for all game callbacks
 
 ### Import Patterns
+
 - **BoardGame.io imports**: Use standard module paths (no /dist/cjs required)
 - **Local imports**: Use relative paths with appropriate extensions
 - **TypeScript**: Proper type imports where needed
 
 #### Working Import Examples:
+
 ```typescript
 // BoardGame.io imports
 import { Server } from 'boardgame.io/server';
@@ -112,6 +121,7 @@ import type { Position } from './Game';
 ```
 
 #### BoardGame.io API (v0.50+)
+
 - **Function signatures**: Use destructured parameters `({ G, ctx }) => {}`
 - **Type safety**: Full TypeScript support with proper interfaces
 - **Applies to**: `setup`, `moves`, `endIf`, `playerView`, `onMove`, etc.
