@@ -62,7 +62,7 @@
     "Mn": "Moves only next to destroyer. Doesn't attack. When attacked is destroyed along with the attacking ship. Destroyed by Minesweeper.",
     "NB": "Click during attack phase to explode - make all ships in a 5×5 square neutral. If attacked - explodes.",
     "Pl": "Defeats Battleship. Doesn't form or consider blocks.",
-    "Rd": "Forms blocks. Can pretend to be any weaker ship in blocks. Rd+St standing next to each other can be considered 2 Destroyers in a block of 2-3 ships. 288 u.p.",
+    "Rd": "Forms blocks. Can pretend to be any weaker ship in blocks. Rd+St standing next to each other can be considered 2 Destroyers in a block of 2‑3 ships. 288 u.p.",
     "Rk": "Moves only next to Cruiser Submarine. Can shoot in a straight line over ships in two ways: 1) no more than 2 cells and destroy all ships in a 3×3 square (with S key) 2) no more than 3 cells and destroy 1 ship (with R key). Doesn't harm Forts. Destroyed when shooting.",
     "Sm": "Can shoot (if Aircraft Carrier is nearby) in a straight line over ships at any distance. Destroys any ship except Fort. Destroyed when shooting.",
     "St": "Forms blocks. 144 u.p.",
@@ -83,7 +83,7 @@
   },
   "pwa": {
     "installTitle": "Install Phystech Seabattle",
-    "installDescription": "Add the game to your home screen for the best full-screen gaming experience",
+    "installDescription": "Add the game to your home screen for the best full‑screen gaming experience",
     "install": "Install",
     "later": "Later",
     "installInstructions": "To install the app:\\n\\nChrome/Edge: Menu → Install app\\nSafari: Share → Add to Home Screen\\nFirefox: Menu → Install"
@@ -104,7 +104,7 @@
   "gameDescriptions": {
     "regular": "Full version with 19 ship types",
     "mini": "Simplified version for quick play on 10×10 field",
-    "micro": "Ultra-fast game on 8×8 field with minimal ship set"
+    "micro": "Ultra‑fast game on 8×8 field with minimal ship set"
   },
   "board": {
     "loadingGame": "Loading game",
