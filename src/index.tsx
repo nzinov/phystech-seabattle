@@ -1,13 +1,12 @@
-import React from 'react';
 import { createRoot } from 'react-dom/client';
-import './index.css';
-import './i18n'; // Initialize i18n
+import { registerSW } from 'virtual:pwa-register';
 import App from './App';
-import registerServiceWorker from './registerServiceWorker.js';
+import './i18n'; // Initialize i18n
+import './index.css';
 
 const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
   root.render(<App />);
 }
-registerServiceWorker();
+registerSW({});
