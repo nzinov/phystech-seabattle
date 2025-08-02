@@ -17,7 +17,11 @@
     "share": "Share game",
     "inviteLink": "Invite link",
     "copyLink": "Copy link",
-    "linkCopied": "Link copied!"
+    "linkCopied": "Link copied!",
+    "notification": {
+      "title": "Phystech Sea Battle",
+      "yourTurn": "Your turn!"
+    }
   },
   "stages": {
     "place": "Place your ships",

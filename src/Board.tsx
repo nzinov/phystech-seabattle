@@ -19,6 +19,7 @@ import {
 import i18n from './i18n';
 import { Log } from './Log.jsx';
 import { shipNames } from './Texts';
+import { notificationService } from './utils/notifications';
 import { getShipDescription, getShipName, getStageDescription } from './utils/translations';
 
 // Multi-backend configuration for seamless touch and mouse support
@@ -554,6 +555,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       labelSelectionPopup: undefined,
       mobileFleetStatus: false,
     };
+
+    // Initialize notification service with i18n
+    notificationService.setI18n(i18n);
   }
 
   Ready = (event: any) => {
@@ -1253,6 +1257,20 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
     if (attackFromChanged || attackToChanged || currentStage !== prevStage) {
       this.updateBlockArrows();
+    }
+
+    // Check for turn changes and notify if it's the player's turn
+    const prevPlayerStage = prevProps.ctx.activePlayers?.[this.props.playerID];
+    const currentPlayerStage = this.props.ctx.activePlayers?.[this.props.playerID];
+    const prevInactive = prevPlayerStage === undefined || prevPlayerStage == 'wait';
+    const currentInactive = currentPlayerStage === undefined || currentPlayerStage == 'wait';
+
+    if (currentInactive) {
+      notificationService.cancel();
+    } else {
+      if (prevInactive) {
+        notificationService.notifyPlayerTurn();
+      }
     }
 
     // Check if we just entered a block declaration stage
