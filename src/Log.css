@@ -25,10 +25,12 @@
   margin: 2px 0;
   cursor: pointer;
   transition: all 0.03s ease;
-  font-size: clamp(0.3rem, 1.7vh, 1.5rem);
+  font-size: clamp(0.25rem, 1vw, 0.9rem);
   color: var(--text-primary);
   line-height: 1.4;
   display: flex;
+  min-height: clamp(32px, 6vw, 48px);
+  align-items: center;
 }
 
 .log-event-container.current-player {
@@ -45,12 +47,15 @@
 
 .log-event-bubble {
   padding: 6px 10px;
-  max-width: 80%;
+  max-width: 95%;
   word-wrap: break-word;
   border-radius: 12px 12px 12px 4px;
   border: 1px solid rgba(139, 92, 246, 0.2);
   background: rgba(139, 92, 246, 0.1);
   transition: all 0.03s ease;
+  min-height: clamp(24px, 4vw, 36px);
+  display: flex;
+  align-items: center;
 }
 
 .log-event-bubble.current-player {
@@ -113,27 +118,30 @@
 
 /* Ship icon styles */
 .log-ship-icon {
-  width: 24px;
-  height: 24px;
-  margin-left: 6px;
+  width: clamp(10px, 3vw, 24px);
+  height: clamp(10px, 3vw, 24px);
+  margin-left: 1px;
   vertical-align: middle;
   display: inline-block;
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
+  flex-shrink: 0;
 }
 
 /* Ship pill background */
 .ship-pill {
   display: inline-flex;
   align-items: center;
-  border-radius: 12px;
-  padding: 2px 6px;
-  margin: 0 1px;
-  font-size: 0.85em;
+  border-radius: clamp(8px, 1.5vw, 12px);
+  padding: clamp(2px, 0.8vw, 4px) clamp(4px, 1.5vw, 8px);
+  margin: 0 clamp(1px, 0.3vw, 2px);
+  font-size: clamp(0.7em, 2vw, 0.9em);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: clamp(100px, 20vw, 180px);
+  height: clamp(20px, 3.5vw, 28px);
 }
 
 /* Ship pill backgrounds based on player */
@@ -145,4 +153,45 @@
 .log-event-bubble.opponent-player .ship-pill {
   background: rgba(107, 114, 128, 0.2);
   border: 1px solid rgba(107, 114, 128, 0.4);
+}
+
+/* Mobile-specific fixes for consistent height */
+@media (max-width: 768px) {
+  .log-event-container {
+    min-height: 40px;
+    padding: 6px 12px;
+  }
+
+  .log-event-bubble {
+    min-height: 32px;
+    padding: 8px 10px;
+  }
+
+  .ship-pill {
+    height: 24px;
+    padding: 2px 6px;
+    font-size: 0.8em;
+    border-radius: 10px;
+    margin: 0 1px;
+  }
+}
+
+@media (max-width: 480px) {
+  .log-event-container {
+    min-height: 36px;
+    padding: 4px 8px;
+  }
+
+  .log-event-bubble {
+    min-height: 28px;
+    padding: 6px 8px;
+  }
+
+  .ship-pill {
+    height: 20px;
+    padding: 1px 4px;
+    font-size: 0.75em;
+    border-radius: 8px;
+    max-width: 120px;
+  }
 }

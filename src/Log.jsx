@@ -20,20 +20,7 @@ function getShipDescr(ship, currentPlayer) {
 
 function getShipIcon(shipType) {
   if (!shipType || shipType === 'Unknown') return null;
-  return (
-    <img
-      src={`/figures/${shipType}.png`}
-      alt={shipType}
-      className="log-ship-icon"
-      style={{
-        width: '24px',
-        height: '24px',
-        marginLeft: '6px',
-        verticalAlign: 'middle',
-        display: 'inline-block',
-      }}
-    />
-  );
+  return <img src={`/figures/${shipType}.png`} alt={shipType} className="log-ship-icon" />;
 }
 
 const LogEvent = ({ event, player, highlight, highlightLastMove }) => {
