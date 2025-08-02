@@ -38,6 +38,17 @@ if (process.env.DATABASE_URL) {
 const server = Server(conf);
 
 const frontEndAppBuildPath = path.resolve('./build');
+
+// Middleware to set no-cache headers for index.html
+server.app.use(async (ctx: any, next: any) => {
+  if (ctx.path === '/' || ctx.path === '/index.html') {
+    ctx.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    ctx.set('Pragma', 'no-cache');
+    ctx.set('Expires', '0');
+  }
+  await next();
+});
+
 server.app.use(serve(frontEndAppBuildPath));
 
 const PORT = parseInt(process.env.PORT || '8000');
