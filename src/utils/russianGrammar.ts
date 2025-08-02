@@ -13,7 +13,7 @@ export const getPossessivePronoun = (
   player: string,
   currentPlayer: string
 ): string => {
-  if (i18n.language !== 'ru') {
+  if (!i18n.language.startsWith('ru')) {
     // For English, use simple logic
     return player === currentPlayer ? i18n.t('log.your') : i18n.t('log.opponents');
   }
@@ -32,7 +32,7 @@ export const getPossessivePronoun = (
 
 // Get correctly gendered verb form
 export const getGenderedVerb = (shipType: string, baseKey: string): string => {
-  if (i18n.language !== 'ru') {
+  if (!i18n.language.startsWith('ru')) {
     // For English, no gender agreement needed
     return i18n.t(`log.${baseKey}`);
   }

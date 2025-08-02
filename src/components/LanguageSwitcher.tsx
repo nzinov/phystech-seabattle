@@ -5,7 +5,7 @@ const LanguageSwitcher: React.FC = () => {
   const { i18n } = useTranslation();
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'ru' ? 'en' : 'ru';
+    const newLang = i18n.language.startsWith('ru') ? 'en' : 'ru';
     i18n.changeLanguage(newLang);
   };
 
@@ -27,9 +27,9 @@ const LanguageSwitcher: React.FC = () => {
         zIndex: 1000,
         boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
       }}
-      title={i18n.language === 'ru' ? 'Switch to English' : 'Switch to Russian'}
+      title={i18n.language.startsWith('ru') ? 'Switch to English' : 'Switch to Russian'}
     >
-      {i18n.language === 'ru' ? 'EN' : 'RU'}
+      {i18n.language.startsWith('ru') ? 'EN' : 'RU'}
     </button>
   );
 };
