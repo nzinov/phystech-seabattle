@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import Cookies from 'universal-cookie';
 import { v4 as uuid } from 'uuid';
 import Board from './Board';
-import { DefaultGame, MiniGame, MicroGame } from './game';
-import MainPage from './MainPage';
+import { DefaultGame, MicroGame, MiniGame } from './game';
 import InstallPrompt from './InstallPrompt';
+import MainPage from './MainPage';
 
 // Store invite link globally for BoardWrapper access
 let globalInviteLink: string | null = null;
@@ -39,12 +39,12 @@ const App: React.FC = () => {
     const search = window.location.search;
     let params = new URLSearchParams(search);
 
-    if (cookies.get('token') != params.get('token')) {
-      let token = params.get('token');
-      if (!token) {
-        token = uuid();
-      }
-      cookies.set('token', token, { path: '/' });
+    if (!cookies.get('token')) {
+      cookies.set('token', uuid(), {
+        path: '/',
+        sameSite: 'lax',
+        secure: !import.meta.env.DEV,
+      });
     }
 
     let matchID = params.get('match');
