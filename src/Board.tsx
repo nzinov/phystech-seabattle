@@ -1445,10 +1445,10 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   });
                 }}
               >
-                <option value="">None</option>
-                {availableShips.map(([key, name]) => (
+                <option value="">{i18n.t('board.none')}</option>
+                {availableShips.map(([key]) => (
                   <option key={key} value={key}>
-                    {name}
+                    {getShipName(key)}
                   </option>
                 ))}
               </select>
@@ -1477,7 +1477,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   });
                 }}
               >
-                None
+                {i18n.t('board.none')}
               </button>
               {colors.map(color => (
                 <button
@@ -1502,7 +1502,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
           <div className="label-section">
             <textarea
               className="label-text-input"
-              placeholder="Enter custom text..."
+              placeholder={i18n.t('board.enterCustomText')}
               value={currentLabels.customText || ''}
               onChange={e => {
                 // Sanitize input to prevent XSS
@@ -1522,13 +1522,13 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
 
         <div className="label-selection-footer">
           <button className="label-button label-cancel" onClick={this.cancelLabelSelection}>
-            Cancel
+            {i18n.t('board.cancel')}
           </button>
           <button
             className="label-button label-apply"
             onClick={() => this.updateLabel(currentLabels)}
           >
-            Apply
+            {i18n.t('board.apply')}
           </button>
         </div>
       </div>
@@ -1592,7 +1592,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       // Ship icons row
       let shipIconRow = [
         <td key="ship-label" className="board-remaining-label board-remaining-label-cell">
-          Ships
+          {i18n.t('board.ships')}
         </td>,
       ];
       for (const [ship] of Object.entries(my_remaining) as [string, number][]) {
@@ -1614,7 +1614,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       // Your numbers row
       let yourRow = [
         <td key="you-label" className="board-remaining-label your">
-          You
+          {i18n.t('board.you')}
         </td>,
       ];
       for (const [ship, count] of Object.entries(my_remaining) as [string, number][]) {
@@ -1631,7 +1631,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
       // Enemy numbers row
       let enemyRow = [
         <td key="enemy-label" className="board-remaining-label enemy">
-          Enemy
+          {i18n.t('board.enemy')}
         </td>,
       ];
       for (const [ship, count] of Object.entries(other_remaining) as [string, number][]) {
@@ -1644,6 +1644,31 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
         );
       }
       remaining_tbody.push(<tr key="enemy-counts">{enemyRow}</tr>);
+
+      // Difference row (You - Enemy)
+      let diffRow = [
+        <td key="diff-label" className="board-remaining-label difference">
+          {i18n.t('board.difference')}
+        </td>,
+      ];
+      for (const [ship] of Object.entries(my_remaining) as [string, number][]) {
+        const myCount = my_remaining[ship] || 0;
+        const enemyCount = other_remaining[ship] || 0;
+        const diff = myCount - enemyCount;
+
+        diffRow.push(
+          <td key={`diff-${ship}`} className="board-remaining-ship-cell">
+            <div
+              className={`board-remaining-number difference ${
+                diff > 0 ? 'positive' : diff < 0 ? 'negative' : 'neutral'
+              }`}
+            >
+              {diff > 0 ? `+${diff}` : diff}
+            </div>
+          </td>
+        );
+      }
+      remaining_tbody.push(<tr key="diff-counts">{diffRow}</tr>);
 
       // Add bottom padding row
       remaining_tbody.push(

@@ -793,6 +793,14 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
+.board-remaining-label.difference {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(124, 58, 237, 0.12) 100%);
+  border: 2px solid rgba(147, 51, 234, 0.25);
+  box-shadow:
+    0 2px 8px rgba(147, 51, 234, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
 .board-remaining-number {
   text-align: center;
   vertical-align: middle;
@@ -832,6 +840,27 @@
 
 .board-remaining-number.enemy.inactive {
   color: #9ca3af;
+  background: rgba(248, 250, 252, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.board-remaining-number.difference.positive {
+  color: #065f46;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(22, 163, 74, 0.15) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.board-remaining-number.difference.negative {
+  color: #7f1d1d;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.15) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+}
+
+.board-remaining-number.difference.neutral {
+  color: #6b7280;
   background: rgba(248, 250, 252, 0.6);
   border: 1px solid rgba(148, 163, 184, 0.4);
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);

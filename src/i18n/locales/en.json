@@ -120,7 +120,13 @@
     "copyInviteLink": "🔗 Copy Invite Link",
     "linkCopied": "✅ Link Copied!",
     "skipTurn": "⏭ Skip Turn",
-    "emptySquare": "Empty square"
+    "emptySquare": "Empty square",
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "ships": "Ships",
+    "you": "You",
+    "enemy": "Enemy",
+    "difference": "Diff"
   },
   "log": {
     "your": "Your",
