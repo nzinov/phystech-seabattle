@@ -46,6 +46,8 @@ npm run pre-commit
 - **Database**: PostgreSQL (production) / in-memory (development)
 - **Real-time**: WebSocket via BoardGame.io's SocketIO
 - **UI**: React DnD 16.0.1 for drag-and-drop ship movement
+- **Internationalization**: i18next 25.3.2 with react-i18next 15.6.1
+- **Notifications**: Browser Web Notifications API for turn alerts
 - **Build Tool**: Vite 6.1.1 (replacing Create React App)
 - **Testing**: Vitest 3.2.4
 - **TypeScript**: Full TypeScript support with strict mode
@@ -57,6 +59,7 @@ npm run pre-commit
 - `src/server.ts` - Backend server with authentication and database setup
 - `src/App.tsx` - Root React component and BoardGame.io client setup
 - `src/Texts.ts` - Ship descriptions and game text constants
+- `src/utils/notifications.ts` - Browser notification service for turn alerts
 - `public/figures/` - Ship imagery for 21 different ship types
 
 ### Game Architecture
@@ -82,6 +85,8 @@ npm run pre-commit
 - **React**: 19.1.0
 - **React DnD**: 16.0.1 (hooks API)
 - **React Tooltip**: 5.29.1
+- **i18next**: 25.3.2
+- **react-i18next**: 15.6.1
 - **Universal Cookie**: 8.0.1
 - **Koa**: 3.0.0
 - **Vite**: 6.1.1
@@ -125,3 +130,33 @@ import type { Position } from './Game';
 - **Function signatures**: Use destructured parameters `({ G, ctx }) => {}`
 - **Type safety**: Full TypeScript support with proper interfaces
 - **Applies to**: `setup`, `moves`, `endIf`, `playerView`, `onMove`, etc.
+
+### Notification System
+
+The project includes a browser notification service (`src/utils/notifications.ts`) that:
+
+- **Turn Notifications**: Alerts players when it's their turn (only when window is not focused)
+- **Permission Management**: Handles browser notification permissions automatically
+- **Focus Detection**: Tracks window focus state to avoid unnecessary notifications
+- **Internationalization**: Uses i18next for localized notification messages
+- **Singleton Pattern**: Provides a global `notificationService` instance
+
+#### Notification Usage:
+
+```typescript
+import { notificationService } from './utils/notifications';
+import { i18n } from 'i18next';
+
+// Initialize with i18n instance
+notificationService.setI18n(i18n);
+
+// Notify player of their turn (only if window not focused)
+await notificationService.notifyPlayerTurn();
+
+// Cancel current notification
+notificationService.cancel();
+```
+
+## Development Memories
+
+- User runs npm start and npm run serve themselves, no need to start

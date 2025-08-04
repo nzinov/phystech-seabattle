@@ -6,6 +6,7 @@ import { MultiBackend } from 'react-dnd-multi-backend';
 import { Tooltip } from 'react-tooltip';
 import './Board.css';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import PlacementManager from './components/PlacementManager';
 import {
   DefaultGameConfig,
   dist,
@@ -20,6 +21,7 @@ import i18n from './i18n';
 import { Log } from './Log.jsx';
 import { shipNames } from './Texts';
 import { notificationService } from './utils/notifications';
+import { placementStorage } from './utils/placementStorage';
 import { getShipDescription, getShipName, getStageDescription } from './utils/translations';
 
 // Multi-backend configuration for seamless touch and mouse support
@@ -705,6 +707,104 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
   };
 
+  handleLoadPlacement = (placementId: string) => {
+    // Get ship types from placement storage
+    const shipTypes = placementStorage.getPlacementShipTypes(placementId);
+    if (!shipTypes) {
+      alert('Failed to load placement: placement not found');
+      return;
+    }
+
+    // Convert ship types to target cell layout and apply
+    this.applyPlacementFromTypes(shipTypes);
+  };
+
+  applyPlacementFromTypes = (shipTypes: (string | null)[][]) => {
+    const currentCells = this.props.G.cells;
+    const fieldSize = this.props.G.config?.fieldSize || DefaultGameConfig.fieldSize;
+    const playerID = parseInt(this.props.playerID);
+
+    // Check if we're in the placement phase
+    if (this.props.ctx?.phase !== 'place') {
+      alert('Placements can only be loaded during the placement phase.');
+      return;
+    }
+
+    // Go through placement zone cell by cell and place correct ship at each position
+    const moves: Array<{ from: [number, number]; to: [number, number] }> = [];
+    const placementZoneSize =
+      this.props.G.config?.placementZoneSize || DefaultGameConfig.placementZoneSize;
+
+    // Get placement zone bounds for this player
+    const isPlayerZero = playerID === 0;
+    const startRow = isPlayerZero ? 0 : fieldSize - placementZoneSize;
+    const endRow = isPlayerZero ? placementZoneSize : fieldSize;
+
+    // Create working copy of current board
+    const workingBoard: (any | null)[][] = [];
+    for (let x = 0; x < fieldSize; x++) {
+      workingBoard[x] = [];
+      for (let y = 0; y < fieldSize; y++) {
+        workingBoard[x][y] = currentCells[x][y];
+      }
+    }
+    // Go through each cell in placement zone from top to bottom, left to right
+    for (let x = startRow; x < endRow; x++) {
+      for (let y = 0; y < fieldSize; y++) {
+        // What should be at this position?
+        const expectedType = shipTypes[x][y];
+
+        // What is currently at this position?
+        const currentCell = workingBoard[x][y];
+        const currentType =
+          currentCell && currentCell.player === playerID ? currentCell.type : null;
+
+        // If it's already correct, continue
+        if (expectedType === currentType) {
+          continue;
+        }
+
+        // Find the ship we need in unvisited cells (to the right and below)
+        let foundX = -1,
+          foundY = -1;
+
+        // Search in remaining cells
+        for (let searchX = x; searchX < endRow; searchX++) {
+          const startY = searchX === x ? y + 1 : 0;
+          for (let searchY = startY; searchY < fieldSize; searchY++) {
+            const searchCell = workingBoard[searchX][searchY];
+            const searchType =
+              searchCell && searchCell.player === playerID ? searchCell.type : null;
+
+            if (searchType === expectedType) {
+              foundX = searchX;
+              foundY = searchY;
+              break;
+            }
+          }
+          if (foundX !== -1) break;
+        }
+
+        // If we found what we need, swap it
+        if (foundX !== -1) {
+          moves.push({
+            from: [foundX, foundY],
+            to: [x, y],
+          });
+
+          // Update working board by swapping
+          const temp = workingBoard[x][y];
+          workingBoard[x][y] = workingBoard[foundX][foundY];
+          workingBoard[foundX][foundY] = temp;
+        }
+      }
+    }
+    // Apply all moves
+    moves.forEach(move => {
+      this.props.moves.Place('m', move.from, move.to);
+    });
+  };
+
   HighlightTrace = () => {
     if (!this.state.trace) {
       return;
@@ -980,7 +1080,7 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     // Don't clear blockArrows on square leave - they should persist during block declaration
   };
 
-  clickBlock = (event: any, block: any) => {
+  clickBlock = (_event: any, block: any) => {
     this.setState({ highlightedBlock: undefined });
     let stage = this.props.ctx.activePlayers?.[this.props.playerID];
     if (stage == 'attackBlock') {
@@ -1833,13 +1933,25 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                   </button>
                 ))}
             </div>
-            <div className="board-log-section">
-              <Log
-                events={this.props.G.log}
-                player={parseInt(this.props.playerID)}
-                highlight={this.highlight}
+            {!placementPhase && (
+              <div className="board-log-section">
+                <Log
+                  events={this.props.G.log}
+                  player={parseInt(this.props.playerID)}
+                  highlight={this.highlight}
+                />
+              </div>
+            )}
+            {stage == 'place' && (
+              <PlacementManager
+                cells={this.props.G.cells}
+                playerID={parseInt(this.props.playerID)}
+                config={this.props.G.config || DefaultGameConfig}
+                onLoadPlacement={this.handleLoadPlacement}
+                isVisible={true}
+                onClose={() => undefined}
               />
-            </div>
+            )}
           </div>
         </div>
         {isMobileDevice() && (

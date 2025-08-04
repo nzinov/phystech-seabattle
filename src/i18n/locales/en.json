@@ -145,5 +145,23 @@
     "blockDeclaredPrefix": "block declared:",
     "unknownEvent": "unknown event",
     "noEventsYet": "No events yet..."
+  },
+  "placement": {
+    "title": "Saved Placements",
+    "save": "Save Current",
+    "load": "Load",
+    "delete": "Delete",
+    "rename": "Rename",
+    "clearAll": "Clear All",
+    "cancel": "Cancel",
+    "saveBtn": "Save",
+    "enterName": "Enter placement name...",
+    "noSavedPlacements": "No saved placements yet",
+    "saveHint": "Save your current ship arrangement to reuse it later",
+    "confirmDelete": "Are you sure you want to delete this placement?",
+    "confirmClearAll": "Are you sure you want to delete all saved placements?",
+    "loadError": "Failed to load placement. It may not be compatible with the current game configuration.",
+    "created": "Created",
+    "used": "Used"
   }
 }

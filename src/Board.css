@@ -302,6 +302,36 @@
   letter-spacing: 0.025em;
 }
 
+.board-placement-button {
+  border: none;
+  padding: clamp(1px, 1vw, 12px) clamp(1px, 1vh, 16px);
+  border-radius: var(--border-radius-lg);
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: var(--text-light);
+  font-size: clamp(0.25rem, 1.1vw, 0.9rem);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-fast);
+  margin-bottom: clamp(4px, 1vh, 8px);
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: clamp(0.05em, 0.1vw, 0.075em);
+  position: relative;
+  overflow: hidden;
+}
+
+.board-placement-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+.board-placement-button-text {
+  position: relative;
+  z-index: 1;
+}
+
 .board-ready-button {
   border: none;
   padding: clamp(1px, 1vw, 16px) clamp(1px, 1vh, 20px);
