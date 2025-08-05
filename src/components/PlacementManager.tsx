@@ -147,22 +147,24 @@ const PlacementManager: React.FC<PlacementManagerProps> = ({
         <div className="placement-manager-content">
           <div className="placement-actions">
             <button
-              className="placement-btn placement-btn-save"
+              className="placement-btn-base placement-btn placement-btn-save"
               onClick={() => setSaveDialogOpen(true)}
+              title={t('placement.save')}
             >
-              💾 {t('placement.save')}
+              💾 <span className="btn-text">{t('placement.save')}</span>
             </button>
             {placements.length > 0 && (
               <button
-                className="placement-btn placement-btn-clear"
+                className="placement-btn-base placement-btn placement-btn-clear"
                 onClick={() => {
                   if (confirm(t('placement.confirmClearAll'))) {
                     placementStorage.clearAllPlacements();
                     loadPlacements();
                   }
                 }}
+                title={t('placement.clearAll')}
               >
-                🗑️ {t('placement.clearAll')}
+                🗑️ <span className="btn-text">{t('placement.clearAll')}</span>
               </button>
             )}
           </div>
@@ -186,20 +188,22 @@ const PlacementManager: React.FC<PlacementManagerProps> = ({
               />
               <div className="placement-save-dialog-actions">
                 <button
-                  className="placement-btn placement-btn-primary"
+                  className="placement-btn-base placement-btn placement-btn-primary"
                   onClick={handleSave}
                   disabled={!saveName.trim()}
+                  title={t('placement.saveBtn')}
                 >
-                  {t('placement.saveBtn')}
+                  ✓ <span className="btn-text">{t('placement.saveBtn')}</span>
                 </button>
                 <button
-                  className="placement-btn"
+                  className="placement-btn-base placement-btn"
                   onClick={() => {
                     setSaveDialogOpen(false);
                     setSaveName('');
                   }}
+                  title={t('placement.cancel')}
                 >
-                  {t('placement.cancel')}
+                  ✕ <span className="btn-text">{t('placement.cancel')}</span>
                 </button>
               </div>
             </div>
@@ -232,17 +236,19 @@ const PlacementManager: React.FC<PlacementManagerProps> = ({
                         />
                         <div className="placement-item-edit-actions">
                           <button
-                            className="placement-btn placement-btn-small placement-btn-primary"
+                            className="placement-btn-base placement-btn placement-btn-small placement-btn-primary"
                             onClick={() => handleRename(placement.id)}
                             disabled={!editName.trim()}
+                            title={t('placement.saveBtn')}
                           >
-                            {t('placement.saveBtn')}
+                            ✓ <span className="btn-text">{t('placement.saveBtn')}</span>
                           </button>
                           <button
-                            className="placement-btn placement-btn-small"
+                            className="placement-btn-base placement-btn placement-btn-small"
                             onClick={cancelEdit}
+                            title={t('placement.cancel')}
                           >
-                            {t('placement.cancel')}
+                            ✕ <span className="btn-text">{t('placement.cancel')}</span>
                           </button>
                         </div>
                       </div>
@@ -263,25 +269,25 @@ const PlacementManager: React.FC<PlacementManagerProps> = ({
                         </div>
                         <div className="placement-item-actions">
                           <button
-                            className="placement-btn placement-btn-small placement-btn-primary"
+                            className="placement-btn-base placement-btn placement-btn-small placement-btn-primary"
                             onClick={() => handleLoad(placement.id)}
                             title={t('placement.load')}
                           >
-                            {t('placement.load')}
+                            📥 <span className="btn-text">{t('placement.load')}</span>
                           </button>
                           <button
-                            className="placement-btn placement-btn-small"
+                            className="placement-btn-base placement-btn placement-btn-small"
                             onClick={() => startEdit(placement)}
                             title={t('placement.rename')}
                           >
-                            {t('placement.rename')}
+                            ✏️ <span className="btn-text">{t('placement.rename')}</span>
                           </button>
                           <button
-                            className="placement-btn placement-btn-small placement-btn-danger"
+                            className="placement-btn-base placement-btn placement-btn-small placement-btn-danger"
                             onClick={() => handleDelete(placement.id)}
                             title={t('placement.delete')}
                           >
-                            {t('placement.delete')}
+                            🗑️ <span className="btn-text">{t('placement.delete')}</span>
                           </button>
                         </div>
                       </>

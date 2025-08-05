@@ -1877,10 +1877,10 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
               <button
                 onClick={this.Ready}
                 onTouchEnd={this.Ready}
-                className={`board-ready-button ${this.state.readyConfirmPending ? 'confirm' : 'normal'}`}
+                className={`board-sidebar-button-base board-ready-button ${this.state.readyConfirmPending ? 'confirm' : 'normal'}`}
                 style={{ touchAction: 'manipulation' }}
               >
-                <span className="board-ready-button-text">
+                <span className="board-sidebar-button-base-text">
                   {this.state.readyConfirmPending
                     ? i18n.t('board.confirmReady')
                     : i18n.t('board.readyToBattle')}
@@ -1888,8 +1888,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
               </button>
             )}
             {stage == 'attack' && (
-              <button onClick={this.Skip} className="board-skip-button">
-                <span className="board-skip-button-text">
+              <button onClick={this.Skip} className="board-sidebar-button-base board-skip-button">
+                <span className="board-sidebar-button-base-text">
                   {i18n.t('board.skipTurn')} (<i>space</i>)
                 </span>
               </button>
@@ -1897,9 +1897,9 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             {this.props.inviteLink && placementPhase && this.props.playerID === '0' && (
               <button
                 onClick={this.copyInviteLink}
-                className={`board-invite-button ${this.state.linkCopied ? 'copied' : 'normal'}`}
+                className={`board-sidebar-button-base board-invite-button ${this.state.linkCopied ? 'copied' : 'normal'}`}
               >
-                <span className="board-invite-button-text">
+                <span className="board-sidebar-button-base-text">
                   {this.state.linkCopied
                     ? i18n.t('board.linkCopied')
                     : i18n.t('board.copyInviteLink')}

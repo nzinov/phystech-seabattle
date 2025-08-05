@@ -10,7 +10,6 @@
   border: 1px solid #e2e8f0;
   box-shadow: var(--shadow-md);
   width: 100%;
-  margin-bottom: clamp(8px, 2vw, 16px);
   display: flex;
   flex-direction: column;
   transition: all 0.2s ease;
@@ -32,7 +31,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: clamp(1px, 1vw, 12px) clamp(1px, 1vh, 16px);
+  padding: clamp(1px, 0.5vh, 12px) clamp(1px, 0.5vw, 16px);
   background: #ffffff;
   border-radius: var(--border-radius-lg);
   cursor: pointer;
@@ -83,7 +82,7 @@
 }
 
 .placement-manager-content {
-  padding: clamp(1px, 1vw, 12px);
+  padding: clamp(1px, 0.5vw, 12px);
   overflow-y: auto;
   flex: 1;
   background: #ffffff;
@@ -108,15 +107,14 @@
 .placement-actions {
   display: flex;
   gap: clamp(4px, 1vw, 8px);
-  margin-bottom: clamp(8px, 2vw, 12px);
+  margin-bottom: clamp(4px, 1vw, 8px);
   flex-wrap: wrap;
 }
 
-.placement-btn {
-  padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
+/* Base button styles shared across all placement buttons */
+.placement-btn-base {
   border: 1px solid #e2e8f0;
   border-radius: var(--border-radius);
-  font-size: clamp(0.625rem, 1.5vw, 0.75rem);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -125,24 +123,30 @@
   gap: 4px;
   letter-spacing: 0.025em;
   box-shadow: var(--shadow-sm);
-  flex: 1;
   background: #ffffff;
   color: #0f172a;
 }
 
-.placement-btn:hover {
+.placement-btn {
+  padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
+  font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+  flex: 1;
+}
+
+/* Base button hover and state styles */
+.placement-btn-base:hover {
   box-shadow: var(--shadow-md);
   background: #f8fafc;
   border-color: #8b5cf6;
 }
 
-.placement-btn:disabled {
+.placement-btn-base:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
 
-.placement-btn:disabled:hover {
+.placement-btn-base:disabled:hover {
   transform: none;
   box-shadow: var(--shadow-sm);
 }
@@ -240,7 +244,7 @@
   border: 1px solid #e2e8f0;
   border-radius: var(--border-radius-lg);
   padding: clamp(12px, 3vw, 20px);
-  margin-bottom: clamp(16px, 4vw, 24px);
+  margin-bottom: clamp(8px, 2vw, 12px);
   box-shadow: var(--shadow-sm);
 }
 
@@ -409,6 +413,12 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* Always hide text in placement item action buttons */
+.placement-item-actions .placement-btn .btn-text,
+.placement-item-edit-actions .placement-btn .btn-text {
+  display: none;
+}
+
 .placement-item-edit {
   flex: 1;
   display: flex;
@@ -442,89 +452,83 @@
   visibility: visible;
 }
 
-/* Hide placement manager on smaller screens */
+/* Responsive styles for smaller screens - use pictograms only */
 @media (max-width: 1200px) {
-  .placement-manager {
+  /* Hide text in buttons, keep only pictograms */
+  .placement-btn-base .btn-text {
     display: none;
   }
-}
 
-/* Mobile-specific touch device styles */
-@media (hover: none) and (pointer: coarse) {
-  .placement-manager-header {
-    /* Increase padding for better touch targets on mobile */
-    padding: clamp(12px, 2vh, 18px) clamp(16px, 3vw, 24px);
-  }
-
-  .placement-collapse-btn {
-    min-width: clamp(24px, 4vw, 32px);
-    height: clamp(24px, 4vw, 32px);
-    padding: clamp(4px, 1vw, 8px);
-  }
-
-  .placement-manager-header h3 {
-    font-size: clamp(0.5rem, 2vw, 1.2rem);
-  }
-
-  /* Disable hover transform on mobile */
-  .placement-collapse-btn:hover {
-    transform: none;
-  }
-
-  .placement-collapse-btn:active {
-    transform: scale(0.98);
-    transition: all 0.1s ease;
-  }
-
-  /* Show buttons on mobile since there's no hover */
-  .placement-item-actions {
-    opacity: 1;
-    visibility: visible;
+  /* Adjust button sizes for pictogram-only mode */
+  .placement-btn-base {
+    justify-content: center;
   }
 
   .placement-btn {
-    padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 16px);
+    min-width: clamp(24px, 4vw, 28px);
+    padding: clamp(4px, 0.5vw, 6px);
     font-size: clamp(0.75rem, 2vw, 0.875rem);
-  }
-
-  .placement-item {
-    height: clamp(60px, 10vw, 90px);
-    border-width: clamp(1px, 0.3vw, 2px);
-  }
-
-  .placement-item-main {
-    padding: clamp(8px, 2vw, 16px) clamp(12px, 3vw, 20px);
-  }
-
-  .placement-item-name {
-    font-size: clamp(0.75rem, 2.5vw, 1rem);
-    margin-bottom: clamp(2px, 0.5vw, 6px);
-  }
-
-  .placement-item-details {
-    font-size: clamp(0.625rem, 1.8vw, 0.75rem);
-    gap: clamp(4px, 1.2vw, 8px);
-  }
-
-  .placement-item-date,
-  .placement-item-last-used {
-    padding: clamp(3px, 0.8vw, 5px) clamp(6px, 1.5vw, 10px);
   }
 
   .placement-btn-small {
-    padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2.5vw, 16px);
-    font-size: clamp(0.75rem, 2vw, 0.875rem);
-    min-height: clamp(32px, 6vw, 40px);
+    min-width: clamp(20px, 3vw, 24px);
+    padding: clamp(3px, 0.8vw, 4px);
+    font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+  }
+
+  /* Special handling for main action buttons */
+  .placement-btn-save,
+  .placement-btn-clear {
+    min-width: clamp(28px, 5vw, 32px);
+    font-size: clamp(0.6rem, 1vw, 0.875rem);
+  }
+
+  /* Make actions more compact */
+  .placement-actions {
+    gap: clamp(6px, 1.5vw, 8px);
+    justify-content: center;
+    margin-bottom: clamp(2px, 0.5vw, 4px);
+  }
+
+  .placement-save-dialog {
+    margin-bottom: clamp(4px, 1vw, 6px);
   }
 
   .placement-item-actions {
-    gap: clamp(6px, 1.5vw, 10px);
-    padding: clamp(6px, 1.5vw, 10px);
-    right: clamp(8px, 2vw, 16px);
+    gap: clamp(4px, 1vw, 6px);
+  }
+
+  /* Make editing UI stack vertically on small screens */
+  .placement-item-edit {
+    flex-direction: column;
+    gap: clamp(4px, 1vw, 6px);
+    align-items: stretch;
+  }
+
+  .placement-item-edit input {
+    padding: clamp(4px, 1vw, 6px) clamp(6px, 1.2vw, 8px);
+    font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .placement-item-edit-actions {
+    gap: clamp(4px, 1vw, 6px);
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Adjust item height when editing to accommodate stacked layout */
+  .placement-item:has(.placement-item-edit) {
+    height: auto;
+    min-height: clamp(70px, 12vw, 90px);
+  }
+
+  .placement-item-main:has(.placement-item-edit) {
+    padding: clamp(8px, 2vw, 12px);
   }
 }
 
-/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;

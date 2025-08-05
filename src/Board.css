@@ -262,7 +262,7 @@
 
 .board-status-container {
   background: var(--accent-primary);
-  padding: clamp(1px, 1vw, 16px) clamp(1px, 1vh, 20px);
+  padding: clamp(1px, 0.5vh, 16px) clamp(1px, 0.5vw, 20px);
   border-radius: var(--border-radius-lg);
   margin-bottom: clamp(4px, 2vh, 24px);
   text-align: center;
@@ -302,53 +302,48 @@
   letter-spacing: 0.025em;
 }
 
-.board-placement-button {
+/* Shared base class for all sidebar buttons */
+.board-sidebar-button-base {
   border: none;
-  padding: clamp(1px, 1vw, 12px) clamp(1px, 1vh, 16px);
+  padding: clamp(8px, 1.5vh, 16px) clamp(12px, 2vw, 20px);
   border-radius: var(--border-radius-lg);
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: var(--text-light);
-  font-size: clamp(0.25rem, 1.1vw, 0.9rem);
+  font-size: clamp(0.8rem, 1.3vw, 1.125rem);
   font-weight: 600;
   cursor: pointer;
   box-shadow: var(--shadow-md);
   transition: var(--transition-fast);
-  margin-bottom: clamp(4px, 1vh, 8px);
-  width: 100%;
-  text-transform: uppercase;
-  letter-spacing: clamp(0.05em, 0.1vw, 0.075em);
-  position: relative;
-  overflow: hidden;
-}
-
-.board-placement-button:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-}
-
-.board-placement-button-text {
-  position: relative;
-  z-index: 1;
-}
-
-.board-ready-button {
-  border: none;
-  padding: clamp(1px, 1vw, 16px) clamp(1px, 1vh, 20px);
-  border-radius: var(--border-radius-lg);
-  color: var(--text-light);
-  font-size: clamp(0.3rem, 1.3vw, 1.125rem);
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-fast);
-  margin-bottom: clamp(4px, 2vh, 24px);
+  margin-bottom: clamp(8px, 2vh, 16px);
   width: 100%;
   text-transform: uppercase;
   letter-spacing: clamp(0.05em, 0.1vw, 0.075em);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
+}
+
+.board-sidebar-button-base:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.board-sidebar-button-base-text {
+  position: relative;
+  z-index: 1;
+}
+
+.board-placement-button {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  padding: clamp(4px, 1vw, 12px) clamp(8px, 1.5vh, 16px);
+  font-size: clamp(0.7rem, 1.1vw, 0.9rem);
+  margin-bottom: clamp(4px, 1vh, 8px);
+}
+
+.board-placement-button:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+.board-ready-button {
   /* Ensure proper mobile touch target */
   min-height: 44px;
   min-width: 44px;
@@ -360,6 +355,7 @@
   /* Improve mobile touch handling */
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  margin-bottom: clamp(8px, 2vh, 24px);
 }
 
 .board-ready-button.normal {
@@ -368,11 +364,6 @@
 
 .board-ready-button.confirm {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-}
-
-.board-ready-button:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
 }
 
 /* Mobile-specific ready button interactions */
@@ -394,34 +385,8 @@
   }
 }
 
-.board-ready-button-text {
-  position: relative;
-  z-index: 1;
-}
-
 .board-skip-button {
-  border: none;
-  padding: clamp(1px, 1vw, 16px) clamp(1px, 1vh, 20px);
-  border-radius: var(--border-radius-lg);
-  color: var(--text-light);
-  font-size: clamp(0.3rem, 1.3vw, 1.125rem);
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-fast);
-  margin-bottom: clamp(4px, 2vh, 24px);
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  width: 100%;
-}
-
-.board-skip-button:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
-}
-
-.board-skip-button-text {
-  position: relative;
-  z-index: 1;
 }
 
 .board-rules-link {
@@ -626,21 +591,6 @@
 }
 
 .board-invite-button {
-  border: none;
-  padding: clamp(1px, 1vw, 16px) clamp(1px, 1vh, 20px);
-  border-radius: var(--border-radius-lg);
-  color: var(--text-light);
-  font-size: clamp(0.3rem, 1.3vw, 1.125rem);
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-fast);
-  margin-bottom: clamp(4px, 2vh, 24px);
-  width: 100%;
-  text-transform: uppercase;
-  letter-spacing: clamp(0.05em, 0.1vw, 0.075em);
-  position: relative;
-  overflow: hidden;
   flex-shrink: 0;
 }
 
@@ -654,16 +604,6 @@
 
 .board-invite-button.copied {
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-}
-
-.board-invite-button:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-lg);
-}
-
-.board-invite-button-text {
-  position: relative;
-  z-index: 1;
 }
 
 .board-blocks-container {
