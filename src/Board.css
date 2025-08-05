@@ -71,15 +71,8 @@
   border: var(--cell-border) solid var(--border-light);
   margin: 0;
   --cell-size: calc(
-    min(
-        (100 * var(--scale-unit) - 2 * var(--board-gap)) / var(--board-size),
-        (
-            100vh - 2 * var(--board-gap) - 2 * clamp(4px, calc(2.4 * var(--scale-unit)), 16px) - 2 *
-              clamp(2px, calc(0.8 * var(--scale-unit)), 4px)
-          ) /
-          var(--board-size)
-      ) -
-      2px - 2 * var(--cell-border)
+    (100 * var(--scale-unit) - 2 * var(--board-gap)) / var(--board-size) - 2px - 2 *
+      var(--cell-border)
   );
   width: var(--cell-size);
   height: var(--cell-size);

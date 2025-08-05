@@ -30,7 +30,7 @@
 .placement-manager-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: clamp(1px, calc(0.5 * var(--scale-unit)), 12px)
     clamp(1px, calc(0.8 * var(--scale-unit)), 16px);
   background: #ffffff;
@@ -38,6 +38,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   border-bottom: none;
+  position: relative;
 }
 
 .placement-manager.expanded .placement-manager-header {
@@ -57,7 +58,6 @@
   text-transform: uppercase;
   letter-spacing: 0.025em;
   text-align: center;
-  flex: 1;
 }
 
 .placement-collapse-btn {
@@ -74,6 +74,11 @@
   justify-content: center;
   min-width: clamp(16px, calc(4.8 * var(--scale-unit)), 24px);
   height: clamp(16px, calc(4.8 * var(--scale-unit)), 24px);
+  position: absolute;
+  right: clamp(1px, calc(0.8 * var(--scale-unit)), 16px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
 }
 
 .placement-collapse-btn:hover {
@@ -129,9 +134,8 @@
 }
 
 .placement-btn {
-  padding: clamp(6px, calc(2.4 * var(--scale-unit)), 8px)
-    clamp(8px, calc(3.2 * var(--scale-unit)), 12px);
-  font-size: clamp(0.625rem, calc(2.4 * var(--scale-unit)), 0.75rem);
+  padding: clamp(2px, calc(0.8 * var(--scale-unit)), 8px);
+  font-size: clamp(0.4rem, calc(1.6 * var(--scale-unit)), 0.75rem);
   flex: 1;
 }
 
@@ -246,20 +250,20 @@
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: var(--border-radius-lg);
-  padding: clamp(12px, calc(4.8 * var(--scale-unit)), 20px);
+  padding: clamp(4px, calc(2 * var(--scale-unit)), 20px);
   margin-bottom: clamp(8px, calc(3.2 * var(--scale-unit)), 12px);
   box-shadow: var(--shadow-sm);
 }
 
 .placement-save-dialog input {
   width: 100%;
-  padding: clamp(8px, calc(3.2 * var(--scale-unit)), 12px)
+  padding: clamp(4px, calc(1.6 * var(--scale-unit)), 12px)
     clamp(10px, calc(4 * var(--scale-unit)), 16px);
   border: 1px solid #cbd5e1;
   border-radius: var(--border-radius);
   background: #ffffff;
   color: #0f172a;
-  font-size: clamp(0.75rem, calc(3.2 * var(--scale-unit)), 0.875rem);
+  font-size: clamp(0.4rem, calc(1.6 * var(--scale-unit)), 0.875rem);
   font-family: 'Inter', sans-serif;
   margin-bottom: clamp(8px, calc(3.2 * var(--scale-unit)), 16px);
   transition: all 0.2s ease;
@@ -290,7 +294,7 @@
 
 .placement-empty {
   text-align: center;
-  padding: clamp(16px, calc(6.4 * var(--scale-unit)), 32px);
+  padding: clamp(4px, calc(6.4 * var(--scale-unit)), 32px);
   color: #94a3b8;
   background: #f8fafc;
   border-radius: var(--border-radius-lg);
@@ -305,11 +309,12 @@
 
 .placement-empty p {
   margin: clamp(4px, calc(1.6 * var(--scale-unit)), 8px) 0;
+  font-size: clamp(0.7rem, calc(2.4 * var(--scale-unit)), 0.875rem);
   font-weight: 500;
 }
 
 .placement-empty-hint {
-  font-size: clamp(0.75rem, calc(2.88 * var(--scale-unit)), 0.875rem);
+  font-size: clamp(0.4rem, calc(1.6 * var(--scale-unit)), 0.875rem);
   opacity: 0.7;
   font-family: 'JetBrains Mono', monospace;
 }
@@ -459,8 +464,7 @@
   visibility: visible;
 }
 
-/* Responsive styles for smaller screens - use pictograms only */
-@media (max-width: 1200px) {
+@media (max-height: 768px) {
   /* Hide text in buttons, keep only pictograms */
   .placement-btn-base .btn-text {
     display: none;
@@ -469,40 +473,6 @@
   /* Adjust button sizes for pictogram-only mode */
   .placement-btn-base {
     justify-content: center;
-  }
-
-  .placement-btn {
-    min-width: clamp(24px, calc(6.4 * var(--scale-unit)), 28px);
-    padding: clamp(4px, calc(0.8 * var(--scale-unit)), 6px);
-    font-size: clamp(0.75rem, calc(3.2 * var(--scale-unit)), 0.875rem);
-  }
-
-  .placement-btn-small {
-    min-width: clamp(20px, calc(4.8 * var(--scale-unit)), 24px);
-    padding: clamp(3px, calc(1.28 * var(--scale-unit)), 4px);
-    font-size: clamp(0.625rem, calc(2.4 * var(--scale-unit)), 0.75rem);
-  }
-
-  /* Special handling for main action buttons */
-  .placement-btn-save,
-  .placement-btn-clear {
-    min-width: clamp(28px, calc(8 * var(--scale-unit)), 32px);
-    font-size: clamp(0.6rem, calc(1.6 * var(--scale-unit)), 0.875rem);
-  }
-
-  /* Make actions more compact */
-  .placement-actions {
-    gap: clamp(6px, calc(2.4 * var(--scale-unit)), 8px);
-    justify-content: center;
-    margin-bottom: clamp(2px, calc(0.8 * var(--scale-unit)), 4px);
-  }
-
-  .placement-save-dialog {
-    margin-bottom: clamp(4px, calc(1.6 * var(--scale-unit)), 6px);
-  }
-
-  .placement-item-actions {
-    gap: clamp(4px, calc(1.6 * var(--scale-unit)), 6px);
   }
 
   /* Make editing UI stack vertically on small screens */
