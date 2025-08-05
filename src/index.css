@@ -38,10 +38,10 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  --border-radius-sm: 6px;
-  --border-radius: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px;
+  --border-radius-sm: clamp(4px, calc(1.6 * var(--scale-unit)), 6px);
+  --border-radius: clamp(6px, calc(2.4 * var(--scale-unit)), 8px);
+  --border-radius-lg: clamp(8px, calc(3.2 * var(--scale-unit)), 12px);
+  --border-radius-xl: clamp(12px, calc(4.8 * var(--scale-unit)), 16px);
   --transition-fast: all 0.05s cubic-bezier(0.4, 0, 0.2, 1);
   --transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

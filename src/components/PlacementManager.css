@@ -213,7 +213,7 @@
   background: transparent;
   color: #64748b;
   border-color: #cbd5e1;
-  border-radius: clamp(3px, calc(0.96 * var(--scale-unit)), 6px);
+  border-radius: var(--border-radius-sm);
 }
 
 .placement-btn-small:hover {
@@ -321,7 +321,7 @@
 
 .placement-item {
   border: clamp(1px, calc(0.32 * var(--scale-unit)), 2px) solid #e2e8f0;
-  border-radius: clamp(8px, calc(3.2 * var(--scale-unit)), 12px);
+  border-radius: var(--border-radius-lg);
   background: #ffffff;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
@@ -401,7 +401,7 @@
   padding: clamp(1px, calc(0.48 * var(--scale-unit)), 3px)
     clamp(2px, calc(0.96 * var(--scale-unit)), 6px);
   background: rgba(139, 92, 246, 0.1);
-  border-radius: clamp(3px, calc(1.28 * var(--scale-unit)), 6px);
+  border-radius: var(--border-radius-sm);
   border: clamp(1px, calc(0.16 * var(--scale-unit)), 1px) solid rgba(139, 92, 246, 0.2);
   white-space: nowrap;
   font-size: inherit;
@@ -420,7 +420,7 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   padding: clamp(2px, calc(0.96 * var(--scale-unit)), 6px);
-  border-radius: clamp(4px, calc(1.6 * var(--scale-unit)), 8px);
+  border-radius: var(--border-radius);
   box-shadow: var(--shadow-sm);
 }
 
