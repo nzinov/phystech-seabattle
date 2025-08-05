@@ -1331,7 +1331,89 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     this.updateBlockArrows();
   }
 
+  // Helper function to check if player has any bombs (AB or NB ships)
+  hasPlayerBombs = (G: any, playerID: number): boolean => {
+    const fieldSize = G.config?.fieldSize || DefaultGameConfig.fieldSize;
+    for (let i = 0; i < fieldSize; i++) {
+      for (let j = 0; j < fieldSize; j++) {
+        const ship = G.cells[i][j];
+        if (ship && ship.player === playerID && (ship.type === 'AB' || ship.type === 'NB')) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // Helper function to check if there are any neutral ships on the board
+  hasNeutralShips = (G: any): boolean => {
+    const fieldSize = G.config?.fieldSize || DefaultGameConfig.fieldSize;
+    for (let i = 0; i < fieldSize; i++) {
+      for (let j = 0; j < fieldSize; j++) {
+        const ship = G.cells[i][j];
+        if (ship && ship.player === -1) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  // Helper function to check if player has any enemy ships adjacent to their ships
+  hasAdjacentEnemies = (G: any, playerID: number): boolean => {
+    const fieldSize = G.config?.fieldSize || DefaultGameConfig.fieldSize;
+    const enemyPlayerID = playerID === 0 ? 1 : 0;
+
+    for (let i = 0; i < fieldSize; i++) {
+      for (let j = 0; j < fieldSize; j++) {
+        const ship = G.cells[i][j];
+        if (ship && ship.player === playerID) {
+          // Check all adjacent positions (not diagonal)
+          const adjacentPositions = [
+            [i - 1, j],
+            [i + 1, j],
+            [i, j - 1],
+            [i, j + 1],
+          ];
+
+          for (const [adjI, adjJ] of adjacentPositions) {
+            if (adjI >= 0 && adjI < fieldSize && adjJ >= 0 && adjJ < fieldSize) {
+              const adjShip = G.cells[adjI][adjJ];
+              if (adjShip && adjShip.player === enemyPlayerID) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  // Helper function to check if attack phase should be auto-skipped
+  shouldAutoSkipAttack = (G: any, playerID: string): boolean => {
+    return (
+      !this.hasAdjacentEnemies(G, parseInt(playerID)) &&
+      !this.hasNeutralShips(G) &&
+      !this.hasPlayerBombs(G, parseInt(playerID))
+    );
+  };
+
   componentDidUpdate(prevProps: BoardPropsLocal) {
+    // Get stage info early for all logic
+    const currentStage = this.props.ctx.activePlayers?.[this.props.playerID];
+    const prevStage = prevProps.ctx.activePlayers?.[this.props.playerID];
+
+    // Auto-skip attack phase if conditions are met - MUST be first to prevent visual updates
+    if (
+      currentStage === 'attack' &&
+      prevStage !== 'attack' &&
+      this.shouldAutoSkipAttack(this.props.G, this.props.playerID)
+    ) {
+      this.Skip();
+      return; // Exit early to prevent any visual updates
+    }
+
     // Clear pending move state when game state changes
     if (
       this.state.pendingMove &&
@@ -1350,8 +1432,6 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
     }
 
     // Update block arrows when attackFrom/attackTo change
-    const currentStage = this.props.ctx.activePlayers?.[this.props.playerID];
-    const prevStage = prevProps.ctx.activePlayers?.[this.props.playerID];
     const attackFromChanged = prevProps.G?.attackFrom !== this.props.G?.attackFrom;
     const attackToChanged = prevProps.G?.attackTo !== this.props.G?.attackTo;
 
@@ -1889,8 +1969,8 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
             )}
             {stage == 'attack' && (
               <button onClick={this.Skip} className="board-sidebar-button-base board-skip-button">
-                <span className="board-sidebar-button-base-text">
-                  {i18n.t('board.skipTurn')} (<i>space</i>)
+                <span className="board-sidebar-button-base-text" title={i18n.t('board.pressSpace')}>
+                  {i18n.t('board.skipTurn')}
                 </span>
               </button>
             )}

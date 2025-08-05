@@ -211,6 +211,15 @@ export function getBlocks(G: GameState, player: number, coord: Position): Block[
       }
     }
   }
+
+  // Sort blocks first by size (descending), then by ship name (ascending)
+  validBlocks.sort((a, b) => {
+    if (a.size !== b.size) {
+      return b.size - a.size; // Larger size first
+    }
+    return a.type.localeCompare(b.type); // Alphabetical by ship name
+  });
+
   return validBlocks;
 }
 

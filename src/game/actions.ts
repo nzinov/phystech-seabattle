@@ -116,7 +116,6 @@ export const Actions = {
       events.setActivePlayers({
         currentPlayer: isBlockableFrom ? 'attackBlock' : undefined,
         others: 'responseBlock',
-        revert: true,
         moveLimit: 1,
       });
     },
