@@ -198,3 +198,23 @@
     max-width: 120px;
   }
 }
+
+/* Smooth scrollbar for log container */
+.log-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.log-scroll-container::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: var(--border-radius-sm);
+}
+
+.log-scroll-container::-webkit-scrollbar-thumb {
+  background: #8b5cf6;
+  border-radius: var(--border-radius-sm);
+  opacity: 0.6;
+}
+
+.log-scroll-container::-webkit-scrollbar-thumb:hover {
+  opacity: 1;
+}
