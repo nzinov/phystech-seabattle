@@ -1938,10 +1938,10 @@ class Board extends React.Component<BoardPropsLocal, BoardState> {
                 <div className="board-game-over-pattern" />
                 <h1 className="board-game-over-title">
                   {this.props.ctx.gameover.winner === undefined
-                    ? '🤝 Draw'
+                    ? `🤝 ${i18n.t('game.draw')}`
                     : this.props.ctx.gameover.winner == parseInt(this.props.playerID)
-                      ? '🎉 Victory!'
-                      : '💥 Defeat'}
+                      ? `🎉 ${i18n.t('game.victory')}`
+                      : `💥 ${i18n.t('game.defeat')}`}
                 </h1>
               </div>
             )}
