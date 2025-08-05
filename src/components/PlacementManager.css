@@ -31,7 +31,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: clamp(1px, 0.5vh, 12px) clamp(1px, 0.5vw, 16px);
+  padding: clamp(1px, calc(0.5 * var(--scale-unit)), 12px)
+    clamp(1px, calc(0.8 * var(--scale-unit)), 16px);
   background: #ffffff;
   border-radius: var(--border-radius-lg);
   cursor: pointer;
@@ -51,7 +52,7 @@
 .placement-manager-header h3 {
   margin: 0;
   color: var(--text-primary);
-  font-size: clamp(0.3rem, 1.3vw, 1rem);
+  font-size: clamp(0.3rem, calc(2.08 * var(--scale-unit)), 1rem);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -62,17 +63,17 @@
 .placement-collapse-btn {
   background: none;
   border: none;
-  font-size: clamp(0.5rem, 1.5vw, 1rem);
+  font-size: clamp(0.5rem, calc(2.4 * var(--scale-unit)), 1rem);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
-  padding: clamp(2px, 0.5vw, 4px);
+  padding: clamp(2px, calc(0.8 * var(--scale-unit)), 4px);
   border-radius: var(--border-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: clamp(16px, 3vw, 24px);
-  height: clamp(16px, 3vw, 24px);
+  min-width: clamp(16px, calc(4.8 * var(--scale-unit)), 24px);
+  height: clamp(16px, calc(4.8 * var(--scale-unit)), 24px);
 }
 
 .placement-collapse-btn:hover {
@@ -82,7 +83,7 @@
 }
 
 .placement-manager-content {
-  padding: clamp(1px, 0.5vw, 12px);
+  padding: clamp(1px, calc(0.8 * var(--scale-unit)), 12px);
   overflow-y: auto;
   flex: 1;
   background: #ffffff;
@@ -106,8 +107,8 @@
 
 .placement-actions {
   display: flex;
-  gap: clamp(4px, 1vw, 8px);
-  margin-bottom: clamp(4px, 1vw, 8px);
+  gap: clamp(4px, calc(1.6 * var(--scale-unit)), 8px);
+  margin-bottom: clamp(4px, calc(1.6 * var(--scale-unit)), 8px);
   flex-wrap: wrap;
 }
 
@@ -128,8 +129,9 @@
 }
 
 .placement-btn {
-  padding: clamp(6px, 1.5vw, 8px) clamp(8px, 2vw, 12px);
-  font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+  padding: clamp(6px, calc(2.4 * var(--scale-unit)), 8px)
+    clamp(8px, calc(3.2 * var(--scale-unit)), 12px);
+  font-size: clamp(0.625rem, calc(2.4 * var(--scale-unit)), 0.75rem);
   flex: 1;
 }
 
@@ -198,15 +200,16 @@
 }
 
 .placement-btn-small {
-  padding: clamp(2px, 0.6vw, 6px) clamp(4px, 1vw, 10px);
-  font-size: clamp(0.4rem, 1vw, 0.75rem);
+  padding: clamp(2px, calc(0.96 * var(--scale-unit)), 6px)
+    clamp(4px, calc(1.6 * var(--scale-unit)), 10px);
+  font-size: clamp(0.4rem, calc(1.6 * var(--scale-unit)), 0.75rem);
   min-width: auto;
   height: auto;
   box-shadow: var(--shadow-xs);
   background: transparent;
   color: #64748b;
   border-color: #cbd5e1;
-  border-radius: clamp(3px, 0.6vw, 6px);
+  border-radius: clamp(3px, calc(0.96 * var(--scale-unit)), 6px);
 }
 
 .placement-btn-small:hover {
@@ -243,21 +246,22 @@
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: var(--border-radius-lg);
-  padding: clamp(12px, 3vw, 20px);
-  margin-bottom: clamp(8px, 2vw, 12px);
+  padding: clamp(12px, calc(4.8 * var(--scale-unit)), 20px);
+  margin-bottom: clamp(8px, calc(3.2 * var(--scale-unit)), 12px);
   box-shadow: var(--shadow-sm);
 }
 
 .placement-save-dialog input {
   width: 100%;
-  padding: clamp(8px, 2vw, 12px) clamp(10px, 2.5vw, 16px);
+  padding: clamp(8px, calc(3.2 * var(--scale-unit)), 12px)
+    clamp(10px, calc(4 * var(--scale-unit)), 16px);
   border: 1px solid #cbd5e1;
   border-radius: var(--border-radius);
   background: #ffffff;
   color: #0f172a;
-  font-size: clamp(0.75rem, 2vw, 0.875rem);
+  font-size: clamp(0.75rem, calc(3.2 * var(--scale-unit)), 0.875rem);
   font-family: 'Inter', sans-serif;
-  margin-bottom: clamp(8px, 2vw, 16px);
+  margin-bottom: clamp(8px, calc(3.2 * var(--scale-unit)), 16px);
   transition: all 0.2s ease;
 }
 
@@ -269,13 +273,13 @@
 
 .placement-save-dialog-actions {
   display: flex;
-  gap: clamp(6px, 1.5vw, 12px);
+  gap: clamp(6px, calc(2.4 * var(--scale-unit)), 12px);
 }
 
 .placement-list {
   display: flex;
   flex-direction: column;
-  gap: clamp(4px, 1vw, 8px);
+  gap: clamp(4px, calc(1.6 * var(--scale-unit)), 8px);
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
@@ -286,13 +290,13 @@
 
 .placement-empty {
   text-align: center;
-  padding: clamp(16px, 4vw, 32px);
+  padding: clamp(16px, calc(6.4 * var(--scale-unit)), 32px);
   color: #94a3b8;
   background: #f8fafc;
   border-radius: var(--border-radius-lg);
   border: 1px dashed #cbd5e1;
   position: relative;
-  min-height: clamp(80px, 10vw, 120px);
+  min-height: clamp(80px, calc(16 * var(--scale-unit)), 120px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -300,25 +304,25 @@
 }
 
 .placement-empty p {
-  margin: clamp(4px, 1vw, 8px) 0;
+  margin: clamp(4px, calc(1.6 * var(--scale-unit)), 8px) 0;
   font-weight: 500;
 }
 
 .placement-empty-hint {
-  font-size: clamp(0.75rem, 1.8vw, 0.875rem);
+  font-size: clamp(0.75rem, calc(2.88 * var(--scale-unit)), 0.875rem);
   opacity: 0.7;
   font-family: 'JetBrains Mono', monospace;
 }
 
 .placement-item {
-  border: clamp(1px, 0.2vw, 2px) solid #e2e8f0;
-  border-radius: clamp(8px, 2vw, 12px);
+  border: clamp(1px, calc(0.32 * var(--scale-unit)), 2px) solid #e2e8f0;
+  border-radius: clamp(8px, calc(3.2 * var(--scale-unit)), 12px);
   background: #ffffff;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
-  height: clamp(50px, 8vw, 75px);
+  height: clamp(50px, calc(12.8 * var(--scale-unit)), 75px);
   flex-shrink: 0;
 }
 
@@ -350,7 +354,8 @@
 }
 
 .placement-item-main {
-  padding: clamp(6px, 1.5vw, 12px) clamp(8px, 2vw, 14px);
+  padding: clamp(6px, calc(2.4 * var(--scale-unit)), 12px)
+    clamp(8px, calc(3.2 * var(--scale-unit)), 14px);
   display: flex;
   align-items: center;
   height: 100%;
@@ -366,17 +371,17 @@
 .placement-item-name {
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: clamp(1px, 0.3vw, 4px);
+  margin-bottom: clamp(1px, calc(0.48 * var(--scale-unit)), 4px);
   word-break: break-word;
-  font-size: clamp(0.5rem, 1.5vw, 0.875rem);
+  font-size: clamp(0.5rem, calc(2.4 * var(--scale-unit)), 0.875rem);
   line-height: 1.2;
 }
 
 .placement-item-details {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(2px, 0.8vw, 6px);
-  font-size: clamp(0.4rem, 1vw, 0.675rem);
+  gap: clamp(2px, calc(1.28 * var(--scale-unit)), 6px);
+  font-size: clamp(0.4rem, calc(1.6 * var(--scale-unit)), 0.675rem);
   color: #64748b;
   font-family: 'JetBrains Mono', monospace;
   line-height: 1.3;
@@ -387,11 +392,12 @@
 .placement-item-last-used {
   display: flex;
   align-items: center;
-  gap: clamp(1px, 0.3vw, 3px);
-  padding: clamp(1px, 0.3vw, 3px) clamp(2px, 0.6vw, 6px);
+  gap: clamp(1px, calc(0.48 * var(--scale-unit)), 3px);
+  padding: clamp(1px, calc(0.48 * var(--scale-unit)), 3px)
+    clamp(2px, calc(0.96 * var(--scale-unit)), 6px);
   background: rgba(139, 92, 246, 0.1);
-  border-radius: clamp(3px, 0.8vw, 6px);
-  border: clamp(1px, 0.1vw, 1px) solid rgba(139, 92, 246, 0.2);
+  border-radius: clamp(3px, calc(1.28 * var(--scale-unit)), 6px);
+  border: clamp(1px, calc(0.16 * var(--scale-unit)), 1px) solid rgba(139, 92, 246, 0.2);
   white-space: nowrap;
   font-size: inherit;
 }
@@ -399,17 +405,17 @@
 .placement-item-actions {
   position: absolute;
   top: 50%;
-  right: clamp(4px, 1vw, 12px);
+  right: clamp(4px, calc(1.6 * var(--scale-unit)), 12px);
   transform: translateY(-50%);
   display: flex;
-  gap: clamp(2px, 0.6vw, 6px);
+  gap: clamp(2px, calc(0.96 * var(--scale-unit)), 6px);
   opacity: 0;
   visibility: hidden;
   transition: all 0.2s ease;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
-  padding: clamp(2px, 0.6vw, 6px);
-  border-radius: clamp(4px, 1vw, 8px);
+  padding: clamp(2px, calc(0.96 * var(--scale-unit)), 6px);
+  border-radius: clamp(4px, calc(1.6 * var(--scale-unit)), 8px);
   box-shadow: var(--shadow-sm);
 }
 
@@ -422,18 +428,19 @@
 .placement-item-edit {
   flex: 1;
   display: flex;
-  gap: clamp(4px, 1vw, 8px);
+  gap: clamp(4px, calc(1.6 * var(--scale-unit)), 8px);
   align-items: center;
 }
 
 .placement-item-edit input {
   flex: 1;
-  padding: clamp(4px, 1vw, 8px) clamp(6px, 1.5vw, 12px);
+  padding: clamp(4px, calc(1.6 * var(--scale-unit)), 8px)
+    clamp(6px, calc(2.4 * var(--scale-unit)), 12px);
   border: 1px solid #e2e8f0;
   border-radius: var(--border-radius-sm);
   background: #ffffff;
   color: #0f172a;
-  font-size: clamp(0.75rem, 1.8vw, 0.875rem);
+  font-size: clamp(0.75rem, calc(2.88 * var(--scale-unit)), 0.875rem);
   font-family: 'Inter', sans-serif;
   font-weight: 700;
   transition: all 0.2s ease;
@@ -447,7 +454,7 @@
 
 .placement-item-edit-actions {
   display: flex;
-  gap: clamp(2px, 0.5vw, 4px);
+  gap: clamp(2px, calc(0.8 * var(--scale-unit)), 4px);
   opacity: 1;
   visibility: visible;
 }
@@ -465,55 +472,56 @@
   }
 
   .placement-btn {
-    min-width: clamp(24px, 4vw, 28px);
-    padding: clamp(4px, 0.5vw, 6px);
-    font-size: clamp(0.75rem, 2vw, 0.875rem);
+    min-width: clamp(24px, calc(6.4 * var(--scale-unit)), 28px);
+    padding: clamp(4px, calc(0.8 * var(--scale-unit)), 6px);
+    font-size: clamp(0.75rem, calc(3.2 * var(--scale-unit)), 0.875rem);
   }
 
   .placement-btn-small {
-    min-width: clamp(20px, 3vw, 24px);
-    padding: clamp(3px, 0.8vw, 4px);
-    font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+    min-width: clamp(20px, calc(4.8 * var(--scale-unit)), 24px);
+    padding: clamp(3px, calc(1.28 * var(--scale-unit)), 4px);
+    font-size: clamp(0.625rem, calc(2.4 * var(--scale-unit)), 0.75rem);
   }
 
   /* Special handling for main action buttons */
   .placement-btn-save,
   .placement-btn-clear {
-    min-width: clamp(28px, 5vw, 32px);
-    font-size: clamp(0.6rem, 1vw, 0.875rem);
+    min-width: clamp(28px, calc(8 * var(--scale-unit)), 32px);
+    font-size: clamp(0.6rem, calc(1.6 * var(--scale-unit)), 0.875rem);
   }
 
   /* Make actions more compact */
   .placement-actions {
-    gap: clamp(6px, 1.5vw, 8px);
+    gap: clamp(6px, calc(2.4 * var(--scale-unit)), 8px);
     justify-content: center;
-    margin-bottom: clamp(2px, 0.5vw, 4px);
+    margin-bottom: clamp(2px, calc(0.8 * var(--scale-unit)), 4px);
   }
 
   .placement-save-dialog {
-    margin-bottom: clamp(4px, 1vw, 6px);
+    margin-bottom: clamp(4px, calc(1.6 * var(--scale-unit)), 6px);
   }
 
   .placement-item-actions {
-    gap: clamp(4px, 1vw, 6px);
+    gap: clamp(4px, calc(1.6 * var(--scale-unit)), 6px);
   }
 
   /* Make editing UI stack vertically on small screens */
   .placement-item-edit {
     flex-direction: column;
-    gap: clamp(4px, 1vw, 6px);
+    gap: clamp(4px, calc(1.6 * var(--scale-unit)), 6px);
     align-items: stretch;
   }
 
   .placement-item-edit input {
-    padding: clamp(4px, 1vw, 6px) clamp(6px, 1.2vw, 8px);
-    font-size: clamp(0.625rem, 1.5vw, 0.75rem);
+    padding: clamp(4px, calc(1.6 * var(--scale-unit)), 6px)
+      clamp(6px, calc(1.92 * var(--scale-unit)), 8px);
+    font-size: clamp(0.625rem, calc(2.4 * var(--scale-unit)), 0.75rem);
     width: 100%;
     box-sizing: border-box;
   }
 
   .placement-item-edit-actions {
-    gap: clamp(4px, 1vw, 6px);
+    gap: clamp(4px, calc(1.6 * var(--scale-unit)), 6px);
     justify-content: center;
     flex-shrink: 0;
   }
@@ -521,11 +529,11 @@
   /* Adjust item height when editing to accommodate stacked layout */
   .placement-item:has(.placement-item-edit) {
     height: auto;
-    min-height: clamp(70px, 12vw, 90px);
+    min-height: clamp(70px, calc(19.2 * var(--scale-unit)), 90px);
   }
 
   .placement-item-main:has(.placement-item-edit) {
-    padding: clamp(8px, 2vw, 12px);
+    padding: clamp(8px, calc(3.2 * var(--scale-unit)), 12px);
   }
 }
 

@@ -1,11 +1,11 @@
 /* Board component styles */
 .board-container {
-  --board-gap: clamp(4px, 2vh, 16px);
+  --board-gap: clamp(4px, calc(2 * var(--scale-unit)), 16px);
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: flex-start;
-  min-height: 100vh;
+  min-height: calc(100 * var(--scale-unit));
   margin: 0;
   padding: var(--board-gap);
   background: var(--bg-primary);
@@ -16,7 +16,7 @@
 }
 
 .board-main-container {
-  padding: clamp(4px, 1.5vw, 16px);
+  padding: clamp(4px, calc(2.4 * var(--scale-unit)), 16px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: var(--border-radius-xl);
@@ -24,8 +24,8 @@
   border: 1px solid var(--border-light);
   position: relative;
   flex-shrink: 0;
-  width: calc(100vh - 2 * var(--board-gap));
-  height: calc(100vh - 2 * var(--board-gap));
+  width: calc(100 * var(--scale-unit) - 2 * var(--board-gap));
+  height: calc(100 * var(--scale-unit) - 2 * var(--board-gap));
   aspect-ratio: 1;
 }
 
@@ -38,17 +38,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: clamp(2px, 0.5vw, 4px);
+  padding: clamp(2px, calc(0.8 * var(--scale-unit)), 4px);
   width: 100%;
   height: 100%;
 }
 
 .board-table {
   border-collapse: separate;
-  border-spacing: clamp(0.5px, 0.15vw, 1px);
+  border-spacing: clamp(0.5px, calc(0.24 * var(--scale-unit)), 1px);
   background: transparent;
   border-radius: var(--border-radius-lg);
-  padding: clamp(4px, 1vw, 8px);
+  padding: clamp(4px, calc(1.6 * var(--scale-unit)), 8px);
   position: relative;
   z-index: 1;
   margin: 0;
@@ -57,11 +57,12 @@
 }
 
 .board-cell {
-  --cell-border: clamp(1px, 0.3vh, 2px);
+  --cell-border: clamp(1px, calc(0.3 * var(--scale-unit)), 2px);
   border: var(--cell-border) solid var(--border-light);
   margin: 0;
   --cell-size: calc(
-    (100vh - 2 * var(--board-gap)) / var(--board-size) - 2px - 2 * var(--cell-border)
+    (100 * var(--scale-unit) - 2 * var(--board-gap)) / var(--board-size) - 2px - 2 *
+      var(--cell-border)
   );
   width: var(--cell-size);
   height: var(--cell-size);
@@ -194,16 +195,16 @@
 /* Arrow SVG positioning is now handled dynamically in React component */
 
 .board-sidebar {
-  padding: clamp(4px, 1.5vw, 16px);
+  padding: clamp(4px, calc(2.4 * var(--scale-unit)), 16px);
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  width: clamp(220px, 30vw, 500px);
+  width: clamp(220px, calc(48 * var(--scale-unit)), 500px);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-  min-height: calc(100vh - 2 * var(--board-gap));
-  max-height: calc(100vh - 2 * var(--board-gap));
+  min-height: calc(100 * var(--scale-unit) - 2 * var(--board-gap));
+  max-height: calc(100 * var(--scale-unit) - 2 * var(--board-gap));
   margin: 0;
   border-radius: var(--border-radius-xl);
   border: 1px solid var(--border-light);
@@ -212,9 +213,9 @@
 }
 
 .board-game-over {
-  padding: clamp(12px, 3vw, 20px);
+  padding: clamp(12px, calc(4.8 * var(--scale-unit)), 20px);
   border-radius: var(--border-radius-lg);
-  margin: 0 0 clamp(12px, 3vw, 24px) 0;
+  margin: 0 0 clamp(12px, calc(4.8 * var(--scale-unit)), 24px) 0;
   text-align: center;
   box-shadow: var(--shadow-lg);
   color: var(--text-light);
@@ -253,7 +254,7 @@
 
 .board-game-over-title {
   margin: 0;
-  font-size: clamp(1.2rem, 4vw, 1.75rem);
+  font-size: clamp(1.2rem, calc(6.4 * var(--scale-unit)), 1.75rem);
   font-weight: 700;
   position: relative;
   z-index: 1;
@@ -262,9 +263,10 @@
 
 .board-status-container {
   background: var(--accent-primary);
-  padding: clamp(1px, 0.5vh, 16px) clamp(1px, 0.5vw, 20px);
+  padding: clamp(1px, calc(0.5 * var(--scale-unit)), 16px)
+    clamp(1px, calc(0.8 * var(--scale-unit)), 20px);
   border-radius: var(--border-radius-lg);
-  margin-bottom: clamp(4px, 2vh, 24px);
+  margin-bottom: clamp(4px, calc(2 * var(--scale-unit)), 24px);
   text-align: center;
   box-shadow: var(--shadow-md);
   color: var(--text-light);
@@ -295,7 +297,7 @@
 
 .board-status-title {
   margin: 0;
-  font-size: clamp(0.3rem, 1.3vw, 1.125rem);
+  font-size: clamp(0.3rem, calc(2.08 * var(--scale-unit)), 1.125rem);
   font-weight: 600;
   position: relative;
   z-index: 1;
@@ -305,18 +307,19 @@
 /* Shared base class for all sidebar buttons */
 .board-sidebar-button-base {
   border: none;
-  padding: clamp(8px, 1.5vh, 16px) clamp(12px, 2vw, 20px);
+  padding: clamp(8px, calc(1.5 * var(--scale-unit)), 16px)
+    clamp(12px, calc(3.2 * var(--scale-unit)), 20px);
   border-radius: var(--border-radius-lg);
   color: var(--text-light);
-  font-size: clamp(0.8rem, 1.3vw, 1.125rem);
+  font-size: clamp(0.8rem, calc(2.08 * var(--scale-unit)), 1.125rem);
   font-weight: 600;
   cursor: pointer;
   box-shadow: var(--shadow-md);
   transition: var(--transition-fast);
-  margin-bottom: clamp(8px, 2vh, 16px);
+  margin-bottom: clamp(8px, calc(2 * var(--scale-unit)), 16px);
   width: 100%;
   text-transform: uppercase;
-  letter-spacing: clamp(0.05em, 0.1vw, 0.075em);
+  letter-spacing: clamp(0.05em, calc(0.16 * var(--scale-unit)), 0.075em);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -334,9 +337,10 @@
 
 .board-placement-button {
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  padding: clamp(4px, 1vw, 12px) clamp(8px, 1.5vh, 16px);
-  font-size: clamp(0.7rem, 1.1vw, 0.9rem);
-  margin-bottom: clamp(4px, 1vh, 8px);
+  padding: clamp(4px, calc(1.6 * var(--scale-unit)), 12px)
+    clamp(8px, calc(1.5 * var(--scale-unit)), 16px);
+  font-size: clamp(0.7rem, calc(1.76 * var(--scale-unit)), 0.9rem);
+  margin-bottom: clamp(4px, var(--scale-unit), 8px);
 }
 
 .board-placement-button:hover {
@@ -355,7 +359,7 @@
   /* Improve mobile touch handling */
   -webkit-tap-highlight-color: transparent;
   outline: none;
-  margin-bottom: clamp(8px, 2vh, 24px);
+  margin-bottom: clamp(8px, calc(2 * var(--scale-unit)), 24px);
 }
 
 .board-ready-button.normal {
@@ -370,7 +374,8 @@
 @media (hover: none) and (pointer: coarse) {
   .board-ready-button {
     /* Increase padding for better touch targets on mobile */
-    padding: clamp(12px, 2vh, 18px) clamp(16px, 3vw, 24px);
+    padding: clamp(12px, calc(2 * var(--scale-unit)), 18px)
+      clamp(16px, calc(4.8 * var(--scale-unit)), 24px);
     /* Disable hover transform on mobile */
   }
 
@@ -391,10 +396,10 @@
 
 .board-rules-link {
   position: fixed;
-  bottom: clamp(8px, 2vw, 16px);
-  right: clamp(8px, 2vw, 16px);
-  width: clamp(24px, 4vw, 32px);
-  height: clamp(24px, 4vw, 32px);
+  bottom: clamp(8px, calc(3.2 * var(--scale-unit)), 16px);
+  right: clamp(8px, calc(3.2 * var(--scale-unit)), 16px);
+  width: clamp(24px, calc(6.4 * var(--scale-unit)), 32px);
+  height: clamp(24px, calc(6.4 * var(--scale-unit)), 32px);
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   display: flex;
@@ -402,7 +407,7 @@
   justify-content: center;
   text-decoration: none;
   color: #666;
-  font-size: clamp(12px, 2vw, 16px);
+  font-size: clamp(12px, calc(3.2 * var(--scale-unit)), 16px);
   font-weight: bold;
   transition: all 0.2s ease;
   z-index: 1000;
@@ -420,10 +425,10 @@
 
 .board-fleet-button {
   position: fixed;
-  bottom: clamp(48px, 8vw, 64px); /* Position above the rules button */
-  right: clamp(8px, 2vw, 16px);
-  width: clamp(24px, 4vw, 32px);
-  height: clamp(24px, 4vw, 32px);
+  bottom: clamp(48px, calc(12.8 * var(--scale-unit)), 64px); /* Position above the rules button */
+  right: clamp(8px, calc(3.2 * var(--scale-unit)), 16px);
+  width: clamp(24px, calc(6.4 * var(--scale-unit)), 32px);
+  height: clamp(24px, calc(6.4 * var(--scale-unit)), 32px);
   background: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   display: flex;
@@ -431,7 +436,7 @@
   justify-content: center;
   border: 1px solid rgba(0, 0, 0, 0.1);
   color: #666;
-  font-size: clamp(10px, 1.8vw, 14px);
+  font-size: clamp(10px, calc(2.88 * var(--scale-unit)), 14px);
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -454,11 +459,11 @@
 /* Action Selection Popup - Lightweight HUD Style */
 .action-selection-popup {
   display: flex;
-  gap: clamp(4px, 1vw, 6px);
-  padding: clamp(8px, 1.5vw, 10px);
+  gap: clamp(4px, calc(1.6 * var(--scale-unit)), 6px);
+  padding: clamp(8px, calc(2.4 * var(--scale-unit)), 10px);
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
   backdrop-filter: blur(16px);
-  border-radius: clamp(10px, 2vw, 14px);
+  border-radius: clamp(10px, calc(3.2 * var(--scale-unit)), 14px);
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.4),
     0 6px 20px rgba(0, 0, 0, 0.3),
@@ -469,19 +474,20 @@
 }
 
 .action-selection-button {
-  min-width: clamp(60px, 12vw, 80px);
-  height: clamp(38px, 8vw, 46px);
+  min-width: clamp(60px, calc(19.2 * var(--scale-unit)), 80px);
+  height: clamp(38px, calc(12.8 * var(--scale-unit)), 46px);
   border: 1px solid rgba(148, 163, 184, 0.3);
-  border-radius: clamp(8px, 1.5vw, 10px);
+  border-radius: clamp(8px, calc(2.4 * var(--scale-unit)), 10px);
   color: rgb(248, 250, 252);
-  font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+  font-size: clamp(0.7rem, calc(2.88 * var(--scale-unit)), 0.85rem);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(4px, 1vw, 6px);
-  padding: clamp(4px, 1vw, 6px) clamp(8px, 2vw, 12px);
+  gap: clamp(4px, calc(1.6 * var(--scale-unit)), 6px);
+  padding: clamp(4px, calc(1.6 * var(--scale-unit)), 6px)
+    clamp(8px, calc(3.2 * var(--scale-unit)), 12px);
   position: relative;
   overflow: hidden;
   box-shadow:
@@ -522,7 +528,7 @@
 }
 
 .action-icon {
-  font-size: clamp(1rem, 2.2vw, 1.1rem);
+  font-size: clamp(1rem, calc(3.52 * var(--scale-unit)), 1.1rem);
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
   position: relative;
   z-index: 1;
@@ -531,7 +537,7 @@
 
 .action-name {
   font-weight: 600;
-  font-size: clamp(0.65rem, 1.6vw, 0.8rem);
+  font-size: clamp(0.65rem, calc(2.56 * var(--scale-unit)), 0.8rem);
   letter-spacing: 0.025em;
   text-shadow:
     0 1px 2px rgba(0, 0, 0, 0.6),
@@ -614,12 +620,12 @@
 }
 
 .board-block-button {
-  width: clamp(40px, 8vw, 80px);
-  height: clamp(40px, 8vw, 80px);
-  margin: clamp(2px, 0.5vw, 6px);
+  width: clamp(40px, calc(12.8 * var(--scale-unit)), 80px);
+  height: clamp(40px, calc(12.8 * var(--scale-unit)), 80px);
+  margin: clamp(2px, calc(0.8 * var(--scale-unit)), 6px);
   background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
-  border: clamp(1px, 0.2vw, 2px) solid var(--border-light);
-  border-radius: clamp(8px, 2vw, 16px);
+  border: clamp(1px, calc(0.32 * var(--scale-unit)), 2px) solid var(--border-light);
+  border-radius: clamp(8px, calc(3.2 * var(--scale-unit)), 16px);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -628,7 +634,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(3px, 1vw, 8px);
+  padding: clamp(3px, calc(1.6 * var(--scale-unit)), 8px);
 }
 
 .board-block-button:hover {
@@ -652,19 +658,19 @@
 
 .board-block-size-badge {
   position: absolute;
-  top: clamp(-6px, -1.2vw, -10px);
-  right: clamp(-6px, -1.2vw, -10px);
+  top: clamp(-6px, calc(-1.92 * var(--scale-unit)), -10px);
+  right: clamp(-6px, calc(-1.92 * var(--scale-unit)), -10px);
   background-color: var(--accent-primary, #6366f1);
   color: white;
   border-radius: 50%;
-  width: clamp(16px, 3.5vw, 28px);
-  height: clamp(16px, 3.5vw, 28px);
+  width: clamp(16px, calc(5.6 * var(--scale-unit)), 28px);
+  height: clamp(16px, calc(5.6 * var(--scale-unit)), 28px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(0.5rem, 1.2vw, 0.8rem);
+  font-size: clamp(0.5rem, calc(1.92 * var(--scale-unit)), 0.8rem);
   font-weight: 700;
-  border: clamp(1.5px, 0.4vw, 3px) solid white;
+  border: clamp(1.5px, calc(0.64 * var(--scale-unit)), 3px) solid white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   font-family: 'JetBrains Mono', monospace;
   z-index: 10;
@@ -694,24 +700,26 @@
     0 4px 16px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 1000;
-  max-width: min(95vw, 800px);
-  max-height: min(90vh, 600px);
+  max-width: min(calc(152 * var(--scale-unit)), 800px);
+  max-height: min(calc(90 * var(--scale-unit)), 600px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: fadeInSlide 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border-collapse: separate;
-  border-spacing: clamp(1px, 0.3vw, 3px) clamp(1px, 0.2vw, 2px);
-  font-size: clamp(10px, 1.5vw, 14px);
+  border-spacing: clamp(1px, calc(0.48 * var(--scale-unit)), 3px)
+    clamp(1px, calc(0.32 * var(--scale-unit)), 2px);
+  font-size: clamp(10px, calc(2.4 * var(--scale-unit)), 14px);
   overflow: auto;
 }
 
 .board-remaining-header {
   text-align: center;
-  font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+  font-size: clamp(0.9rem, calc(4 * var(--scale-unit)), 1.3rem);
   font-weight: 700;
   color: #1e293b;
-  padding: clamp(12px, 3vw, 18px) clamp(16px, 4vw, 24px) clamp(8px, 2vw, 12px)
-    clamp(16px, 4vw, 24px);
-  border-bottom: clamp(1px, 0.3vw, 2px) solid rgba(99, 102, 241, 0.3);
+  padding: clamp(12px, calc(4.8 * var(--scale-unit)), 18px)
+    clamp(16px, calc(6.4 * var(--scale-unit)), 24px) clamp(8px, calc(3.2 * var(--scale-unit)), 12px)
+    clamp(16px, calc(6.4 * var(--scale-unit)), 24px);
+  border-bottom: clamp(1px, calc(0.48 * var(--scale-unit)), 2px) solid rgba(99, 102, 241, 0.3);
   letter-spacing: 0.025em;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.05) 100%);
@@ -719,10 +727,10 @@
 }
 
 .board-remaining-ship-icon {
-  width: clamp(20px, 4vw, 45px);
-  height: clamp(20px, 4vw, 45px);
-  min-width: clamp(20px, 4vw, 45px);
-  min-height: clamp(20px, 4vw, 45px);
+  width: clamp(20px, calc(6.4 * var(--scale-unit)), 45px);
+  height: clamp(20px, calc(6.4 * var(--scale-unit)), 45px);
+  min-width: clamp(20px, calc(6.4 * var(--scale-unit)), 45px);
+  min-height: clamp(20px, calc(6.4 * var(--scale-unit)), 45px);
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -735,9 +743,9 @@
 }
 
 .board-remaining-label {
-  padding: clamp(2px, 0.5vw, 6px);
+  padding: clamp(2px, calc(0.8 * var(--scale-unit)), 6px);
   font-weight: 600;
-  font-size: clamp(0.6rem, 1.4vw, 0.9rem);
+  font-size: clamp(0.6rem, calc(2.24 * var(--scale-unit)), 0.9rem);
   color: #1e293b;
   text-align: center;
   vertical-align: middle;
@@ -774,13 +782,14 @@
 .board-remaining-number {
   text-align: center;
   vertical-align: middle;
-  padding: clamp(2px, 0.8vw, 6px) clamp(1px, 0.4vw, 3px);
+  padding: clamp(2px, calc(1.28 * var(--scale-unit)), 6px)
+    clamp(1px, calc(0.64 * var(--scale-unit)), 3px);
   font-weight: 700;
-  font-size: clamp(0.7rem, 1.5vw, 1rem);
+  font-size: clamp(0.7rem, calc(2.4 * var(--scale-unit)), 1rem);
   font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
   border-radius: var(--border-radius-sm);
-  min-width: clamp(18px, 3.5vw, 32px);
-  min-height: clamp(18px, 3.5vw, 32px);
+  min-width: clamp(18px, calc(5.6 * var(--scale-unit)), 32px);
+  min-height: clamp(18px, calc(5.6 * var(--scale-unit)), 32px);
   letter-spacing: -0.02em;
   display: flex;
   align-items: center;
@@ -894,12 +903,12 @@
 }
 
 .board-block-button {
-  width: clamp(40px, 8vw, 80px);
-  height: clamp(40px, 8vw, 80px);
-  margin: clamp(2px, 0.5vw, 6px);
+  width: clamp(40px, calc(12.8 * var(--scale-unit)), 80px);
+  height: clamp(40px, calc(12.8 * var(--scale-unit)), 80px);
+  margin: clamp(2px, calc(0.8 * var(--scale-unit)), 6px);
   background: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
-  border: clamp(1px, 0.2vw, 2px) solid var(--border-light);
-  border-radius: clamp(8px, 2vw, 16px);
+  border: clamp(1px, calc(0.32 * var(--scale-unit)), 2px) solid var(--border-light);
+  border-radius: clamp(8px, calc(3.2 * var(--scale-unit)), 16px);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -908,7 +917,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(3px, 1vw, 8px);
+  padding: clamp(3px, calc(1.6 * var(--scale-unit)), 8px);
 }
 
 .board-block-button:hover {
@@ -932,44 +941,44 @@
 
 .board-block-size-badge {
   position: absolute;
-  top: clamp(-6px, -1.2vw, -10px);
-  right: clamp(-6px, -1.2vw, -10px);
+  top: clamp(-6px, calc(-1.92 * var(--scale-unit)), -10px);
+  right: clamp(-6px, calc(-1.92 * var(--scale-unit)), -10px);
   background-color: var(--accent-primary, #6366f1);
   color: white;
   border-radius: 50%;
-  width: clamp(16px, 3.5vw, 28px);
-  height: clamp(16px, 3.5vw, 28px);
+  width: clamp(16px, calc(5.6 * var(--scale-unit)), 28px);
+  height: clamp(16px, calc(5.6 * var(--scale-unit)), 28px);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(0.5rem, 1.2vw, 0.8rem);
+  font-size: clamp(0.5rem, calc(1.92 * var(--scale-unit)), 0.8rem);
   font-weight: 700;
-  border: clamp(1.5px, 0.4vw, 3px) solid white;
+  border: clamp(1.5px, calc(0.64 * var(--scale-unit)), 3px) solid white;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   font-family: 'JetBrains Mono', monospace;
   z-index: 10;
 }
 .board-remaining-ship-cell {
-  padding: clamp(1px, 0.2vw, 2px);
+  padding: clamp(1px, calc(0.32 * var(--scale-unit)), 2px);
   min-width: 0;
   width: 1%;
 }
 
 .board-remaining-label-cell {
-  padding: clamp(1px, 0.2vw, 2px);
+  padding: clamp(1px, calc(0.32 * var(--scale-unit)), 2px);
   min-width: 0;
   width: auto;
 }
 
 .board-remaining-padding-cell {
-  padding: clamp(1px, 0.2vw, 2px) 0;
+  padding: clamp(1px, calc(0.32 * var(--scale-unit)), 2px) 0;
 }
 
 /* Extra responsive adjustments for very small screens */
 @media (max-width: 480px) {
   .board-remaining-overlay {
-    max-width: 98vw;
-    max-height: 95vh;
+    max-width: calc(156.8 * var(--scale-unit));
+    max-height: calc(95 * var(--scale-unit));
     border-spacing: 1px 1px;
     font-size: 10px;
   }
@@ -1002,7 +1011,7 @@
 /* Extra small screens (phones in landscape) */
 @media (max-width: 320px) {
   .board-remaining-overlay {
-    max-width: 99vw;
+    max-width: calc(158.4 * var(--scale-unit));
     border-spacing: 0.5px 0.5px;
     font-size: 9px;
   }
@@ -1059,28 +1068,28 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: var(--border-radius-xl);
-  padding: clamp(24px, 6vw, 40px);
+  padding: clamp(24px, calc(9.6 * var(--scale-unit)), 40px);
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--border-light);
-  max-width: clamp(300px, 60vw, 400px);
+  max-width: clamp(300px, calc(96 * var(--scale-unit)), 400px);
   text-align: center;
 }
 
 .flip-screen-icon {
-  font-size: clamp(2.5rem, 8vw, 4rem);
-  margin-bottom: clamp(16px, 4vw, 24px);
+  font-size: clamp(2.5rem, calc(12.8 * var(--scale-unit)), 4rem);
+  margin-bottom: clamp(16px, calc(6.4 * var(--scale-unit)), 24px);
   animation: rotate 2s ease-in-out infinite alternate;
 }
 
 .flip-screen-title {
-  font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+  font-size: clamp(1.1rem, calc(5.6 * var(--scale-unit)), 1.5rem);
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: clamp(12px, 3vw, 16px);
+  margin-bottom: clamp(12px, calc(4.8 * var(--scale-unit)), 16px);
 }
 
 .flip-screen-text {
-  font-size: clamp(0.8rem, 2.2vw, 1rem);
+  font-size: clamp(0.8rem, calc(3.52 * var(--scale-unit)), 1rem);
   color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 0;
@@ -1099,7 +1108,7 @@
 .label-selection-popup {
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
   backdrop-filter: blur(16px);
-  border-radius: clamp(10px, 2vw, 14px);
+  border-radius: clamp(10px, calc(3.2 * var(--scale-unit)), 14px);
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.4),
     0 6px 20px rgba(0, 0, 0, 0.3),

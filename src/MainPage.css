@@ -1,5 +1,5 @@
 .main-page {
-  min-height: 100vh;
+  min-height: calc(100 * var(--scale-unit));
   background: var(--bg-primary);
   display: flex;
   align-items: center;
@@ -279,7 +279,7 @@
   border-radius: 12px;
   padding: 2rem;
   max-width: 800px;
-  max-height: 80vh;
+  max-height: calc(80 * var(--scale-unit));
   overflow-y: auto;
   backdrop-filter: blur(10px);
 }

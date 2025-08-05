@@ -25,11 +25,11 @@
   margin: 2px 0;
   cursor: pointer;
   transition: all 0.03s ease;
-  font-size: clamp(0.25rem, 1vw, 0.9rem);
+  font-size: clamp(0.25rem, calc(1.6 * var(--scale-unit)), 0.9rem);
   color: var(--text-primary);
   line-height: 1.4;
   display: flex;
-  min-height: clamp(32px, 6vw, 48px);
+  min-height: clamp(32px, calc(9.6 * var(--scale-unit)), 48px);
   align-items: center;
 }
 
@@ -53,7 +53,7 @@
   border: 1px solid rgba(139, 92, 246, 0.2);
   background: rgba(139, 92, 246, 0.1);
   transition: all 0.03s ease;
-  min-height: clamp(24px, 4vw, 36px);
+  min-height: clamp(24px, calc(6.4 * var(--scale-unit)), 36px);
   display: flex;
   align-items: center;
 }
@@ -118,8 +118,8 @@
 
 /* Ship icon styles */
 .log-ship-icon {
-  width: clamp(10px, 3vw, 24px);
-  height: clamp(10px, 3vw, 24px);
+  width: clamp(10px, calc(4.8 * var(--scale-unit)), 24px);
+  height: clamp(10px, calc(4.8 * var(--scale-unit)), 24px);
   margin-left: 1px;
   vertical-align: middle;
   display: inline-block;
@@ -133,15 +133,16 @@
 .ship-pill {
   display: inline-flex;
   align-items: center;
-  border-radius: clamp(8px, 1.5vw, 12px);
-  padding: clamp(2px, 0.8vw, 4px) clamp(4px, 1.5vw, 8px);
-  margin: 0 clamp(1px, 0.3vw, 2px);
-  font-size: clamp(0.7em, 2vw, 0.9em);
+  border-radius: clamp(8px, calc(2.4 * var(--scale-unit)), 12px);
+  padding: clamp(2px, calc(1.28 * var(--scale-unit)), 4px)
+    clamp(4px, calc(2.4 * var(--scale-unit)), 8px);
+  margin: 0 clamp(1px, calc(0.48 * var(--scale-unit)), 2px);
+  font-size: clamp(0.7em, calc(3.2 * var(--scale-unit)), 0.9em);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: clamp(100px, 20vw, 180px);
-  height: clamp(20px, 3.5vw, 28px);
+  max-width: clamp(100px, calc(32 * var(--scale-unit)), 180px);
+  height: clamp(20px, calc(5.6 * var(--scale-unit)), 28px);
 }
 
 /* Ship pill backgrounds based on player */
