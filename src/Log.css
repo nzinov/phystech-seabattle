@@ -3,7 +3,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  overflow-y: hidden;
+  height: 100%;
+  flex: 1;
 }
 
 .log-scroll-container {
