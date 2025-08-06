@@ -81,12 +81,6 @@
   z-index: 2;
 }
 
-.placement-collapse-btn:hover {
-  background: #f8fafc;
-  color: #8b5cf6;
-  transform: scale(1.1);
-}
-
 .placement-manager-content {
   padding: clamp(1px, calc(0.8 * var(--scale-unit)), 12px);
   overflow-y: auto;
